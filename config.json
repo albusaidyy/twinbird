@@ -1,0 +1,387 @@
+{
+  "branding": {
+    "appName": "Sea Smoke Kenya",
+    "primaryColor": "#193da9",
+    "accentColor": "#f6ab03",
+    "font": "inter",
+    "logoUrl": "/brand/logos/logo.png",
+    "faviconUrl": "/brand/favicons/favicon.ico",
+    "darkMode": false
+  },
+  "navigation": [
+    {
+      "key": "home",
+      "label": "Home",
+      "href": "/",
+      "icon": "Home",
+      "enabled": true
+    },
+    {
+      "key": "contact",
+      "label": "Contact",
+      "href": "/contact",
+      "icon": "Mail",
+      "enabled": true
+    }
+  ],
+  "features": {
+    "bookings": true,
+    "tours": true,
+    "reports": true,
+    "clientPortal": false,
+    "notifications": true
+  },
+  "homepage": {
+    "sectionOrder": [
+      "stats",
+      "tours",
+      "whyus",
+      "reviews",
+      "gallery",
+      "cta"
+    ],
+    "hero": {
+      "enabled": true,
+      "size": "fullscreen",
+      "showEyebrow": true,
+      "eyebrow": "Join the best on the water",
+      "headline": "Cast Your Line",
+      "italicText": "Into the Deep",
+      "showSubtitle": true,
+      "subtitle": "Experience the thrill of deep sea fishing and connect with a community of passionate anglers. Whether you are a beginner or a seasoned pro, there is a spot for you in our club.",
+      "showPrimaryCta": true,
+      "primaryCtaLabel": "Join the Club",
+      "primaryCtaHref": "/bookings",
+      "showSecondaryCta": true,
+      "secondaryCtaLabel": "View Events",
+      "secondaryCtaHref": "/events",
+      "imageUrl": "/images/hero/hero.jpg"
+    },
+    "stats": {
+      "enabled": false,
+      "backgroundColor": "#ffffff",
+      "title": "",
+      "subtitle": "",
+      "eyebrow": "",
+      "items": [
+        {
+          "enabled": true,
+          "value": "15+",
+          "label": "Years Active"
+        },
+        {
+          "enabled": true,
+          "value": "500+",
+          "label": "Club Members"
+        },
+        {
+          "enabled": true,
+          "value": "100+",
+          "label": "Annual Events"
+        },
+        {
+          "enabled": true,
+          "value": "4.9/5",
+          "label": "Community Rating"
+        }
+      ]
+    },
+    "tours": {
+      "enabled": true,
+      "backgroundColor": "#fafafa",
+      "eyebrow": "Our Fishing Charters",
+      "title": "Deep Sea Fishing Experiences",
+      "subtitle": "Book unforgettable deep sea fishing charters and guided tours. Catch trophy fish with expert captains.",
+      "items": [
+        {
+          "enabled": true,
+          "badge": "Most Popular",
+          "title": "Deep Sea Excursion",
+          "description": "Join us for a full day of deep sea fishing chasing marlin, tuna, and sailfish.",
+          "duration": "Full Day",
+          "rating": 5,
+          "imageUrl": "/images/hero/hero.jpg"
+        },
+        {
+          "enabled": true,
+          "badge": "Beginner Friendly",
+          "title": "Inshore Catch & Release",
+          "description": "A relaxed half-day trip exploring the coastal waters, perfect for families and beginners.",
+          "duration": "Half Day",
+          "rating": 4.8,
+          "imageUrl": "/images/hero/hero.jpg"
+        },
+        {
+          "enabled": true,
+          "badge": "Competitive",
+          "title": "Annual Summer Tournament",
+          "description": "Compete with fellow members in our biggest catch-and-release tournament of the year.",
+          "duration": "2 Days",
+          "rating": 5,
+          "imageUrl": "/images/hero/hero.jpg"
+        }
+      ]
+    },
+    "reviews": {
+      "enabled": true,
+      "backgroundColor": "#020617",
+      "eyebrow": "Excellent on TripAdvisor",
+      "title": "Guest reviews",
+      "subtitle": "",
+      "items": [
+        {
+          "enabled": true,
+          "quote": "Joining this club was the best decision I ever made. I have learned so much from the veteran anglers and made lifelong friends on the water.",
+          "name": "Michael Thompson",
+          "location": "Local Member"
+        },
+        {
+          "enabled": true,
+          "quote": "The deep sea excursions are incredibly well organized. The captains know exactly where the fish are biting. Highly recommend the summer tournament!",
+          "name": "Sarah Jenkins",
+          "location": "Tournament Winner"
+        },
+        {
+          "enabled": true,
+          "quote": "A fantastic community that truly cares about marine conservation. They teach sustainable fishing practices to all new members.",
+          "name": "David & Lisa",
+          "location": "Family Members"
+        }
+      ]
+    },
+    "whyUs": {
+      "enabled": true,
+      "backgroundColor": "#ffffff",
+      "imageUrl": "https://plus.unsplash.com/premium_photo-1661762422433-b18f87b64341?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "eyebrow": "Why Fish With Us",
+      "title": "Guided by expertise, inspired by the ocean",
+      "subtitle": "",
+      "items": [
+        {
+          "enabled": true,
+          "icon": "Shield",
+          "title": "Expert Community",
+          "body": "Learn from seasoned professionals with decades of experience on the local waters."
+        },
+        {
+          "enabled": true,
+          "icon": "Globe",
+          "title": "Exclusive Events",
+          "body": "Get access to members-only tournaments, chartered trips, and gear demonstrations."
+        },
+        {
+          "enabled": true,
+          "icon": "Leaf",
+          "title": "Conservation First",
+          "body": "We practice and promote sustainable catch-and-release fishing to protect our oceans."
+        }
+      ]
+    },
+    "gallery": {
+      "enabled": true,
+      "backgroundColor": "#ffffff",
+      "indicatorColor": "#000000",
+      "title": "Catch Gallery",
+      "subtitle": "",
+      "eyebrow": "",
+      "items": [
+        {
+          "enabled": true,
+          "imageUrl": "/images/hero/hero.jpg",
+          "caption": "Giant Marlin Catch"
+        },
+        {
+          "enabled": true,
+          "imageUrl": "https://plus.unsplash.com/premium_photo-1661762422433-b18f87b64341?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          "caption": "Summer Tournament 2024"
+        },
+        {
+          "enabled": true,
+          "imageUrl": "https://images.unsplash.com/photo-1541742425281-c1d3fc8aff96?q=80&w=2012&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          "caption": "Sunset Fishing"
+        },
+        {
+          "enabled": true,
+          "imageUrl": "/images/hero/hero.jpg",
+          "caption": "Group Trip"
+        }
+      ]
+    },
+    "ctaBanner": {
+      "enabled": false,
+      "backgroundColor": "#193da9",
+      "headline": "Ready to Catch the Big One?",
+      "subtitle": "Become a member today and get access to exclusive events, trips, and premium gear discounts.",
+      "ctaLabel": "Join the Club Now",
+      "ctaHref": "/bookings"
+    },
+    "footer": {
+      "enabled": true,
+      "backgroundColor": "#020617",
+      "description": "A passionate community of anglers dedicated to the sport of fishing and marine conservation. Join us on the water.",
+      "contact": {
+        "location": "Coastal Harbor Marina, Dock 4",
+        "phone": "+1 (555) 019-8372",
+        "email": "info@seasmokefishingclub.com",
+        "workingDays": "Mon - Sun: 5:00 AM - 8:00 PM",
+        "workingHours": "Always on the water"
+      },
+      "socials": {
+        "enabled": true,
+        "items": [
+          {
+            "enabled": true,
+            "icon": "Facebook",
+            "url": "#"
+          },
+          {
+            "enabled": true,
+            "icon": "Instagram",
+            "url": "#"
+          },
+          {
+            "enabled": true,
+            "icon": "Whatsapp",
+            "url": "#"
+          },
+          {
+            "enabled": true,
+            "icon": "Tiktok",
+            "url": "#"
+          }
+        ]
+      },
+      "quickLinks": {
+        "enabled": true,
+        "items": [
+          {
+            "enabled": true,
+            "label": "Home",
+            "href": "/"
+          },
+          {
+            "enabled": true,
+            "label": "Events",
+            "href": "#"
+          },
+          {
+            "enabled": true,
+            "label": "Membership",
+            "href": "#"
+          }
+        ]
+      },
+      "topPackages": {
+        "enabled": true,
+        "items": [
+          {
+            "enabled": true,
+            "label": "Deep Sea Charter",
+            "href": "#"
+          },
+          {
+            "enabled": true,
+            "label": "Inshore Fishing",
+            "href": "#"
+          },
+          {
+            "enabled": true,
+            "label": "Tournament Entry",
+            "href": "#"
+          },
+          {
+            "enabled": true,
+            "label": "Beginner Classes",
+            "href": "#"
+          },
+          {
+            "enabled": true,
+            "label": "Gear Rental",
+            "href": "#"
+          }
+        ]
+      },
+      "bottomLinks": {
+        "enabled": true,
+        "items": [
+          {
+            "enabled": true,
+            "label": "Privacy Policy",
+            "href": "#"
+          },
+          {
+            "enabled": true,
+            "label": "Terms & Conditions",
+            "href": "#"
+          },
+          {
+            "enabled": true,
+            "label": "Club Rules",
+            "href": "#"
+          }
+        ]
+      }
+    }
+  },
+  "contactPage": {
+    "hero": {
+      "enabled": true,
+      "backgroundColor": "#000000",
+      "showEyebrow": true,
+      "eyebrow": "Get in Touch",
+      "headline": "Let's plan your",
+      "italicText": "adventure",
+      "showSubtitle": true,
+      "subtitle": "Have a question about our charters or want to book a trip? Our team is ready to help you plan your perfect day on the water.",
+      "showPrimaryCta": false,
+      "primaryCtaLabel": "",
+      "primaryCtaHref": "",
+      "showSecondaryCta": false,
+      "secondaryCtaLabel": "",
+      "secondaryCtaHref": "",
+      "imageUrl": "/images/hero/hero.jpg",
+      "size": "medium"
+    },
+    "contact": {
+      "enabled": true,
+      "backgroundColor": "#f5f5f0",
+      "location": "Mombasa, Kenya",
+      "locationLink": "https://maps.google.com/?q=Mombasa",
+      "phone": "+254 123 456 789",
+      "email": "info@seasmokekenya.com",
+      "whatsapp": "+254 123 456 789",
+      "tripAdvisorLink": "https://tripadvisor.com"
+    },
+    "form": {
+      "enabled": true,
+      "backgroundColor": "#ffffff",
+      "title": "Send a message",
+      "buttonText": "Submit request",
+      "accessKey": ""
+    },
+    "faq": {
+      "enabled": true,
+      "backgroundColor": "#f5f5f0",
+      "title": "Commonly asked questions",
+      "subtitle": "",
+      "eyebrow": "QUICK ANSWERS",
+      "items": [
+        {
+          "enabled": true,
+          "question": "What is the best time for deep sea fishing?",
+          "answer": "The peak season runs from August to March when Marlin and Sailfish are most abundant in Kenyan waters."
+        },
+        {
+          "enabled": true,
+          "question": "Do I need to bring my own fishing gear?",
+          "answer": "No, all premium rods, reels, and tackle are provided on our charters. However, you're welcome to bring your favorite gear."
+        },
+        {
+          "enabled": true,
+          "question": "Is it catch and release?",
+          "answer": "We strictly enforce a catch-and-release policy for all Billfish (Marlin, Sailfish) to support marine conservation efforts."
+        }
+      ]
+    }
+  }
+}

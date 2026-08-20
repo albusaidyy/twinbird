@@ -1,0 +1,63 @@
+import {
+  FaFacebook,
+  FaInstagram,
+  FaWhatsapp,
+  FaTwitter,
+  FaYoutube,
+  FaTiktok,
+} from 'react-icons/fa';
+import {
+  LayoutDashboard,
+  MapPin,
+  CalendarCheck,
+  Users,
+  BarChart3,
+  Settings,
+  Home,
+  FileText,
+  Bell,
+  Globe,
+  Shield,
+  Leaf,
+  MessageCircle,
+  Mail,
+  Phone,
+  Clock,
+  Camera,
+  Share2,
+  Video,
+  type LucideIcon,
+} from 'lucide-react';
+
+const iconMap: Record<string, LucideIcon | React.ComponentType<{ className?: string }>> = {
+  LayoutDashboard,
+  MapPin,
+  CalendarCheck,
+  Users,
+  BarChart3,
+  Settings,
+  Home,
+  FileText,
+  Bell,
+  Globe,
+  Shield,
+  Leaf,
+  MessageCircle,
+  Mail,
+  Phone,
+  Clock,
+  Camera,
+  Share2,
+  Video,
+  Facebook: FaFacebook,
+  Instagram: FaInstagram,
+  Whatsapp: FaWhatsapp,
+  Twitter: FaTwitter,
+  Youtube: FaYoutube,
+  Tiktok: FaTiktok,
+};
+
+/** Resolves an icon by string name. Falls back to Home if not found. */
+export function getIcon(name: string): LucideIcon | React.ComponentType<{ className?: string }> {
+  return iconMap[name] ?? Home;
+}
