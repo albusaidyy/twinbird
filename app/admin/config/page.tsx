@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAppConfig } from '@/components/providers/AppConfigProvider';
 import { saveAppConfig } from '@/lib/config/saveAppConfig';
 import { defaultConfig } from '@/config/default-config';
-import { getLogoFiles, getFaviconFiles, uploadImage, getMediaFiles } from './actions';
+import { uploadImage, getMediaLibrary, type MediaItem } from './actions';
 import type { AppConfig, StatItem, TourItem, ReviewItem, WhyUsItem, GalleryItem, FooterLink, SocialLink } from '@/types/app-config';
 import {
   CheckCircle,
@@ -39,6 +39,9 @@ import {
   Images,
   Check,
   RefreshCw,
+  Search,
+  HardDrive,
+  Cloud,
 } from 'lucide-react';
 
 // ─── Sidebar configuration ──────────────────────────────────────────────────────
@@ -123,7 +126,6 @@ function ImageUploaderField({
   onChange,
   placeholder = 'Image URL, upload, or choose from library...',
   folder = 'uploads',
-  presets = [],
   disabled = false,
 }: {
   id: string;
@@ -137,20 +139,20 @@ function ImageUploaderField({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showLibrary, setShowLibrary] = useState(false);
-  const [libraryImages, setLibraryImages] = useState<string[]>(presets);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loadingLibrary, setLoadingLibrary] = useState(false);
+  const [filterTab, setFilterTab] = useState<'all' | 'local' | 'uploaded'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showAllFolders, setShowAllFolders] = useState(false);
 
-  const loadImages = async () => {
+  const loadImages = async (includeAll = showAllFolders) => {
     setLoadingLibrary(true);
+    setError(null);
     try {
-      const [folderFiles, uploadFiles] = await Promise.all([
-        getMediaFiles(folder),
-        folder !== 'uploads' ? getMediaFiles('uploads') : Promise.resolve([]),
-      ]);
-      const combined = Array.from(new Set([...presets, ...folderFiles, ...uploadFiles])).filter(Boolean);
-      setLibraryImages(combined);
+      const res = await getMediaLibrary(folder, includeAll);
+      setMediaItems(res.items);
     } catch {
-      setLibraryImages(presets);
+      setMediaItems([]);
     } finally {
       setLoadingLibrary(false);
     }
@@ -169,7 +171,13 @@ function ImageUploaderField({
         setError(res.error);
       } else if (res.url) {
         onChange(res.url);
-        setLibraryImages((prev) => Array.from(new Set([res.url, ...prev])));
+        const newItem: MediaItem = {
+          url: res.url,
+          name: file.name || res.url.split('/').pop() || 'uploaded-image',
+          source: 'uploaded',
+          folder,
+        };
+        setMediaItems((prev) => [newItem, ...prev.filter((item) => item.url !== res.url)]);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Upload failed';
@@ -180,7 +188,22 @@ function ImageUploaderField({
     }
   };
 
-  const allAvailableImages = Array.from(new Set([...presets, ...libraryImages])).filter(Boolean);
+  const localCount = mediaItems.filter((i) => i.source === 'local').length;
+  const uploadedCount = mediaItems.filter((i) => i.source === 'uploaded').length;
+
+  const filteredItems = mediaItems.filter((item) => {
+    if (filterTab === 'local' && item.source !== 'local') return false;
+    if (filterTab === 'uploaded' && item.source !== 'uploaded') return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        item.name.toLowerCase().includes(q) ||
+        item.url.toLowerCase().includes(q) ||
+        (item.folder && item.folder.toLowerCase().includes(q))
+      );
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -231,20 +254,15 @@ function ImageUploaderField({
           variant={showLibrary ? 'secondary' : 'outline'}
           size="sm"
           onClick={() => {
-            if (!showLibrary) loadImages();
+            if (!showLibrary) loadImages(showAllFolders);
             setShowLibrary(!showLibrary);
           }}
           disabled={disabled}
           className="h-9 gap-1.5 text-xs shrink-0"
-          title="Browse uploaded image gallery"
+          title="Browse section image gallery"
         >
           <Images className="h-3.5 w-3.5" />
           <span>Library</span>
-          {allAvailableImages.length > 0 && (
-            <span className="ml-0.5 rounded-full bg-primary/10 text-primary px-1.5 py-0.2 text-[10px] font-semibold">
-              {allAvailableImages.length}
-            </span>
-          )}
         </Button>
       </div>
 
@@ -280,19 +298,41 @@ function ImageUploaderField({
 
       {/* Image Library Drawer / Grid */}
       {showLibrary && (
-        <div className="rounded-lg border border-border bg-card p-3 shadow-inner">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-border text-xs">
-            <span className="font-semibold text-foreground flex items-center gap-1.5">
-              <Images className="h-3.5 w-3.5 text-primary" />
-              Available Images ({allAvailableImages.length})
-            </span>
+        <div className="rounded-lg border border-border bg-card p-3 shadow-inner space-y-3">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-2 border-b border-border text-xs">
             <div className="flex items-center gap-2">
+              <span className="font-semibold text-foreground flex items-center gap-1.5">
+                <Images className="h-3.5 w-3.5 text-primary" />
+                Media Gallery
+              </span>
+              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
+                {showAllFolders ? 'all folders' : folder}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const nextVal = !showAllFolders;
+                  setShowAllFolders(nextVal);
+                  loadImages(nextVal);
+                }}
+                className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
+                  showAllFolders
+                    ? 'border-primary text-primary bg-primary/10 font-medium'
+                    : 'border-border text-muted-foreground hover:text-foreground'
+                }`}
+                title="Toggle showing all folders or only this section's folder"
+              >
+                {showAllFolders ? 'Scope to folder' : 'Show all folders'}
+              </button>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
-                onClick={loadImages}
+                onClick={() => loadImages(showAllFolders)}
                 disabled={loadingLibrary}
               >
                 <RefreshCw className={`h-3 w-3 mr-1 ${loadingLibrary ? 'animate-spin' : ''}`} />
@@ -310,45 +350,134 @@ function ImageUploaderField({
             </div>
           </div>
 
-          {loadingLibrary ? (
-            <div className="flex h-24 items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              Loading images...
+          {/* Filter tabs & Search Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1 bg-muted/50 p-0.5 rounded-lg border border-border/50 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setFilterTab('all')}
+                className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                  filterTab === 'all'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                All ({mediaItems.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterTab('local')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${
+                  filterTab === 'local'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <HardDrive className="h-3 w-3" />
+                Local ({localCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterTab('uploaded')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${
+                  filterTab === 'uploaded'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Cloud className="h-3 w-3" />
+                Uploaded ({uploadedCount})
+              </button>
             </div>
-          ) : allAvailableImages.length === 0 ? (
-            <div className="py-6 text-center text-xs text-muted-foreground">
-              No images uploaded yet. Click &quot;Upload&quot; to add one.
+
+            <div className="relative flex-1 min-w-[140px] max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search images..."
+                className="h-7 pl-8 pr-7 text-xs"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Grid Content */}
+          {loadingLibrary ? (
+            <div className="flex h-28 items-center justify-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              Loading media files...
+            </div>
+          ) : filteredItems.length === 0 ? (
+            <div className="py-8 text-center text-xs text-muted-foreground space-y-2">
+              <p>No images found in this folder.</p>
+              {searchQuery && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  onClick={() => setSearchQuery('')}
+                >
+                  Clear search
+                </Button>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-h-56 overflow-y-auto p-1">
-              {allAvailableImages.map((imgUrl) => {
-                const isSelected = value === imgUrl;
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 max-h-64 overflow-y-auto p-1">
+              {filteredItems.map((item) => {
+                const isSelected = value === item.url;
                 return (
                   <button
-                    key={imgUrl}
+                    key={item.url}
                     type="button"
-                    onClick={() => onChange(imgUrl)}
-                    className={`group relative aspect-video rounded-md overflow-hidden border-2 transition-all text-left bg-muted/40 hover:opacity-90 ${
+                    onClick={() => onChange(item.url)}
+                    className={`group relative aspect-video rounded-md overflow-hidden border-2 transition-all text-left bg-muted/40 hover:opacity-95 ${
                       isSelected
                         ? 'border-primary ring-2 ring-primary/30'
                         : 'border-border/60 hover:border-foreground/40'
                     }`}
-                    title={imgUrl}
+                    title={`${item.name} (${item.url})`}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={imgUrl}
-                      alt="Thumbnail"
+                      src={item.url}
+                      alt={item.name}
                       className="h-full w-full object-cover"
                       loading="lazy"
                     />
+
+                    {/* Source Tag Badge */}
+                    <div className="absolute top-1 left-1">
+                      <span
+                        className={`text-[9px] font-semibold px-1 py-0.5 rounded shadow-sm uppercase tracking-wider ${
+                          item.source === 'local'
+                            ? 'bg-slate-900/80 text-slate-100'
+                            : 'bg-blue-600/90 text-white'
+                        }`}
+                      >
+                        {item.source === 'local' ? 'Local' : 'Upload'}
+                      </span>
+                    </div>
+
+                    {/* Selected Checkmark */}
                     {isSelected && (
                       <div className="absolute top-1 right-1 rounded-full bg-primary p-0.5 text-primary-foreground shadow-sm">
                         <Check className="h-3 w-3 stroke-[3]" />
                       </div>
                     )}
-                    <div className="absolute inset-x-0 bottom-0 bg-black/60 px-1 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="truncate text-[9px] text-white">{imgUrl.split('/').pop()}</p>
+
+                    {/* Overlay Filename */}
+                    <div className="absolute inset-x-0 bottom-0 bg-black/70 px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="truncate text-[9px] font-medium text-white">{item.name}</p>
                     </div>
                   </button>
                 );
@@ -366,14 +495,6 @@ function BrandingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCon
   const b = draft.branding;
   const upd = <K extends keyof AppConfig['branding']>(k: K, v: AppConfig['branding'][K]) =>
     set((p) => ({ ...p, branding: { ...p.branding, [k]: v } }));
-
-  const [logos, setLogos] = useState<string[]>([]);
-  const [favs, setFavs] = useState<string[]>([]);
-
-  useEffect(() => {
-    getLogoFiles().then(setLogos);
-    getFaviconFiles().then(setFavs);
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -419,7 +540,6 @@ function BrandingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCon
             });
           }}
           folder="brand/logos"
-          presets={logos}
           placeholder="Upload or choose logo..."
         />
         <p className="text-[11px] text-muted-foreground mt-1">Recommended: 512x512px or SVG. Used in header and footer.</p>
@@ -431,7 +551,6 @@ function BrandingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCon
           value={b.faviconUrl ?? ''}
           onChange={(val) => upd('faviconUrl', val || null)}
           folder="brand/favicons"
-          presets={favs}
           placeholder="Upload or choose favicon..."
         />
         <p className="text-[11px] text-muted-foreground mt-1">Recommended: 32x32px or 16x16px (PNG or ICO). Used in browser tab.</p>
@@ -654,7 +773,6 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
                 value={t.imageUrl}
                 onChange={(url) => updTour(i, 'imageUrl', url)}
                 folder="tours"
-                presets={['/images/hero/hero.jpg']}
                 placeholder="Upload or choose tour image..."
                 disabled={!t.enabled}
               />
@@ -793,7 +911,6 @@ function GalleryEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConf
                 value={img.imageUrl}
                 onChange={(url) => updItem(i, 'imageUrl', url)}
                 folder="gallery"
-                presets={['/images/hero/hero.jpg']}
                 placeholder="Upload or choose gallery photo..."
                 disabled={!img.enabled}
               />
@@ -841,7 +958,6 @@ function WhyUsEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
           value={data.imageUrl ?? ''}
           onChange={(url) => set((p) => ({ ...p, homepage: { ...p.homepage, whyUs: { ...p.homepage.whyUs, imageUrl: url } } }))}
           folder="whyus"
-          presets={['/images/hero/hero.jpg']}
           placeholder="Upload or choose Why Us image..."
           disabled={!data.enabled}
         />
@@ -1331,7 +1447,6 @@ function ContactHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: App
           value={h.imageUrl}
           onChange={(url) => upd('imageUrl', url)}
           folder="contact-hero"
-          presets={['/images/hero/hero.jpg']}
           placeholder="Upload or choose contact hero image..."
         />
       </FieldRow>
