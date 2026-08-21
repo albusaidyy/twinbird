@@ -11,21 +11,27 @@ export function Hero({ hero, primaryColor }: { hero: HeroSection; primaryColor: 
     hero.size === 'large' ? 'h-[85vh] min-h-[600px]' : 
     'h-screen min-h-[600px]'; // fullscreen default
 
+  const hasImage = Boolean(hero.imageUrl && hero.imageUrl.trim() !== '');
+
   return (
     <section 
       className={`relative ${sizeClass} flex flex-col items-center justify-center overflow-hidden`}
       style={{ backgroundColor: hero.backgroundColor || '#000000' }}
     >
-      <Image
-        src={hero.imageUrl}
-        alt="Hero background"
-        fill
-        sizes="100vw"
-        className="object-cover object-center"
-        priority={true}
-        loading="eager"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
+      {hasImage && (
+        <>
+          <Image
+            src={hero.imageUrl}
+            alt="Hero background"
+            fill
+            sizes="100vw"
+            className="object-cover object-[center_30%]"
+            priority={true}
+            loading="eager"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
+        </>
+      )}
 
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-4xl">
         {hero.showEyebrow && (  

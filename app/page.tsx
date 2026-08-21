@@ -19,6 +19,7 @@ import type {
   CTABannerSection,
 } from '@/types/app-config';
 import { defaultConfig } from '@/config/default-config';
+import { getTourSlug } from '@/lib/tour-utils';
 
 // Extracted to components/
 
@@ -96,49 +97,58 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: { enabled: b
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {visibleTours.map((tour) => (
-            <article
-              key={tour.title}
-              className="group relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 shadow-sm hover:shadow-xl transition-shadow duration-300"
-            >
-              <div className="relative h-52 overflow-hidden">
-                <Image
-                  src={tour.imageUrl}
-                  alt={tour.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  priority={true}
-                />
-                <span
-                  className="absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold text-white shadow"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  {tour.badge}
-                </span>
-              </div>
-              <div className="p-5">
-                <div className="flex items-center gap-1 mb-2">
-                  <Star className="h-3.5 w-3.5" style={{ fill: accentColor, color: accentColor }} />
-                  <span className="text-xs font-semibold text-foreground">{tour.rating}</span>
-                  <span className="text-xs text-muted-foreground ml-1">· {tour.duration}</span>
-                </div>
-                <h3 className="font-bold text-foreground text-base">{tour.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                  {tour.description}
-                </p>
-                <div className="mt-4 flex items-center justify-between">
-                  <Link
-                    href="/bookings"
-                    className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-80"
-                    style={{ color: primaryColor }}
+          {visibleTours.map((tour) => {
+            const slug = getTourSlug(tour);
+            const targetHref = `/tours/${slug}`;
+
+            return (
+              <article
+                key={tour.title}
+                className="group relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 shadow-sm hover:shadow-xl transition-shadow duration-300"
+              >
+                <Link href={targetHref} className="block relative h-52 overflow-hidden">
+                  <Image
+                    src={tour.imageUrl}
+                    alt={tour.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    priority={true}
+                  />
+                  <span
+                    className="absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold text-white shadow"
+                    style={{ backgroundColor: primaryColor }}
                   >
-                    Book now <ArrowRight className="h-3 w-3" />
+                    {tour.badge}
+                  </span>
+                </Link>
+                <div className="p-5">
+                  <div className="flex items-center gap-1 mb-2">
+                    <Star className="h-3.5 w-3.5" style={{ fill: accentColor, color: accentColor }} />
+                    <span className="text-xs font-semibold text-foreground">{tour.rating}</span>
+                    <span className="text-xs text-muted-foreground ml-1">· {tour.duration}</span>
+                  </div>
+                  <Link href={targetHref} className="block">
+                    <h3 className="font-bold text-foreground text-base hover:text-primary transition-colors">
+                      {tour.title}
+                    </h3>
                   </Link>
+                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                    {tour.description}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <Link
+                      href={targetHref}
+                      className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-80"
+                      style={{ color: primaryColor }}
+                    >
+                      View Details <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -33,7 +33,10 @@ export function AppHeader() {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-6">
       {/* Left: App name */}
-      <p className="text-sm font-semibold text-foreground">{config.branding.appName}</p>
+      <div className="flex items-center gap-2">
+        <div id="admin-mobile-menu-portal" />
+        <p className="text-sm font-semibold text-foreground">{config.branding.appName}</p>
+      </div>
 
       {/* Right: actions */}
       <div className="flex items-center gap-1">

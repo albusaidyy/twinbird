@@ -132,6 +132,7 @@
   }
   html {
     @apply font-sans;
+    overflow-x: clip;
   }
 
   /* WebKit scrollbar styles */

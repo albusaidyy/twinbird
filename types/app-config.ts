@@ -56,6 +56,8 @@ export interface StatItem {
 }
 
 export interface TourItem {
+  id?: string;
+  slug?: string;
   enabled: boolean;
   badge: string;
   title: string;
@@ -63,6 +65,20 @@ export interface TourItem {
   duration: string;
   rating: number;
   imageUrl: string;
+  heroImageUrl?: string;
+  heroBackgroundColor?: string;
+  indicatorColor?: string;
+  gallery?: string[];
+  location?: string;
+  schedule?: string;
+  groupType?: string;
+  overview?: string;
+  included?: string[];
+  whyChoose?: string[];
+  knowBeforeYouGo?: string[];
+  price?: string;
+  priceLabel?: string;
+  href?: string;
 }
 
 export interface ReviewItem {
@@ -150,6 +166,44 @@ export interface HomepageConfig {
   footer: FooterSection;
 }
 
+export type FormFieldType =
+  | 'text'
+  | 'email'
+  | 'tel'
+  | 'number'
+  | 'date'
+  | 'time'
+  | 'datetime-local'
+  | 'select'
+  | 'checkbox'
+  | 'textarea';
+
+export interface DynamicFormField {
+  id: string;
+  label: string;
+  type: FormFieldType;
+  placeholder?: string;
+  required?: boolean;
+  options?: string[]; // For 'select' dropdown
+  halfWidth?: boolean; // 2-column layout
+  enabled?: boolean;
+}
+
+export interface TourBookingFormConfig {
+  enabled?: boolean;
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
+  accessKey?: string;
+  fields?: DynamicFormField[];
+}
+
+export interface ToursPageConfig {
+  hero: HeroSection;
+  tours: SectionList<TourItem>;
+  bookingForm?: TourBookingFormConfig;
+}
+
 export interface FAQItem {
   enabled: boolean;
   question: string;
@@ -171,8 +225,10 @@ export interface ContactFormConfig {
   enabled?: boolean;
   backgroundColor?: string;
   title: string;
+  subtitle?: string;
   buttonText: string;
   accessKey: string;
+  fields?: DynamicFormField[];
 }
 
 export interface ContactPageConfig {
@@ -188,5 +244,6 @@ export interface AppConfig {
   navigation: NavItem[];
   features: FeatureFlags;
   homepage: HomepageConfig;
+  toursPage?: ToursPageConfig;
   contactPage: ContactPageConfig;
 }

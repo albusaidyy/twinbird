@@ -1,0 +1,251 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import type { TourItem, TourBookingFormConfig, DynamicFormField } from '@/types/app-config';
+import { defaultConfig } from '@/config/default-config';
+
+export function TourBookingForm({
+  tour,
+  config,
+  primaryColor,
+  defaultAccessKey,
+}: {
+  tour: TourItem;
+  config?: TourBookingFormConfig;
+  primaryColor: string;
+  defaultAccessKey?: string;
+}) {
+  const formConfig: TourBookingFormConfig = config || defaultConfig.toursPage!.bookingForm!;
+
+  const fields: DynamicFormField[] = (formConfig.fields && formConfig.fields.length > 0)
+    ? formConfig.fields.filter((f) => f.enabled !== false)
+    : (defaultConfig.toursPage!.bookingForm!.fields || []);
+
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize form state
+  const [formData, setFormData] = useState<Record<string, string | boolean>>(() => {
+    const init: Record<string, string | boolean> = {};
+    fields.forEach((f) => {
+      if (f.type === 'checkbox') {
+        init[f.id] = false;
+      } else if (f.type === 'select' && f.options && f.options.length > 0) {
+        init[f.id] = f.options[0];
+      } else {
+        init[f.id] = '';
+      }
+    });
+    return init;
+  });
+
+  if (formConfig.enabled === false) {
+    return null;
+  }
+
+  const accessKey = formConfig.accessKey || defaultAccessKey;
+
+  const handleChange = (fieldId: string, value: string | boolean) => {
+    setFormData((prev) => ({ ...prev, [fieldId]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      // Map submission payload with labels for readable email body
+      const payload: Record<string, string | boolean> = {
+        charter: tour.title,
+      };
+
+      fields.forEach((f) => {
+        const val = formData[f.id];
+        payload[f.label || f.id] = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : (val || 'N/A');
+      });
+
+      const customerName = String(formData.fullName || formData.name || 'Valued Guest');
+
+      if (accessKey && accessKey.trim() !== '') {
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            access_key: accessKey,
+            subject: `Charter Reservation: ${tour.title} - ${customerName}`,
+            from_name: customerName,
+            ...payload,
+          }),
+        });
+
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.message || 'Submission failed. Please try again.');
+        }
+      }
+
+      setSubmitted(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'An error occurred while submitting.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-3xl bg-white dark:bg-zinc-900 p-6 md:p-8 shadow-xl border border-black/5 dark:border-white/10 sticky top-28">
+      <div className="mb-6 border-b border-border/60 pb-4">
+        <h3 className="font-serif text-2xl font-bold text-foreground">
+          {formConfig.title || 'Book This Charter'}
+        </h3>
+        {formConfig.subtitle && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {formConfig.subtitle}
+          </p>
+        )}
+      </div>
+
+      {submitted ? (
+        <div className="py-8 text-center space-y-4">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h4 className="text-lg font-bold text-foreground">Reservation Request Received!</h4>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Thank you for reaching out. Our charter crew will review your booking details for{' '}
+            <span className="font-semibold text-foreground">{tour.title}</span> and get back to you shortly.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setSubmitted(false)}
+          >
+            Submit Another Inquiry
+          </Button>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs md:text-sm">
+          {error && (
+            <div className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {fields.map((field) => {
+              const spanClass = field.halfWidth ? 'sm:col-span-1' : 'sm:col-span-2';
+
+              if (field.type === 'checkbox') {
+                return (
+                  <div key={field.id} className={`${spanClass} flex items-center gap-2.5 pt-1`}>
+                    <input
+                      type="checkbox"
+                      id={`dyn-${field.id}`}
+                      checked={Boolean(formData[field.id])}
+                      onChange={(e) => handleChange(field.id, e.target.checked)}
+                      className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary"
+                      style={{ accentColor: primaryColor }}
+                    />
+                    <Label htmlFor={`dyn-${field.id}`} className="text-xs font-medium cursor-pointer">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </Label>
+                  </div>
+                );
+              }
+
+              if (field.type === 'select') {
+                return (
+                  <div key={field.id} className={`${spanClass} space-y-1.5`}>
+                    <Label htmlFor={`dyn-${field.id}`} className="text-xs font-semibold text-foreground">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </Label>
+                    <select
+                      id={`dyn-${field.id}`}
+                      required={field.required}
+                      value={String(formData[field.id] || '')}
+                      onChange={(e) => handleChange(field.id, e.target.value)}
+                      className="w-full h-10 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      {field.placeholder && <option value="">{field.placeholder}</option>}
+                      {(field.options || []).map((opt, i) => (
+                        <option key={i} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              }
+
+              if (field.type === 'textarea') {
+                return (
+                  <div key={field.id} className={`${spanClass} space-y-1.5`}>
+                    <Label htmlFor={`dyn-${field.id}`} className="text-xs font-semibold text-foreground">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </Label>
+                    <textarea
+                      id={`dyn-${field.id}`}
+                      rows={3}
+                      required={field.required}
+                      placeholder={field.placeholder || ''}
+                      value={String(formData[field.id] || '')}
+                      onChange={(e) => handleChange(field.id, e.target.value)}
+                      className="w-full rounded-md border border-input bg-background p-3 text-xs shadow-xs focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+                    />
+                  </div>
+                );
+              }
+
+              // Text, Email, Tel, Number, Date, Time, Datetime-local inputs
+              return (
+                <div key={field.id} className={`${spanClass} space-y-1.5`}>
+                  <Label htmlFor={`dyn-${field.id}`} className="text-xs font-semibold text-foreground">
+                    {field.label} {field.required && <span className="text-red-500">*</span>}
+                  </Label>
+                  <Input
+                    id={`dyn-${field.id}`}
+                    type={field.type}
+                    required={field.required}
+                    placeholder={field.placeholder || ''}
+                    value={String(formData[field.id] || '')}
+                    onChange={(e) => handleChange(field.id, e.target.value)}
+                    className="h-10 text-xs"
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full h-11 text-sm font-semibold text-white shadow-md transition-all hover:scale-[1.02] hover:shadow-lg mt-3"
+            style={{ backgroundColor: primaryColor }}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Sending Request...
+              </>
+            ) : (
+              formConfig.buttonText || 'Submit Reservation'
+            )}
+          </Button>
+        </form>
+      )}
+    </div>
+  );
+}

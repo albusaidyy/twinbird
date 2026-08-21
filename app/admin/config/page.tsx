@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,7 @@ import { useAppConfig } from '@/components/providers/AppConfigProvider';
 import { saveAppConfig } from '@/lib/config/saveAppConfig';
 import { defaultConfig } from '@/config/default-config';
 import { uploadImage, getMediaLibrary, type MediaItem } from './actions';
-import type { AppConfig, StatItem, TourItem, ReviewItem, WhyUsItem, GalleryItem, FooterLink, SocialLink } from '@/types/app-config';
+import type { AppConfig, NavItem, StatItem, TourItem, TourBookingFormConfig, DynamicFormField, FormFieldType, ReviewItem, WhyUsItem, GalleryItem, FooterLink, SocialLink } from '@/types/app-config';
 import {
   CheckCircle,
   RotateCcw,
@@ -42,13 +43,21 @@ import {
   Search,
   HardDrive,
   Cloud,
+  Ship,
+  Compass,
+  Calendar,
+  ArrowUp,
+  ArrowDown,
+  Menu,
+  PanelLeftClose,
 } from 'lucide-react';
 
 // ─── Sidebar configuration ──────────────────────────────────────────────────────
-type SectionKey = 'branding' | 'hero' | 'stats' | 'tours' | 'reviews' | 'whyus' | 'gallery' | 'cta' | 'footer' | 'contact-hero' | 'contact-details' | 'contact-faq';
+type SectionKey = 'branding' | 'navigation' | 'hero' | 'stats' | 'tours' | 'reviews' | 'whyus' | 'gallery' | 'cta' | 'footer' | 'tours-page-hero' | 'tours-page-list' | 'tours-page-booking' | 'contact-hero' | 'contact-details' | 'contact-faq';
 
 const APP_SETTINGS = [
   { key: 'branding' as SectionKey, label: 'Branding & Theme', Icon: Palette, description: 'Colors, app name, logo' },
+  { key: 'navigation' as SectionKey, label: 'Header Navigation', Icon: Compass, description: 'Top navbar links & order' },
 ];
 
 const PAGES = [
@@ -66,6 +75,17 @@ const PAGES = [
       { key: 'gallery' as SectionKey,  label: 'Gallery',         Icon: ImageIcon,  description: 'Catch photo gallery' },
       { key: 'cta' as SectionKey,      label: 'CTA Banner',      Icon: Megaphone,  description: 'Bottom call-to-action' },
       { key: 'footer' as SectionKey,   label: 'Footer',          Icon: LayoutDashboard, description: 'Site footer & links' },
+    ],
+  },
+  {
+    id: 'tours',
+    label: 'Fishing Charters',
+    Icon: Ship,
+    href: '/tours',
+    sections: [
+      { key: 'tours-page-hero' as SectionKey, label: 'Hero', Icon: Layers, description: 'Fishing Charters splash hero' },
+      { key: 'tours-page-list' as SectionKey, label: 'Charters Listing', Icon: Map, description: 'Fishing charter packages & cards' },
+      { key: 'tours-page-booking' as SectionKey, label: 'Booking Form', Icon: Calendar, description: 'Single charter reservation form settings' },
     ],
   },
   {
@@ -555,6 +575,85 @@ function BrandingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCon
         />
         <p className="text-[11px] text-muted-foreground mt-1">Recommended: 32x32px or 16x16px (PNG or ICO). Used in browser tab.</p>
       </FieldRow>
+    </div>
+  );
+}
+
+function NavigationEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const nav = draft.navigation || defaultConfig.navigation;
+  const updItem = (i: number, k: keyof NavItem, v: string | boolean) =>
+    set((p) => {
+      const arr = [...(p.navigation || defaultConfig.navigation)];
+      arr[i] = { ...arr[i], [k]: v };
+      return { ...p, navigation: arr };
+    });
+  const addNavItem = () =>
+    set((p) => {
+      const current = p.navigation || defaultConfig.navigation;
+      return {
+        ...p,
+        navigation: [
+          ...current,
+          { key: `custom-${Date.now()}`, label: 'New Link', href: '/', icon: 'Link', enabled: true },
+        ],
+      };
+    });
+  const rmNavItem = (i: number) =>
+    set((p) => {
+      const current = p.navigation || defaultConfig.navigation;
+      return {
+        ...p,
+        navigation: current.filter((_, idx) => idx !== i),
+      };
+    });
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h3 className="text-base font-semibold">Header Navigation Links</h3>
+        <p className="text-sm text-muted-foreground">Manage the navigation links displayed in the top navbar.</p>
+      </div>
+
+      <div className="space-y-3">
+        {nav.map((item, idx) => (
+          <div key={idx} className="flex items-center gap-4 rounded-lg border border-border p-4 bg-card">
+            <Switch
+              checked={item.enabled}
+              onCheckedChange={(v) => updItem(idx, 'enabled', v)}
+            />
+            <div className="flex-1 grid grid-cols-2 gap-3">
+              <FieldRow label="Label" id={`nav-label-${idx}`}>
+                <Input
+                  id={`nav-label-${idx}`}
+                  value={item.label}
+                  onChange={(e) => updItem(idx, 'label', e.target.value)}
+                  disabled={!item.enabled}
+                />
+              </FieldRow>
+              <FieldRow label="URL / Route" id={`nav-href-${idx}`}>
+                <Input
+                  id={`nav-href-${idx}`}
+                  value={item.href}
+                  onChange={(e) => updItem(idx, 'href', e.target.value)}
+                  disabled={!item.enabled}
+                />
+              </FieldRow>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0"
+              onClick={() => rmNavItem(idx)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      <Button variant="outline" className="w-full gap-2" onClick={addNavItem}>
+        <Plus className="h-4 w-4" /> Add Nav Link
+      </Button>
     </div>
   );
 }
@@ -1156,16 +1255,46 @@ export default function AdminConfigPage() {
   const [draft, setDraft] = useState<AppConfig>(config);
   const [active, setActive] = useState<SectionKey>('branding');
   const [expandedPages, setExpandedPages] = useState<Record<string, boolean>>({});
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Live preview
   useEffect(() => { updateConfig(draft); }, [draft, updateConfig]);
 
   const handleSave = async () => {
     setSaving(true);
-    await saveAppConfig(draft);
+    
+    // Clean up empty options in select fields before saving
+    const cleanedDraft = JSON.parse(JSON.stringify(draft)) as AppConfig;
+    
+    if (cleanedDraft.toursPage?.bookingForm?.fields) {
+      cleanedDraft.toursPage.bookingForm.fields.forEach(f => {
+        if (f.type === 'select' && f.options) {
+          f.options = f.options.map(o => o.trim()).filter(Boolean);
+        }
+      });
+    }
+    
+    if (cleanedDraft.contactPage?.form?.fields) {
+      cleanedDraft.contactPage.form.fields.forEach(f => {
+        if (f.type === 'select' && f.options) {
+          f.options = f.options.map(o => o.trim()).filter(Boolean);
+        }
+      });
+    }
+
+    await saveAppConfig(cleanedDraft);
+    setDraft(cleanedDraft); // Update UI to reflect cleaned state
+    updateConfig(cleanedDraft); // Update context to reflect cleaned state
+    
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
@@ -1181,11 +1310,27 @@ export default function AdminConfigPage() {
 
   const editorProps = { draft, set: setDraft };
 
+  const handleSectionClick = (key: string) => {
+    setActive(key as SectionKey);
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   return (
-    <div className="flex h-full gap-0">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-4rem)] md:h-full gap-0">
       {/* ── Left sidebar ────────────────────────────────────────────────── */}
-      <aside className="w-64 shrink-0 border-r border-border bg-muted/30 flex flex-col">
-        <div className="px-4 py-5 border-b border-border">
+      <aside className={`${isSidebarOpen ? 'w-full md:w-64 flex' : 'hidden'} shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/30 flex-col h-full transition-all duration-300 relative`}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setIsSidebarOpen(false)} 
+          className="absolute right-2 top-3 h-8 w-8 text-muted-foreground hover:text-foreground"
+          title="Collapse Sidebar"
+        >
+          <PanelLeftClose className="h-4 w-4" />
+        </Button>
+        <div className="px-4 py-5 border-b border-border pr-12">
           <div className="flex items-center gap-2">
             <Layers className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-semibold text-foreground">Configuration</span>
@@ -1203,7 +1348,7 @@ export default function AdminConfigPage() {
               {APP_SETTINGS.map(({ key, label, Icon }) => (
                 <button
                   key={key}
-                  onClick={() => setActive(key)}
+                  onClick={() => handleSectionClick(key)}
                   className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors text-left ${
                     active === key
                       ? 'text-white'
@@ -1226,6 +1371,9 @@ export default function AdminConfigPage() {
             <div className="space-y-2">
               {PAGES.map((page) => {
                 const isExpanded = expandedPages[page.id];
+                const navItem = (draft.navigation || defaultConfig.navigation).find((n) => n.key === page.id);
+                const pageLabel = navItem?.label || page.label;
+
                 return (
                   <div key={page.id} className="space-y-1">
                     <div className="flex items-center gap-1 group">
@@ -1234,7 +1382,7 @@ export default function AdminConfigPage() {
                         className="flex flex-1 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-foreground bg-accent hover:bg-accent/80 transition-colors"
                       >
                         <page.Icon className="h-4 w-4 shrink-0" style={{ color: config.branding.primaryColor }} />
-                        <span className="flex-1 text-left">{page.label}</span>
+                        <span className="flex-1 text-left">{pageLabel}</span>
                         {isExpanded ? (
                           <ChevronDown className="h-4 w-4 text-muted-foreground" />
                         ) : (
@@ -1258,7 +1406,7 @@ export default function AdminConfigPage() {
                             return page.sections.map(({ key, label, Icon }) => (
                               <button
                                 key={key}
-                                onClick={() => setActive(key)}
+                                onClick={() => handleSectionClick(key)}
                                 className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors text-left ${
                                   active === key
                                     ? 'text-foreground font-semibold bg-accent/50'
@@ -1325,7 +1473,7 @@ export default function AdminConfigPage() {
                                     }
                                   }
                                 }}
-                                onClick={() => setActive(key)}
+                                onClick={() => handleSectionClick(key)}
                                 className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${isMiddle ? 'cursor-grab active:cursor-grabbing hover:bg-accent/80' : ''} ${
                                   active === key
                                     ? 'text-foreground font-semibold bg-accent/50'
@@ -1371,8 +1519,20 @@ export default function AdminConfigPage() {
       </aside>
 
       {/* ── Editor area ─────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
-        <Card className="m-6 shadow-none border">
+      <div className={`flex-1 overflow-y-auto relative ${isSidebarOpen ? 'hidden md:block' : 'block'}`}>
+        {!isSidebarOpen && mounted && typeof document !== 'undefined' && document.getElementById('admin-mobile-menu-portal') && createPortal(
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSidebarOpen(true)}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+            title="Open Sidebar"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>,
+          document.getElementById('admin-mobile-menu-portal')!
+        )}
+        <Card className="m-3 md:m-6 shadow-none border">
           <CardHeader className="border-b border-border pb-4">
             <CardTitle className="flex items-center gap-2 text-base">
               {currentSectionInfo?.Icon && <currentSectionInfo.Icon className="h-4 w-4" style={{ color: config.branding.primaryColor }} />}
@@ -1382,6 +1542,7 @@ export default function AdminConfigPage() {
           </CardHeader>
           <CardContent className="pt-6">
             {active === 'branding' && <BrandingEditor {...editorProps} />}
+            {active === 'navigation' && <NavigationEditor {...editorProps} />}
             {active === 'hero'     && <HeroEditor {...editorProps} />}
             {active === 'stats'    && <StatsEditor {...editorProps} />}
             {active === 'tours'    && <ToursEditor {...editorProps} />}
@@ -1390,11 +1551,820 @@ export default function AdminConfigPage() {
             {active === 'whyus'    && <WhyUsEditor {...editorProps} />}
             {active === 'cta'      && <CTAEditor {...editorProps} />}
             {active === 'footer'   && <FooterEditor {...editorProps} />}
+            {active === 'tours-page-hero' && <ToursPageHeroEditor {...editorProps} />}
+            {active === 'tours-page-list' && <ToursPageListEditor {...editorProps} />}
+            {active === 'tours-page-booking' && <ToursBookingFormEditor {...editorProps} />}
             {active === 'contact-hero'    && <ContactHeroEditor {...editorProps} />}
             {active === 'contact-details' && <ContactEditor {...editorProps} />}
             {active === 'contact-faq'     && <FAQEditor {...editorProps} />}
           </CardContent>
         </Card>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tours Page Editors ─────────────────────────────────────────────────────
+function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const h = draft.toursPage?.hero || defaultConfig.toursPage?.hero || defaultConfig.contactPage.hero;
+  const upd = <K extends keyof AppConfig['homepage']['hero']>(k: K, v: AppConfig['homepage']['hero'][K]) =>
+    set((p) => {
+      const current = p.toursPage || defaultConfig.toursPage!;
+      return { ...p, toursPage: { ...current, hero: { ...current.hero, [k]: v } } };
+    });
+
+  return (
+    <div className="space-y-5">
+      <SectionToggle title="Fishing Charters Hero Section" enabled={h.enabled} onChange={(v) => upd('enabled', v)} />
+      <BackgroundColorPicker value={h.backgroundColor} onChange={(v) => upd('backgroundColor', v)} />
+      
+      <div className="flex gap-4 items-start">
+        <Switch checked={h.showEyebrow} onCheckedChange={(v) => upd('showEyebrow', v)} className="mt-8" />
+        <div className="flex-1">
+          <FieldRow label="Eyebrow text" id="tph-eyebrow">
+            <Input id="tph-eyebrow" value={h.eyebrow} onChange={(e) => upd('eyebrow', e.target.value)} disabled={!h.showEyebrow} />
+          </FieldRow>
+        </div>
+      </div>
+      <Separator />
+      
+      <FieldRow label="Headline" id="tph-headline">
+        <Input id="tph-headline" value={h.headline} onChange={(e) => upd('headline', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Italic / highlight text" id="tph-italic">
+        <Input id="tph-italic" value={h.italicText} onChange={(e) => upd('italicText', e.target.value)} />
+      </FieldRow>
+      
+      <div className="flex gap-4 items-start">
+        <Switch checked={h.showSubtitle} onCheckedChange={(v) => upd('showSubtitle', v)} className="mt-8" />
+        <div className="flex-1">
+          <FieldRow label="Subtitle" id="tph-subtitle">
+            <textarea id="tph-subtitle" rows={3} value={h.subtitle}
+              onChange={(e) => upd('subtitle', e.target.value)}
+              disabled={!h.showSubtitle}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50" />
+          </FieldRow>
+        </div>
+      </div>
+      
+      <Separator />
+      <FieldRow label="Background image" id="tph-image">
+        <ImageUploaderField
+          id="tph-image"
+          value={h.imageUrl}
+          onChange={(url) => upd('imageUrl', url)}
+          folder="hero"
+          placeholder="Upload or choose hero background..."
+        />
+      </FieldRow>
+    </div>
+  );
+}
+
+function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const data = draft.toursPage?.tours || defaultConfig.toursPage!.tours;
+  const updEnabled = (v: boolean) => set((p) => {
+    const current = p.toursPage || defaultConfig.toursPage!;
+    return { ...p, toursPage: { ...current, tours: { ...current.tours, enabled: v } } };
+  });
+  const updTour = (i: number, k: keyof TourItem, v: string | number | boolean | string[]) =>
+    set((p) => {
+      const current = p.toursPage || defaultConfig.toursPage!;
+      const arr = [...current.tours.items];
+      arr[i] = { ...arr[i], [k]: v };
+      return { ...p, toursPage: { ...current, tours: { ...current.tours, items: arr } } };
+    });
+  const addTour = () =>
+    set((p) => {
+      const current = p.toursPage || defaultConfig.toursPage!;
+      return {
+        ...p,
+        toursPage: {
+          ...current,
+          tours: {
+            ...current.tours,
+            items: [
+              ...current.tours.items,
+              {
+                enabled: true,
+                title: 'New Fishing Charter',
+                badge: 'Popular',
+                description: 'Custom charter description...',
+                duration: 'Guided 6 hours Tour',
+                rating: 5,
+                imageUrl: '/images/hero/hero.jpg',
+                location: 'Watamu Marine Park, Kilifi County',
+                schedule: 'Morning Slots (November To March)',
+                groupType: 'Families · Private · Groups',
+                price: 'Contact for pricing',
+                overview: 'Full overview of this fishing charter experience...',
+                included: ['Professional skipper & crew', 'Tackle & bait', 'Refreshments & lunch'],
+                whyChoose: ['Decades of local fishing experience', 'Modern rigged tournament boat'],
+                knowBeforeYouGo: ['Departure: 6:00 AM', 'What to bring: Sunscreen, hat, sunglasses'],
+              },
+            ],
+          },
+        },
+      };
+    });
+  const rmTour = (i: number) =>
+    set((p) => {
+      const current = p.toursPage || defaultConfig.toursPage!;
+      return {
+        ...p,
+        toursPage: {
+          ...current,
+          tours: {
+            ...current.tours,
+            items: current.tours.items.filter((_, idx) => idx !== i),
+          },
+        },
+      };
+    });
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="Charters Listing Section" enabled={data.enabled} onChange={updEnabled} />
+      <BackgroundColorPicker value={data.backgroundColor} onChange={(v) => set((p) => {
+        const current = p.toursPage || defaultConfig.toursPage!;
+        return { ...p, toursPage: { ...current, tours: { ...current.tours, backgroundColor: v } } };
+      })} />
+      
+      <SectionHeaderFields 
+        data={data} 
+        onChange={(k, v) => set((p) => {
+          const current = p.toursPage || defaultConfig.toursPage!;
+          return { ...p, toursPage: { ...current, tours: { ...current.tours, [k]: v } } };
+        })} 
+      />
+
+      {data.items.map((t, i) => (
+        <div key={i} className="relative rounded-lg border border-border p-5 pt-10 bg-card">
+          <div className="absolute top-2 left-4 right-2 flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
+              <span className="text-xs text-muted-foreground">{t.enabled ? 'Shown' : 'Hidden'}</span>
+            </div>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => rmTour(i)}>
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+          <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: t.enabled ? 1 : 0.5 }}>
+            <div className="grid grid-cols-2 gap-3">
+              <FieldRow label="Title" id={`tp-title-${i}`}>
+                <Input id={`tp-title-${i}`} value={t.title} onChange={(e) => updTour(i, 'title', e.target.value)} disabled={!t.enabled} />
+              </FieldRow>
+              <FieldRow label="Badge" id={`tp-badge-${i}`}>
+                <Input id={`tp-badge-${i}`} value={t.badge} onChange={(e) => updTour(i, 'badge', e.target.value)} disabled={!t.enabled} />
+              </FieldRow>
+              <FieldRow label="Duration (e.g. Guided 6 - 8 hours Tour)" id={`tp-dur-${i}`}>
+                <Input id={`tp-dur-${i}`} value={t.duration} onChange={(e) => updTour(i, 'duration', e.target.value)} disabled={!t.enabled} />
+              </FieldRow>
+              <FieldRow label="Rating (0–5)" id={`tp-rating-${i}`}>
+                <Input id={`tp-rating-${i}`} type="number" min={0} max={5} step={0.1}
+                  value={t.rating} onChange={(e) => updTour(i, 'rating', parseFloat(e.target.value) || 0)} disabled={!t.enabled} />
+              </FieldRow>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <FieldRow label="Price Text" id={`tp-price-${i}`}>
+                <Input id={`tp-price-${i}`} value={t.price || ''} placeholder="Contact for pricing" onChange={(e) => updTour(i, 'price', e.target.value)} disabled={!t.enabled} />
+              </FieldRow>
+              <FieldRow label="Custom URL (Leave blank for auto /tours/[slug])" id={`tp-href-${i}`}>
+                <Input id={`tp-href-${i}`} value={t.href || ''} placeholder="/tours/..." onChange={(e) => updTour(i, 'href', e.target.value)} disabled={!t.enabled} />
+              </FieldRow>
+            </div>
+            <FieldRow label="Charter Card & Gallery Main Image" id={`tp-img-${i}`}>
+              <ImageUploaderField
+                id={`tp-img-${i}`}
+                value={t.imageUrl}
+                onChange={(url) => updTour(i, 'imageUrl', url)}
+                folder="tours"
+                placeholder="Upload or choose charter image..."
+                disabled={!t.enabled}
+              />
+            </FieldRow>
+            <FieldRow label="Card Short Description" id={`tp-desc-${i}`}>
+              <textarea id={`tp-desc-${i}`} rows={2} value={t.description}
+                onChange={(e) => updTour(i, 'description', e.target.value)}
+                disabled={!t.enabled}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50" />
+            </FieldRow>
+
+            {/* Single Tour Page Details Accordion */}
+            <details className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
+              <summary className="cursor-pointer text-xs font-semibold text-foreground flex items-center justify-between select-none">
+                <span>Single Charter Page Details (Overview, Included, Location, Info)</span>
+                <span className="text-[10px] text-muted-foreground font-mono">▼ Expand</span>
+              </summary>
+              
+              <div className="space-y-4 pt-3 border-t border-border/60">
+                {/* Hero Background & Carousel Photos */}
+                <div className="rounded-lg border border-border p-4 bg-background space-y-4">
+                  <div>
+                    <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">Single Charter Hero & Carousel Photos</h5>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Configure the hero background color, backdrop image, and the interactive photo carousel for this single charter detail page.
+                    </p>
+                  </div>
+
+                  <BackgroundColorPicker
+                    label="Hero Background Color"
+                    desc="Custom hero background color when no hero image is set or behind the overlay."
+                    value={t.heroBackgroundColor || '#193da9'}
+                    onChange={(v) => updTour(i, 'heroBackgroundColor', v)}
+                  />
+
+                  <FieldRow label="Hero Background Image (Behind Title)" id={`tp-hero-img-${i}`}>
+                    <ImageUploaderField
+                      id={`tp-hero-img-${i}`}
+                      value={t.heroImageUrl || ''}
+                      onChange={(url) => updTour(i, 'heroImageUrl', url)}
+                      folder="hero"
+                      placeholder="Select hero background image (Optional)..."
+                      disabled={!t.enabled}
+                    />
+                    <p className="text-[10px] text-muted-foreground mt-1">Optional hero backdrop image with dark ambient gradient overlay.</p>
+                  </FieldRow>
+
+                  <BackgroundColorPicker
+                    label="Carousel Indicator Color"
+                    desc="Pick a custom color for the active carousel dot indicators."
+                    value={t.indicatorColor || '#f6ab03'}
+                    onChange={(v) => updTour(i, 'indicatorColor', v)}
+                  />
+
+                  <div className="space-y-3 pt-2 border-t border-border/60">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold">Carousel Photos (Like Catch Gallery)</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const baseImg = t.imageUrl || '/images/hero/hero.jpg';
+                          const currentGallery = t.gallery && t.gallery.length > 0 ? t.gallery : [baseImg, baseImg, baseImg];
+                          updTour(i, 'gallery', [...currentGallery, '/images/hero/hero.jpg']);
+                        }}
+                        disabled={!t.enabled}
+                        className="gap-1.5 h-7 text-xs"
+                      >
+                        <Plus className="h-3 w-3" /> Add Carousel Photo
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {(t.gallery && t.gallery.length > 0 ? t.gallery : [t.imageUrl || '/images/hero/hero.jpg', t.imageUrl || '/images/hero/hero.jpg', t.imageUrl || '/images/hero/hero.jpg']).map((imgUrl, gIdx) => {
+                        const baseImg = t.imageUrl || '/images/hero/hero.jpg';
+                        const currentGallery = t.gallery && t.gallery.length > 0 ? t.gallery : [baseImg, baseImg, baseImg];
+                        const updGalleryImg = (newUrl: string) => {
+                          const updated = [...currentGallery];
+                          updated[gIdx] = newUrl;
+                          updTour(i, 'gallery', updated);
+                        };
+                        const removeGalleryImg = () => {
+                          const updated = currentGallery.filter((_, idx) => idx !== gIdx);
+                          const baseImg = t.imageUrl || '/images/hero/hero.jpg';
+                          updTour(i, 'gallery', updated.length > 0 ? updated : [baseImg, baseImg, baseImg]);
+                        };
+                        const moveGalleryImg = (dir: 'up' | 'down') => {
+                          const target = dir === 'up' ? gIdx - 1 : gIdx + 1;
+                          if (target < 0 || target >= currentGallery.length) return;
+                          const updated = [...currentGallery];
+                          const temp = updated[gIdx];
+                          updated[gIdx] = updated[target];
+                          updated[target] = temp;
+                          updTour(i, 'gallery', updated);
+                        };
+
+                        return (
+                          <div key={gIdx} className="flex items-center gap-2 rounded-lg border border-border p-2.5 bg-card shadow-xs">
+                            <span className="text-xs font-mono font-medium text-muted-foreground w-6 text-center">{gIdx + 1}</span>
+                            <div className="flex-1">
+                              <ImageUploaderField
+                                id={`tp-gal-${i}-${gIdx}`}
+                                value={imgUrl}
+                                onChange={updGalleryImg}
+                                folder="tours"
+                                placeholder="Choose carousel photo..."
+                                disabled={!t.enabled}
+                              />
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                disabled={gIdx === 0 || !t.enabled}
+                                onClick={() => moveGalleryImg('up')}
+                                title="Move up"
+                              >
+                                <ArrowUp className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                disabled={gIdx === currentGallery.length - 1 || !t.enabled}
+                                onClick={() => moveGalleryImg('down')}
+                                title="Move down"
+                              >
+                                <ArrowDown className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                                disabled={!t.enabled || currentGallery.length <= 1}
+                                onClick={removeGalleryImg}
+                                title="Delete photo"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <FieldRow label="Location Strip Text" id={`tp-loc-${i}`}>
+                    <Input
+                      id={`tp-loc-${i}`}
+                      value={t.location || ''}
+                      placeholder="e.g. Watamu Marine Park, Kilifi County"
+                      onChange={(e) => updTour(i, 'location', e.target.value)}
+                      disabled={!t.enabled}
+                    />
+                  </FieldRow>
+                  <FieldRow label="Schedule / Season Text" id={`tp-sched-${i}`}>
+                    <Input
+                      id={`tp-sched-${i}`}
+                      value={t.schedule || ''}
+                      placeholder="e.g. Morning Slots (November To March)"
+                      onChange={(e) => updTour(i, 'schedule', e.target.value)}
+                      disabled={!t.enabled}
+                    />
+                  </FieldRow>
+                  <FieldRow label="Group Suitability Text" id={`tp-grp-${i}`}>
+                    <Input
+                      id={`tp-grp-${i}`}
+                      value={t.groupType || ''}
+                      placeholder="e.g. Families · Private · Groups"
+                      onChange={(e) => updTour(i, 'groupType', e.target.value)}
+                      disabled={!t.enabled}
+                    />
+                  </FieldRow>
+                </div>
+
+                <FieldRow label="Full Tour Overview (Main Article)" id={`tp-over-${i}`}>
+                  <textarea
+                    id={`tp-over-${i}`}
+                    rows={3}
+                    value={t.overview || ''}
+                    placeholder="Full detailed narrative description for the single tour page..."
+                    onChange={(e) => updTour(i, 'overview', e.target.value)}
+                    disabled={!t.enabled}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+                  />
+                </FieldRow>
+
+                <FieldRow label="What's Included (1 item per line)" id={`tp-inc-${i}`}>
+                  <textarea
+                    id={`tp-inc-${i}`}
+                    rows={4}
+                    value={(t.included || []).join('\n')}
+                    placeholder="Heavy tackle Penn & Shimano rods&#10;Live bait & lures&#10;Marine park entry permits&#10;Seafood lunch & drinks"
+                    onChange={(e) =>
+                      updTour(
+                        i,
+                        'included',
+                        e.target.value
+                          .split('\n')
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                    disabled={!t.enabled}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                  />
+                </FieldRow>
+
+                <FieldRow label="Why Choose This Tour (1 item per line)" id={`tp-why-${i}`}>
+                  <textarea
+                    id={`tp-why-${i}`}
+                    rows={3}
+                    value={(t.whyChoose || []).join('\n')}
+                    placeholder="Twin-engine sportfisher with fighting chair&#10;IGFA certified captain with 20+ years experience&#10;Strict billfish conservation policy"
+                    onChange={(e) =>
+                      updTour(
+                        i,
+                        'whyChoose',
+                        e.target.value
+                          .split('\n')
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                    disabled={!t.enabled}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                  />
+                </FieldRow>
+
+                <FieldRow label="Know Before You Go (1 item per line)" id={`tp-know-${i}`}>
+                  <textarea
+                    id={`tp-know-${i}`}
+                    rows={3}
+                    value={(t.knowBeforeYouGo || []).join('\n')}
+                    placeholder="Departure: 6:00 AM from Watamu Marine Park Gate&#10;Duration: Approx. 8 hours&#10;What to bring: Polarized sunglasses, reef-safe sunscreen"
+                    onChange={(e) =>
+                      updTour(
+                        i,
+                        'knowBeforeYouGo',
+                        e.target.value
+                          .split('\n')
+                          .map((s) => s.trim())
+                          .filter(Boolean)
+                      )
+                    }
+                    disabled={!t.enabled}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                  />
+                </FieldRow>
+              </div>
+            </details>
+          </div>
+        </div>
+      ))}
+      <Button variant="outline" className="w-full gap-2" onClick={addTour}>
+        <Plus className="h-4 w-4" /> Add Fishing Charter
+      </Button>
+    </div>
+  );
+}
+
+function ToursBookingFormEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const f = draft.toursPage?.bookingForm || defaultConfig.toursPage?.bookingForm || {
+    enabled: true,
+    title: 'Book This Charter',
+    subtitle: 'Reserve your private expedition on the water.',
+    buttonText: 'Submit Reservation',
+    accessKey: '',
+    fields: defaultConfig.toursPage!.bookingForm!.fields || [],
+  };
+
+  const fields: DynamicFormField[] = f.fields || defaultConfig.toursPage!.bookingForm!.fields || [];
+
+  const updF = <K extends keyof TourBookingFormConfig>(k: K, v: TourBookingFormConfig[K]) =>
+    set((p) => {
+      const current = p.toursPage || defaultConfig.toursPage!;
+      return {
+        ...p,
+        toursPage: {
+          ...current,
+          bookingForm: {
+            ...(current.bookingForm || defaultConfig.toursPage?.bookingForm || {}),
+            [k]: v,
+          },
+        },
+      };
+    });
+
+  const updField = (index: number, key: keyof DynamicFormField, val: unknown) => {
+    const updated = [...fields];
+    updated[index] = { ...updated[index], [key]: val };
+    updF('fields', updated);
+  };
+
+  const addField = () => {
+    const newField: DynamicFormField = {
+      id: `field_${Date.now()}`,
+      label: 'New Field',
+      type: 'text',
+      placeholder: 'Enter details...',
+      required: false,
+      halfWidth: false,
+      enabled: true,
+    };
+    updF('fields', [...fields, newField]);
+  };
+
+  const addFieldWithType = (type: FormFieldType, label = 'New Field') => {
+    const newField: DynamicFormField = {
+      id: `field_${Date.now()}`,
+      label,
+      type,
+      placeholder: type === 'select' || type === 'checkbox' ? '' : 'Enter details...',
+      options: type === 'select' ? ['Option 1', 'Option 2'] : undefined,
+      required: false,
+      halfWidth: type === 'date' || type === 'time' || type === 'text' || type === 'tel',
+      enabled: true,
+    };
+    updF('fields', [...fields, newField]);
+  };
+
+  const removeField = (index: number) => {
+    updF('fields', fields.filter((_, i) => i !== index));
+  };
+
+  const moveField = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= fields.length) return;
+    const reordered = [...fields];
+    const temp = reordered[index];
+    reordered[index] = reordered[targetIndex];
+    reordered[targetIndex] = temp;
+    updF('fields', reordered);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle
+        title="Enable Reservation Form on Charter Pages"
+        enabled={f.enabled !== false}
+        onChange={(v) => updF('enabled', v)}
+      />
+
+      <div className="space-y-4">
+        <FieldRow label="Form Title" id="tbf-title">
+          <Input
+            id="tbf-title"
+            value={f.title || ''}
+            placeholder="Book This Charter"
+            onChange={(e) => updF('title', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="Form Subtitle" id="tbf-sub">
+          <Input
+            id="tbf-sub"
+            value={f.subtitle || ''}
+            placeholder="Reserve your private expedition on the water."
+            onChange={(e) => updF('subtitle', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="Submit Button Label" id="tbf-btn">
+          <Input
+            id="tbf-btn"
+            value={f.buttonText || ''}
+            placeholder="Submit Reservation"
+            onChange={(e) => updF('buttonText', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="Web3Forms Access Key (Optional override)" id="tbf-key">
+          <Input
+            id="tbf-key"
+            value={f.accessKey || ''}
+            placeholder="Leave blank to use Contact Page access key"
+            onChange={(e) => updF('accessKey', e.target.value)}
+            disabled={f.enabled === false}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            If left blank, it automatically uses the access key configured on the Contact Page form.
+          </p>
+        </FieldRow>
+
+        <Separator />
+
+        {/* Dynamic Form Fields Builder */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-foreground">Dynamic Reservation Form Fields</h4>
+              <p className="text-xs text-muted-foreground">
+                Customize, reorder, add dropdowns, checkboxes, date/time pickers, or text fields.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addField}
+              disabled={f.enabled === false}
+              className="gap-1.5"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Field
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {fields.map((field, idx) => (
+              <div
+                key={field.id || idx}
+                className="relative rounded-xl border border-border p-4 bg-card shadow-xs space-y-3"
+                style={{ opacity: field.enabled !== false ? 1 : 0.55 }}
+              >
+                {/* Field Top Bar: Controls */}
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={field.enabled !== false}
+                      onCheckedChange={(v) => updField(idx, 'enabled', v)}
+                      disabled={f.enabled === false}
+                    />
+                    <span className="text-xs font-semibold text-foreground">
+                      {field.label || `Field ${idx + 1}`}
+                    </span>
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground uppercase">
+                      {field.type}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      disabled={idx === 0 || f.enabled === false}
+                      onClick={() => moveField(idx, 'up')}
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      disabled={idx === fields.length - 1 || f.enabled === false}
+                      onClick={() => moveField(idx, 'down')}
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                      disabled={f.enabled === false}
+                      onClick={() => removeField(idx)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Field Configuration Inputs */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <FieldRow label="Field Label" id={`f-lbl-${idx}`}>
+                    <Input
+                      id={`f-lbl-${idx}`}
+                      value={field.label}
+                      onChange={(e) => updField(idx, 'label', e.target.value)}
+                      disabled={f.enabled === false}
+                    />
+                  </FieldRow>
+
+                  <FieldRow label="Field Type" id={`f-typ-${idx}`}>
+                    <select
+                      id={`f-typ-${idx}`}
+                      value={field.type}
+                      onChange={(e) => updField(idx, 'type', e.target.value as FormFieldType)}
+                      disabled={f.enabled === false}
+                      className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="text">Text (Single Line)</option>
+                      <option value="email">Email Address</option>
+                      <option value="tel">Phone Number</option>
+                      <option value="number">Number</option>
+                      <option value="date">Date Picker</option>
+                      <option value="time">Time Picker</option>
+                      <option value="datetime-local">Date & Time Picker</option>
+                      <option value="select">Dropdown (Select Menu)</option>
+                      <option value="checkbox">Checkbox Toggle</option>
+                      <option value="textarea">Textarea (Multi-Line)</option>
+                    </select>
+                  </FieldRow>
+                </div>
+
+                {/* Placeholder (Not applicable for checkbox) */}
+                {field.type !== 'checkbox' && (
+                  <FieldRow label="Placeholder Text" id={`f-plc-${idx}`}>
+                    <Input
+                      id={`f-plc-${idx}`}
+                      value={field.placeholder || ''}
+                      placeholder="e.g. Enter details..."
+                      onChange={(e) => updField(idx, 'placeholder', e.target.value)}
+                      disabled={f.enabled === false}
+                    />
+                  </FieldRow>
+                )}
+
+                {/* Dropdown Options (For Select Type) */}
+                {field.type === 'select' && (
+                  <FieldRow label="Dropdown Options (1 per line)" id={`f-opt-${idx}`}>
+                    <textarea
+                      id={`f-opt-${idx}`}
+                      rows={3}
+                      value={(field.options || []).join('\n')}
+                      placeholder="Option 1&#10;Option 2&#10;Option 3"
+                      onChange={(e) =>
+                        updField(
+                          idx,
+                          'options',
+                          e.target.value.split('\n')
+                        )
+                      }
+                      disabled={f.enabled === false}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none font-mono"
+                    />
+                  </FieldRow>
+                )}
+
+                {/* Toggles: Required & Half Width */}
+                <div className="flex flex-wrap items-center gap-6 pt-1">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`f-req-${idx}`}
+                      checked={Boolean(field.required)}
+                      onCheckedChange={(v) => updField(idx, 'required', v)}
+                      disabled={f.enabled === false}
+                    />
+                    <Label htmlFor={`f-req-${idx}`} className="text-xs cursor-pointer">
+                      Required field
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`f-half-${idx}`}
+                      checked={Boolean(field.halfWidth)}
+                      onCheckedChange={(v) => updField(idx, 'halfWidth', v)}
+                      disabled={f.enabled === false}
+                    />
+                    <Label htmlFor={`f-half-${idx}`} className="text-xs cursor-pointer">
+                      Half Width (2-Column Grid)
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Add Field at the Bottom */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => addField()}
+              disabled={f.enabled === false}
+              className="w-full sm:flex-1 h-10 border-dashed gap-2 text-xs font-semibold"
+            >
+              <Plus className="h-4 w-4" /> Add Custom Field
+            </Button>
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('date', 'Preferred Date')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Date
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('time', 'Departure Time')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Time
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('select', 'Select Option')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Dropdown
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('checkbox', 'Checkbox Option')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Checkbox
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1518,6 +2488,9 @@ function ContactEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConf
         <FieldRow label="Form Title" id="cf-title">
           <Input id="cf-title" value={f.title} onChange={(e) => updF('title', e.target.value)} />
         </FieldRow>
+        <FieldRow label="Form Subtitle" id="cf-sub">
+          <Input id="cf-sub" value={f.subtitle || ''} placeholder="We usually respond within 2-4 hours." onChange={(e) => updF('subtitle', e.target.value)} />
+        </FieldRow>
         <FieldRow label="Submit Button Text" id="cf-btn">
           <Input id="cf-btn" value={f.buttonText} onChange={(e) => updF('buttonText', e.target.value)} />
         </FieldRow>
@@ -1525,6 +2498,325 @@ function ContactEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConf
           <Input id="cf-key" value={f.accessKey} onChange={(e) => updF('accessKey', e.target.value)} placeholder="Enter key from web3forms.com" />
           <p className="text-xs text-muted-foreground mt-1">Get your free access key from <a href="https://web3forms.com/" target="_blank" className="underline text-blue-500">web3forms.com</a> to receive emails.</p>
         </FieldRow>
+
+        <Separator />
+
+        {/* Dynamic Contact Form Fields */}
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-foreground">Dynamic Contact Form Fields</h4>
+              <p className="text-xs text-muted-foreground">
+                Customize, reorder, add dropdowns, checkboxes, date/time pickers, or text fields.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const newField: DynamicFormField = {
+                  id: `cf_${Date.now()}`,
+                  label: 'New Field',
+                  type: 'text',
+                  placeholder: 'Enter details...',
+                  required: false,
+                  halfWidth: false,
+                  enabled: true,
+                };
+                const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
+                updF('fields', [...currentFields, newField]);
+              }}
+              disabled={f.enabled === false}
+              className="gap-1.5"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Field
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {(f.fields || defaultConfig.contactPage.form.fields || []).map((field, idx) => {
+              const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
+              const updCField = (key: keyof DynamicFormField, val: unknown) => {
+                const updated = [...currentFields];
+                updated[idx] = { ...updated[idx], [key]: val };
+                updF('fields', updated);
+              };
+
+              const removeCField = () => {
+                updF('fields', currentFields.filter((_, i) => i !== idx));
+              };
+
+              const moveCField = (direction: 'up' | 'down') => {
+                const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+                if (targetIdx < 0 || targetIdx >= currentFields.length) return;
+                const reordered = [...currentFields];
+                const temp = reordered[idx];
+                reordered[idx] = reordered[targetIdx];
+                reordered[targetIdx] = temp;
+                updF('fields', reordered);
+              };
+
+              return (
+                <div
+                  key={field.id || idx}
+                  className="relative rounded-xl border border-border p-4 bg-card shadow-xs space-y-3"
+                  style={{ opacity: field.enabled !== false ? 1 : 0.55 }}
+                >
+                  <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={field.enabled !== false}
+                        onCheckedChange={(v) => updCField('enabled', v)}
+                        disabled={f.enabled === false}
+                      />
+                      <span className="text-xs font-semibold text-foreground">
+                        {field.label || `Field ${idx + 1}`}
+                      </span>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground uppercase">
+                        {field.type}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        disabled={idx === 0 || f.enabled === false}
+                        onClick={() => moveCField('up')}
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        disabled={idx === currentFields.length - 1 || f.enabled === false}
+                        onClick={() => moveCField('down')}
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                        disabled={f.enabled === false}
+                        onClick={removeCField}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <FieldRow label="Field Label" id={`cf-lbl-${idx}`}>
+                      <Input
+                        id={`cf-lbl-${idx}`}
+                        value={field.label}
+                        onChange={(e) => updCField('label', e.target.value)}
+                        disabled={f.enabled === false}
+                      />
+                    </FieldRow>
+
+                    <FieldRow label="Field Type" id={`cf-typ-${idx}`}>
+                      <select
+                        id={`cf-typ-${idx}`}
+                        value={field.type}
+                        onChange={(e) => updCField('type', e.target.value as FormFieldType)}
+                        disabled={f.enabled === false}
+                        className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                      >
+                        <option value="text">Text (Single Line)</option>
+                        <option value="email">Email Address</option>
+                        <option value="tel">Phone Number</option>
+                        <option value="number">Number</option>
+                        <option value="date">Date Picker</option>
+                        <option value="time">Time Picker</option>
+                        <option value="datetime-local">Date & Time Picker</option>
+                        <option value="select">Dropdown (Select Menu)</option>
+                        <option value="checkbox">Checkbox Toggle</option>
+                        <option value="textarea">Textarea (Multi-Line)</option>
+                      </select>
+                    </FieldRow>
+                  </div>
+
+                  {field.type !== 'checkbox' && (
+                    <FieldRow label="Placeholder Text" id={`cf-plc-${idx}`}>
+                      <Input
+                        id={`cf-plc-${idx}`}
+                        value={field.placeholder || ''}
+                        placeholder="e.g. Enter details..."
+                        onChange={(e) => updCField('placeholder', e.target.value)}
+                        disabled={f.enabled === false}
+                      />
+                    </FieldRow>
+                  )}
+
+                  {field.type === 'select' && (
+                    <FieldRow label="Dropdown Options (1 per line)" id={`cf-opt-${idx}`}>
+                      <textarea
+                        id={`cf-opt-${idx}`}
+                        rows={3}
+                        value={(field.options || []).join('\n')}
+                        placeholder="Option 1&#10;Option 2&#10;Option 3"
+                        onChange={(e) =>
+                          updCField(
+                            'options',
+                            e.target.value.split('\n')
+                          )
+                        }
+                        disabled={f.enabled === false}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none font-mono"
+                      />
+                    </FieldRow>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-6 pt-1">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`cf-req-${idx}`}
+                        checked={Boolean(field.required)}
+                        onCheckedChange={(v) => updCField('required', v)}
+                        disabled={f.enabled === false}
+                      />
+                      <Label htmlFor={`cf-req-${idx}`} className="text-xs cursor-pointer">
+                        Required field
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id={`cf-half-${idx}`}
+                        checked={Boolean(field.halfWidth)}
+                        onCheckedChange={(v) => updCField('halfWidth', v)}
+                        disabled={f.enabled === false}
+                      />
+                      <Label htmlFor={`cf-half-${idx}`} className="text-xs cursor-pointer">
+                        Half Width (2-Column Grid)
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Quick Add Buttons at the bottom for Contact Form */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const newField: DynamicFormField = {
+                  id: `cf_${Date.now()}`,
+                  label: 'New Field',
+                  type: 'text',
+                  placeholder: 'Enter details...',
+                  required: false,
+                  halfWidth: false,
+                  enabled: true,
+                };
+                const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
+                updF('fields', [...currentFields, newField]);
+              }}
+              disabled={f.enabled === false}
+              className="w-full sm:flex-1 h-10 border-dashed gap-2 text-xs font-semibold"
+            >
+              <Plus className="h-4 w-4" /> Add Custom Field
+            </Button>
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  const newField: DynamicFormField = {
+                    id: `cf_date_${Date.now()}`,
+                    label: 'Preferred Date',
+                    type: 'date',
+                    required: false,
+                    halfWidth: true,
+                    enabled: true,
+                  };
+                  const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
+                  updF('fields', [...currentFields, newField]);
+                }}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Date
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  const newField: DynamicFormField = {
+                    id: `cf_time_${Date.now()}`,
+                    label: 'Preferred Time',
+                    type: 'time',
+                    required: false,
+                    halfWidth: true,
+                    enabled: true,
+                  };
+                  const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
+                  updF('fields', [...currentFields, newField]);
+                }}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Time
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  const newField: DynamicFormField = {
+                    id: `cf_select_${Date.now()}`,
+                    label: 'Subject / Category',
+                    type: 'select',
+                    options: ['General Inquiry', 'Charters', 'Feedback'],
+                    required: false,
+                    halfWidth: true,
+                    enabled: true,
+                  };
+                  const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
+                  updF('fields', [...currentFields, newField]);
+                }}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Dropdown
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  const newField: DynamicFormField = {
+                    id: `cf_check_${Date.now()}`,
+                    label: 'Subscribe to newsletter',
+                    type: 'checkbox',
+                    required: false,
+                    halfWidth: false,
+                    enabled: true,
+                  };
+                  const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
+                  updF('fields', [...currentFields, newField]);
+                }}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Checkbox
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>

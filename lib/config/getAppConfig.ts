@@ -12,11 +12,110 @@ export async function getAppConfig(): Promise<AppConfig> {
 
     if (error || !data?.config) return defaultConfig;
 
-    const config = data.config as AppConfig;
-    if (!config.branding) return defaultConfig;
+    const savedConfig = data.config as Partial<AppConfig>;
+    if (!savedConfig.branding) return defaultConfig;
 
-    return config;
+    // Merge navigation: ensure default navigation items (e.g. 'tours') exist and order: Home, Fishing Charters, Contact
+    const savedNav = savedConfig.navigation || [];
+    const savedNavKeys = new Set(savedNav.map((n) => n.key));
+    const rawNav = [
+      ...savedNav,
+      ...defaultConfig.navigation.filter((n) => !savedNavKeys.has(n.key)),
+    ];
+
+    const desiredOrder = ['home', 'tours', 'contact'];
+    rawNav.sort((a, b) => {
+      const aIdx = desiredOrder.indexOf(a.key);
+      const bIdx = desiredOrder.indexOf(b.key);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return 0;
+    });
+
+    // Clean up any stale /contact URLs from tour items
+    const sanitizeTours = (items?: typeof defaultConfig.homepage.tours.items) => {
+      if (!items) return items;
+      return items.map((item) => {
+        if (!item.href || item.href.startsWith('/contact') || item.href.startsWith('/bookings')) {
+          const s = item.slug || item.title.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_-]+/g, '-');
+          return { ...item, href: `/tours/${s}` };
+        }
+        return item;
+      });
+    };
+
+    // Merge with defaults so new page sections like toursPage are present
+    const mergedConfig: AppConfig = {
+      ...defaultConfig,
+      ...savedConfig,
+      branding: {
+        ...defaultConfig.branding,
+        ...(savedConfig.branding || {}),
+      },
+      navigation: rawNav,
+      homepage: {
+        ...defaultConfig.homepage,
+        ...(savedConfig.homepage || {}),
+        tours: {
+          ...defaultConfig.homepage.tours,
+          ...(savedConfig.homepage?.tours || {}),
+          items: sanitizeTours(savedConfig.homepage?.tours?.items) || defaultConfig.homepage.tours.items,
+        },
+      },
+      toursPage: {
+        ...defaultConfig.toursPage!,
+        ...(savedConfig.toursPage || {}),
+        hero: {
+          ...defaultConfig.toursPage!.hero,
+          ...(savedConfig.toursPage?.hero || {}),
+          backgroundColor:
+            savedConfig.toursPage?.hero?.backgroundColor &&
+            savedConfig.toursPage.hero.backgroundColor !== '#0b251a'
+              ? savedConfig.toursPage.hero.backgroundColor
+              : (savedConfig.branding?.primaryColor || defaultConfig.branding.primaryColor || '#193da9'),
+        },
+        tours: {
+          ...defaultConfig.toursPage!.tours,
+          ...(savedConfig.toursPage?.tours || {}),
+          items: sanitizeTours(savedConfig.toursPage?.tours?.items) || defaultConfig.toursPage!.tours.items,
+        },
+        bookingForm: {
+          ...defaultConfig.toursPage!.bookingForm!,
+          ...(savedConfig.toursPage?.bookingForm || {}),
+          fields:
+            savedConfig.toursPage?.bookingForm?.fields &&
+            savedConfig.toursPage?.bookingForm?.fields.length > 0
+              ? savedConfig.toursPage.bookingForm.fields
+              : defaultConfig.toursPage!.bookingForm!.fields,
+        },
+      },
+      contactPage: {
+        ...defaultConfig.contactPage,
+        ...(savedConfig.contactPage || {}),
+        contact: {
+          ...defaultConfig.contactPage.contact,
+          ...(savedConfig.contactPage?.contact || {}),
+        },
+        form: {
+          ...defaultConfig.contactPage.form,
+          ...(savedConfig.contactPage?.form || {}),
+          fields:
+            savedConfig.contactPage?.form?.fields &&
+            savedConfig.contactPage?.form?.fields.length > 0
+              ? savedConfig.contactPage.form.fields
+              : defaultConfig.contactPage.form.fields,
+        },
+        faq: {
+          ...defaultConfig.contactPage.faq,
+          ...(savedConfig.contactPage?.faq || {}),
+        },
+      },
+    };
+
+    return mergedConfig;
   } catch {
     return defaultConfig;
   }
 }
+

@@ -27,7 +27,7 @@ export function Footer() {
           {/* Col 1: Branding & Description */}
           <div className="space-y-6">
             <div className="flex items-start gap-3">
-              {branding.logoUrl ? (
+              {branding.logoUrl && branding.logoUrl.trim() !== '' ? (
                 <Image src={branding.logoUrl} alt={branding.appName} width={400} height={400} className="w-auto h-48 object-contain object-left" style={{ width: 'auto' }} />
               ) : (
                 <div className="flex h-12 w-12 items-center justify-center rounded-full text-xl font-bold text-white shadow-md" style={{ backgroundColor: branding.primaryColor }}>
@@ -55,12 +55,15 @@ export function Footer() {
             )}
           </div>
 
-          {/* Col 2: Quick Links */}
+          {/* Col 2: Quick Links (Synchronized with Nav Menu) */}
           <div>
             <h3 className="text-sm font-bold uppercase tracking-widest text-white mb-6">Quick Links</h3>
             {footer.quickLinks.enabled && (
               <ul className="space-y-4">
-                {footer.quickLinks.items.filter(l => l.enabled).map((link, i) => (
+                {((config.navigation && config.navigation.length > 0)
+                  ? config.navigation.filter((l) => l.enabled)
+                  : footer.quickLinks.items.filter((l) => l.enabled)
+                ).map((link, i) => (
                   <li key={i}>
                     <Link href={link.href} className="text-sm text-slate-400 hover:text-white transition-colors">
                       {link.label}
