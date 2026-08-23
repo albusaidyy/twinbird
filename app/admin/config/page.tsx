@@ -559,6 +559,19 @@ function BrandingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCon
       <FieldRow label="App Name" id="b-name">
         <Input id="b-name" value={b.appName} onChange={(e) => upd('appName', e.target.value)} />
       </FieldRow>
+      <FieldRow label="Site Meta Description (SEO)" id="b-meta-desc">
+        <textarea
+          id="b-meta-desc"
+          rows={3}
+          value={b.metaDescription || ''}
+          placeholder="e.g. Premier big-game sportfishing charters, marlin & sailfish safaris, and coastal expeditions on the Kenyan Coast."
+          onChange={(e) => upd('metaDescription', e.target.value)}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
+        <p className="text-[11px] text-muted-foreground mt-1">
+          Used by search engines, social media previews, and browser metadata.
+        </p>
+      </FieldRow>
       <div className="grid grid-cols-2 gap-4">
         <FieldRow label="Primary Color" id="b-primary">
           <div className="flex gap-2">
@@ -1984,6 +1997,38 @@ function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
           placeholder="Upload or choose hero background..."
         />
       </FieldRow>
+
+      <div className="rounded-lg border border-border bg-card p-4 space-y-3 pt-3">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">Fishing Charters Page SEO & Meta</h4>
+        <FieldRow label="Meta Title" id="tp-meta-title">
+          <Input
+            id="tp-meta-title"
+            value={draft.toursPage?.metaTitle || ''}
+            placeholder="e.g. Fishing Charters & Packages"
+            onChange={(e) =>
+              set((p) => {
+                const current = p.toursPage || defaultConfig.toursPage!;
+                return { ...p, toursPage: { ...current, metaTitle: e.target.value } };
+              })
+            }
+          />
+        </FieldRow>
+        <FieldRow label="Meta Description" id="tp-meta-desc">
+          <textarea
+            id="tp-meta-desc"
+            rows={2}
+            value={draft.toursPage?.metaDescription || ''}
+            placeholder="e.g. Explore our fleet of sportfishing charter packages in Watamu..."
+            onChange={(e) =>
+              set((p) => {
+                const current = p.toursPage || defaultConfig.toursPage!;
+                return { ...p, toursPage: { ...current, metaDescription: e.target.value } };
+              })
+            }
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+          />
+        </FieldRow>
+      </div>
     </div>
   );
 }
@@ -2619,6 +2664,34 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                     </FieldRow>
                   </div>
                 </div>
+
+                <div className="pt-3 border-t border-border/60 space-y-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Single Charter SEO & Meta
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <FieldRow label="Meta Title (Optional)" id={`tp-mtitle-${i}`}>
+                      <Input
+                        id={`tp-mtitle-${i}`}
+                        value={t.metaTitle || ''}
+                        placeholder={t.title ? `${t.title} | Sea Smoke Fishing Club` : 'e.g. Marlin Safari | Sea Smoke'}
+                        onChange={(e) => updTour(i, 'metaTitle', e.target.value)}
+                        disabled={!t.enabled}
+                      />
+                    </FieldRow>
+                    <FieldRow label="Meta Description (Optional)" id={`tp-mdesc-${i}`}>
+                      <textarea
+                        id={`tp-mdesc-${i}`}
+                        rows={2}
+                        value={t.metaDescription || ''}
+                        placeholder="Overrides default meta description for this single charter page..."
+                        onChange={(e) => updTour(i, 'metaDescription', e.target.value)}
+                        disabled={!t.enabled}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
               </div>
             </details>
           </div>
@@ -3042,6 +3115,32 @@ function ContactHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: App
           placeholder="Upload or choose contact hero image..."
         />
       </FieldRow>
+
+      <div className="rounded-lg border border-border bg-card p-4 space-y-3 pt-3">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">Contact Page SEO & Meta</h4>
+        <FieldRow label="Meta Title" id="ct-meta-title">
+          <Input
+            id="ct-meta-title"
+            value={draft.contactPage?.metaTitle || ''}
+            placeholder="e.g. Contact & Reservations"
+            onChange={(e) =>
+              set((p) => ({ ...p, contactPage: { ...p.contactPage, metaTitle: e.target.value } }))
+            }
+          />
+        </FieldRow>
+        <FieldRow label="Meta Description" id="ct-meta-desc">
+          <textarea
+            id="ct-meta-desc"
+            rows={2}
+            value={draft.contactPage?.metaDescription || ''}
+            placeholder="e.g. Get in touch with our booking desk to plan your custom fishing trip..."
+            onChange={(e) =>
+              set((p) => ({ ...p, contactPage: { ...p.contactPage, metaDescription: e.target.value } }))
+            }
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+          />
+        </FieldRow>
+      </div>
     </div>
   );
 }
@@ -3587,6 +3686,38 @@ function AboutHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCo
           placeholder="Upload or choose hero image..."
         />
       </FieldRow>
+
+      <div className="rounded-lg border border-border bg-card p-4 space-y-3 pt-3">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">About Page SEO & Meta</h4>
+        <FieldRow label="Meta Title" id="ab-meta-title">
+          <Input
+            id="ab-meta-title"
+            value={draft.aboutPage?.metaTitle || ''}
+            placeholder="e.g. About Our Heritage & Crew"
+            onChange={(e) =>
+              set((p) => {
+                const current = p.aboutPage || defaultConfig.aboutPage!;
+                return { ...p, aboutPage: { ...current, metaTitle: e.target.value } };
+              })
+            }
+          />
+        </FieldRow>
+        <FieldRow label="Meta Description" id="ab-meta-desc">
+          <textarea
+            id="ab-meta-desc"
+            rows={2}
+            value={draft.aboutPage?.metaDescription || ''}
+            placeholder="e.g. Discover our story, decades of sportfishing heritage, and conservation..."
+            onChange={(e) =>
+              set((p) => {
+                const current = p.aboutPage || defaultConfig.aboutPage!;
+                return { ...p, aboutPage: { ...current, metaDescription: e.target.value } };
+              })
+            }
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+          />
+        </FieldRow>
+      </div>
     </div>
   );
 }

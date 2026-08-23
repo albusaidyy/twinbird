@@ -1,6 +1,7 @@
 // ─── Branding ──────────────────────────────────────────────────────────────────
 export interface Branding {
   appName: string;
+  metaDescription?: string;
   primaryColor: string;
   accentColor: string;
   font: string;
@@ -91,6 +92,8 @@ export interface TourItem {
   showWhyChoose?: boolean;
   knowBeforeYouGo?: string[];
   showKnowBeforeYouGo?: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
   href?: string;
 }
 
@@ -212,6 +215,8 @@ export interface TourBookingFormConfig {
 }
 
 export interface ToursPageConfig {
+  metaTitle?: string;
+  metaDescription?: string;
   hero: HeroSection;
   tours: SectionList<TourItem>;
   bookingForm?: TourBookingFormConfig;
@@ -245,6 +250,8 @@ export interface ContactFormConfig {
 }
 
 export interface ContactPageConfig {
+  metaTitle?: string;
+  metaDescription?: string;
   hero: HeroSection;
   contact: ContactInfo;
   form: ContactFormConfig;
@@ -317,6 +324,8 @@ export interface AboutCTASection {
 }
 
 export interface AboutPageConfig {
+  metaTitle?: string;
+  metaDescription?: string;
   hero: HeroSection;
   story: AboutStorySection;
   values: SectionList<AboutValueItem>;

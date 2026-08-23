@@ -8,6 +8,7 @@ import type { AppConfig } from '@/types/app-config';
 export const defaultConfig: AppConfig = {
   branding: {
     appName: 'Sea Smoke Fishing Club',
+    metaDescription: 'Premier big-game sportfishing charters, marlin & sailfish safaris, and coastal expeditions on the Kenyan Coast.',
     primaryColor: '#193da9',
     accentColor: '#f6ab03',
     font: 'inter',
@@ -262,6 +263,8 @@ export const defaultConfig: AppConfig = {
   },
 
   toursPage: {
+    metaTitle: 'Fishing Charters & Packages',
+    metaDescription: 'Explore our fleet of sportfishing charter packages, from inshore light tackle to full-day offshore marlin safaris in Watamu, Kenya.',
     hero: {
       enabled: true,
       backgroundColor: '#193da9',
@@ -569,6 +572,8 @@ export const defaultConfig: AppConfig = {
   },
 
   contactPage: {
+    metaTitle: 'Contact & Reservations',
+    metaDescription: 'Get in touch with our booking desk to plan your custom fishing trip, big game charter, or private boat excursion.',
     hero: {
       enabled: true,
       backgroundColor: '#000000',
@@ -685,6 +690,8 @@ export const defaultConfig: AppConfig = {
   },
 
   aboutPage: {
+    metaTitle: 'About Our Heritage & Crew',
+    metaDescription: 'Discover our story, decades of sportfishing heritage, tournament-rigged boats, and marine conservation commitment in Kenya.',
     hero: {
       enabled: true,
       backgroundColor: '#000000',
