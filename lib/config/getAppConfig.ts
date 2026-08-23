@@ -1,5 +1,5 @@
 import { defaultConfig } from '@/config/default-config';
-import type { AppConfig } from '@/types/app-config';
+import type { AppConfig, TourItem } from '@/types/app-config';
 import { supabase } from '@/lib/supabase';
 
 export async function getAppConfig(): Promise<AppConfig> {
@@ -33,8 +33,7 @@ export async function getAppConfig(): Promise<AppConfig> {
       return 0;
     });
 
-    // Clean up any stale /contact URLs from tour items
-    const sanitizeTours = (items?: typeof defaultConfig.homepage.tours.items) => {
+    const sanitizeTours = (items?: TourItem[]) => {
       if (!items) return items;
       return items.map((item) => {
         if (!item.href || item.href.startsWith('/contact') || item.href.startsWith('/bookings')) {
@@ -44,6 +43,64 @@ export async function getAppConfig(): Promise<AppConfig> {
         return item;
       });
     };
+
+    const savedHpItems = sanitizeTours(savedConfig.homepage?.tours?.items);
+    const savedTpItems = sanitizeTours(savedConfig.toursPage?.tours?.items);
+    const fallbackItems = defaultConfig.toursPage!.tours.items;
+
+    // Map of latest content values keyed by id, slug, or title
+    const contentMap = new Map<string, TourItem>();
+    const allItems = [...fallbackItems, ...(savedHpItems || []), ...(savedTpItems || [])];
+    for (const item of allItems) {
+      const key = item.id || item.slug || item.title;
+      if (key) {
+        contentMap.set(key, { ...(contentMap.get(key) || {}), ...item });
+      }
+    }
+
+    const homepageTours = (savedHpItems || fallbackItems).map((item) => {
+      const key = item.id || item.slug || item.title;
+      const latestContent = key ? contentMap.get(key) : null;
+      return {
+        ...item,
+        ...(latestContent || {}),
+        enabled: item.enabled !== undefined ? item.enabled : true,
+        showTitle: item.showTitle !== undefined ? item.showTitle : true,
+        showBadge: item.showBadge !== undefined ? item.showBadge : true,
+        showDuration: item.showDuration !== undefined ? item.showDuration : true,
+        showRating: item.showRating !== undefined ? item.showRating : true,
+        showPrice: item.showPrice !== undefined ? item.showPrice : true,
+        showLocation: item.showLocation !== undefined ? item.showLocation : true,
+        showSchedule: item.showSchedule !== undefined ? item.showSchedule : true,
+        showGroupType: item.showGroupType !== undefined ? item.showGroupType : true,
+        showIncluded: item.showIncluded !== undefined ? item.showIncluded : true,
+        showNotIncluded: item.showNotIncluded !== undefined ? item.showNotIncluded : true,
+        showWhyChoose: item.showWhyChoose !== undefined ? item.showWhyChoose : true,
+        showKnowBeforeYouGo: item.showKnowBeforeYouGo !== undefined ? item.showKnowBeforeYouGo : true,
+      };
+    });
+
+    const listingTours = (savedTpItems || fallbackItems).map((item) => {
+      const key = item.id || item.slug || item.title;
+      const latestContent = key ? contentMap.get(key) : null;
+      return {
+        ...item,
+        ...(latestContent || {}),
+        enabled: item.enabled !== undefined ? item.enabled : true,
+        showTitle: item.showTitle !== undefined ? item.showTitle : true,
+        showBadge: item.showBadge !== undefined ? item.showBadge : true,
+        showDuration: item.showDuration !== undefined ? item.showDuration : true,
+        showRating: item.showRating !== undefined ? item.showRating : true,
+        showPrice: item.showPrice !== undefined ? item.showPrice : true,
+        showLocation: item.showLocation !== undefined ? item.showLocation : true,
+        showSchedule: item.showSchedule !== undefined ? item.showSchedule : true,
+        showGroupType: item.showGroupType !== undefined ? item.showGroupType : true,
+        showIncluded: item.showIncluded !== undefined ? item.showIncluded : true,
+        showNotIncluded: item.showNotIncluded !== undefined ? item.showNotIncluded : true,
+        showWhyChoose: item.showWhyChoose !== undefined ? item.showWhyChoose : true,
+        showKnowBeforeYouGo: item.showKnowBeforeYouGo !== undefined ? item.showKnowBeforeYouGo : true,
+      };
+    });
 
     // Merge with defaults so new page sections like toursPage are present
     const mergedConfig: AppConfig = {
@@ -60,7 +117,7 @@ export async function getAppConfig(): Promise<AppConfig> {
         tours: {
           ...defaultConfig.homepage.tours,
           ...(savedConfig.homepage?.tours || {}),
-          items: sanitizeTours(savedConfig.homepage?.tours?.items) || defaultConfig.homepage.tours.items,
+          items: homepageTours,
         },
       },
       toursPage: {
@@ -78,7 +135,7 @@ export async function getAppConfig(): Promise<AppConfig> {
         tours: {
           ...defaultConfig.toursPage!.tours,
           ...(savedConfig.toursPage?.tours || {}),
-          items: sanitizeTours(savedConfig.toursPage?.tours?.items) || defaultConfig.toursPage!.tours.items,
+          items: listingTours,
         },
         bookingForm: {
           ...defaultConfig.toursPage!.bookingForm!,

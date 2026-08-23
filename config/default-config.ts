@@ -19,6 +19,7 @@ export const defaultConfig: AppConfig = {
   navigation: [
     { key: 'home', label: 'Home', href: '/', icon: 'Home', enabled: true },
     { key: 'tours', label: 'Fishing Charters', href: '/tours', icon: 'Ship', enabled: true },
+    { key: 'about', label: 'About', href: '/about', icon: 'Info', enabled: true },
     { key: 'contact', label: 'Contact', href: '/contact', icon: 'Mail', enabled: true },
   ],
 
@@ -314,6 +315,14 @@ export const defaultConfig: AppConfig = {
             'Life jackets, Garmin GPS sonar navigation, and emergency safety gear',
             'Complimentary high-res photo package upon request',
           ],
+          showIncluded: true,
+          notIncluded: [
+            'Crew gratuities and tips (optional)',
+            'Hotel pickup & return transfers (available on request)',
+            'Personal swimwear & beach towels',
+            'Alcoholic spirits (BYOB welcome)',
+          ],
+          showNotIncluded: true,
           whyChoose: [
             'Combines big-game billfish hunting, dolphin watching, and ocean exploration',
             'Twin-engine offshore sportfishing vessel with shaded deck',
@@ -321,6 +330,7 @@ export const defaultConfig: AppConfig = {
             'Strict catch-and-release conservation policy for all billfish',
             'All-inclusive private charter with premium gear and catering',
           ],
+          showWhyChoose: true,
           knowBeforeYouGo: [
             'Departure: 6:00 AM from Watamu Marine Park Gate',
             'Duration: Approx. 8 hours',
@@ -328,6 +338,7 @@ export const defaultConfig: AppConfig = {
             'What to bring: Polarized sunglasses, reef-safe sunscreen, light jacket, deck shoes',
             'Booking: Reserve in advance to secure your boat and date',
           ],
+          showKnowBeforeYouGo: true,
           price: 'Contact for pricing',
           priceLabel: 'Contact for pricing',
           href: '/tours/marlin-sailfish-safari',
@@ -357,17 +368,26 @@ export const defaultConfig: AppConfig = {
             'Soft drinks, mineral water, and tropical fruit snacks',
             'Life jackets for all ages (including child sizes)',
           ],
+          showIncluded: true,
+          notIncluded: [
+            'Crew gratuities and tips (optional)',
+            'Hotel pickup & return transfers (available on request)',
+            'Personal swimwear & beach towels',
+          ],
+          showNotIncluded: true,
           whyChoose: [
             'Calm waters, perfect for families and children',
             'Consistent multi-species action on light tackle',
             'Scenic mangrove creek tour combined with reef fishing',
           ],
+          showWhyChoose: true,
           knowBeforeYouGo: [
             'Departure: 7:30 AM or 1:30 PM from Watamu Bay',
             'Duration: Approx. 4 hours',
             'What to bring: Swimwear, sunglasses, sunscreen, hat',
             'Booking: Available daily all year round',
           ],
+          showKnowBeforeYouGo: true,
           price: 'Contact for pricing',
           priceLabel: 'Contact for pricing',
           href: '/tours/inshore-reef-fishing',
@@ -396,16 +416,25 @@ export const defaultConfig: AppConfig = {
             'Experienced sportfishing skipper & first mate',
             'Cold beer, soft drinks, sandwiches, and fresh fruit',
           ],
+          showIncluded: true,
+          notIncluded: [
+            'Crew gratuities and tips (optional)',
+            'Hotel pickup & return transfers (available on request)',
+            'Personal apparel & beach towels',
+          ],
+          showNotIncluded: true,
           whyChoose: [
             'Fast-paced reel-screaming surface action',
             'Target delicious game fish with option to retain edible tuna/dorado',
             'High success rate on offshore current rips',
           ],
+          showWhyChoose: true,
           knowBeforeYouGo: [
             'Departure: 6:00 AM from Watamu Marine Gate',
             'Duration: Approx. 6 hours',
             'What to bring: Sunglasses, hat, non-slip footwear',
           ],
+          showKnowBeforeYouGo: true,
           price: 'Contact for pricing',
           priceLabel: 'Contact for pricing',
           href: '/tours/yellowfin-tuna-dorado',
@@ -434,16 +463,25 @@ export const defaultConfig: AppConfig = {
             'Overnight dinner, hot coffee, snacks, and refreshments',
             'Full navigation radar and safety equipment',
           ],
+          showIncluded: true,
+          notIncluded: [
+            'Crew gratuities and tips (optional)',
+            'Hotel pickup & return transfers (available on request)',
+            'Personal heavy clothing & toiletries',
+          ],
+          showNotIncluded: true,
           whyChoose: [
             'Exclusive expedition for passionate big-game anglers',
             'Pursue the powerful "Gladiator of the Sea"',
             'Unforgettable night on the Indian Ocean under starlit skies',
           ],
+          showWhyChoose: true,
           knowBeforeYouGo: [
             'Departure: 5:00 PM (Return approx. 3:00 AM)',
             'Duration: Approx. 10 hours',
             'What to bring: Warm layers, windbreaker jacket, sea-sickness remedy',
           ],
+          showKnowBeforeYouGo: true,
           price: 'Contact for pricing',
           priceLabel: 'Contact for pricing',
           href: '/tours/broadbill-swordfish-night',
@@ -645,4 +683,154 @@ export const defaultConfig: AppConfig = {
       ],
     },
   },
+
+  aboutPage: {
+    hero: {
+      enabled: true,
+      backgroundColor: '#000000',
+      showEyebrow: true,
+      eyebrow: 'OUR HERITAGE',
+      headline: 'Born on the tides,',
+      italicText: 'bound by the deep',
+      showSubtitle: true,
+      subtitle:
+        'Pioneering premier big-game sportfishing and marine conservation along the pristine Kenyan coastline.',
+      showPrimaryCta: false,
+      primaryCtaLabel: '',
+      primaryCtaHref: '',
+      showSecondaryCta: false,
+      secondaryCtaLabel: '',
+      secondaryCtaHref: '',
+      imageUrl: '/images/hero/hero.jpg',
+      size: 'large',
+    },
+    story: {
+      enabled: true,
+      backgroundColor: '#ffffff',
+      eyebrow: 'OUR VOYAGE',
+      title: "The heartbeat of Kenya's coastal waters and big-game tradition.",
+      paragraphs: [
+        {
+          enabled: true,
+          text: 'Founded on the rugged shores of the Kenya Coast, Sea Smoke Fishing Club was born from a singular passion: to deliver world-class sportfishing adventures while championing ocean stewardship. For our anglers, a charter into the deep is more than a sport — it is an intimate encounter with the raw power of the open sea.',
+        },
+        {
+          enabled: true,
+          text: 'Over 15 years, we have worked alongside coastal maritime communities and marine biologists to pioneer catch-and-release tagging programs, protect vital billfish breeding grounds, and ensure our blue waters thrive for generations of anglers to come.',
+        },
+      ],
+      imageUrl: '/images/hero/hero.jpg',
+      imageAlt: 'Sea Smoke Fishing Club crew on the water',
+    },
+    values: {
+      enabled: true,
+      backgroundColor: '#fafafa',
+      title: 'Guided by the tides',
+      subtitle:
+        'Our core values steer every expedition we launch, every hook we set, and every relationship we nurture on and off the water.',
+      eyebrow: 'CORE VALUES',
+      items: [
+        {
+          enabled: true,
+          icon: 'Anchor',
+          title: 'Marine Conservation',
+          description:
+            'Pioneering strict billfish catch-and-release protocols and active marine habitat preservation.',
+        },
+        {
+          enabled: true,
+          icon: 'Compass',
+          title: 'Master Seamanship',
+          description:
+            'Seasoned captains with decades of navigational mastery across the East African swell.',
+        },
+        {
+          enabled: true,
+          icon: 'Users',
+          title: 'Community & Craft',
+          description:
+            'Empowering coastal fishing communities through fair maritime partnerships and training.',
+        },
+        {
+          enabled: true,
+          icon: 'Star',
+          title: 'Unmatched Excellence',
+          description:
+            'State-of-the-art sportfishing rigs, tournament-grade tackle, and bespoke hospitality at sea.',
+        },
+      ],
+    },
+    team: {
+      enabled: true,
+      backgroundColor: '#ffffff',
+      eyebrow: 'THE CREW',
+      title: 'Meet your skippers & naturalists',
+      subtitle:
+        "Our crew members aren't just master captains; they are custodians of the Indian Ocean, carrying decades of maritime instincts.",
+      items: [
+        {
+          enabled: true,
+          name: 'Captain Peter K.',
+          role: 'Head Skipper',
+          quote: '"The deep blue speaks to those who respect its currents."',
+          imageUrl: '/images/hero/hero.jpg',
+        },
+        {
+          enabled: true,
+          name: 'Sarah O.',
+          role: 'Marine Biologist & Tagging Specialist',
+          quote: '"Every billfish tagged brings us closer to understanding our ocean\'s secrets."',
+          imageUrl: '/images/hero/hero.jpg',
+        },
+        {
+          enabled: true,
+          name: 'David M.',
+          role: 'Master Navigator',
+          quote: '"The ocean has a memory; we read every ripple and reef."',
+          imageUrl: '/images/hero/hero.jpg',
+        },
+      ],
+    },
+    impact: {
+      enabled: true,
+      backgroundColor: '#0f172a',
+      title: 'Our impact by the numbers',
+      subtitle:
+        "Marine conservation isn't an afterthought; it is our compass. Through every charter, we deliver measurable protection for our oceans.",
+      stats: [
+        { enabled: true, value: '1,200+', label: 'BILLFISH TAGGED & RELEASED' },
+        { enabled: true, value: '15+', label: 'YEARS OF VOYAGES' },
+        { enabled: true, value: '100%', label: 'CATCH & RELEASE BILLFISH' },
+        { enabled: true, value: '350nm', label: 'COASTLINE MONITORED' },
+      ],
+      partnersCard: {
+        title: 'Our Conservation Partners',
+        icon: 'ShieldCheck',
+        partners: [
+          'The Billfish Foundation',
+          'Kenya Wildlife Service',
+          'Marine Megafauna',
+          'East Africa Ocean Trust',
+        ],
+      },
+    },
+    cta: {
+      enabled: true,
+      backgroundColor: '#fafafa',
+      title: 'Answer the call of the deep',
+      subtitle:
+        'Whether chasing trophy marlin on the open banks or enjoying an inshore excursion, your next great maritime adventure begins here.',
+      primaryCta: {
+        enabled: true,
+        label: 'Book Your Charter',
+        href: '/contact',
+      },
+      secondaryCta: {
+        enabled: true,
+        label: 'Get in Touch',
+        href: '/contact',
+      },
+    },
+  },
 };
+

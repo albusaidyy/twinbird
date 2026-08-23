@@ -4,35 +4,33 @@ import { Clock, MapPin, Calendar, Users } from 'lucide-react';
 
 export function TourQuickInfoBar({
   duration,
+  showDuration = true,
   location,
+  showLocation = true,
   schedule,
+  showSchedule = true,
   groupType,
+  showGroupType = true,
   primaryColor,
 }: {
   duration?: string;
+  showDuration?: boolean;
   location?: string;
+  showLocation?: boolean;
   schedule?: string;
+  showSchedule?: boolean;
   groupType?: string;
+  showGroupType?: boolean;
   primaryColor: string;
 }) {
   const items = [
-    {
-      icon: Clock,
-      label: duration || 'Guided 6 - 8 hours Tour',
-    },
-    {
-      icon: MapPin,
-      label: location || 'Watamu Marine Park, Kilifi County',
-    },
-    {
-      icon: Calendar,
-      label: schedule || 'Morning Slots (November To March)',
-    },
-    {
-      icon: Users,
-      label: groupType || 'Families · Private · Solo Anglers · Groups',
-    },
-  ].filter((item) => Boolean(item.label));
+    showDuration !== false && duration ? { icon: Clock, label: duration } : null,
+    showLocation !== false && location ? { icon: MapPin, label: location } : null,
+    showSchedule !== false && schedule ? { icon: Calendar, label: schedule } : null,
+    showGroupType !== false && groupType ? { icon: Users, label: groupType } : null,
+  ].filter(Boolean) as { icon: React.ComponentType<{ className?: string }>; label: string }[];
+
+  if (items.length === 0) return null;
 
   return (
     <section className="border-y border-border/80 bg-muted/20 py-4 px-6">

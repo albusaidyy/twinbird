@@ -13,8 +13,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const favicon = config.branding.faviconUrl || '/brand/favicons/favicon.ico';
 
   return {
-    title: config.branding.appName || 'Safari App',
-    description: 'Configurable multi-sector management platform',
+    title: config.branding.appName || 'Sea Smoke Fishing Club',
+    description:
+      config.branding.metaDescription ||
+      'Premier big-game sportfishing charters, marlin & sailfish safaris, and coastal expeditions on the Kenyan Coast.',
     icons: {
       icon: favicon,
       shortcut: favicon,

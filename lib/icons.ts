@@ -26,6 +26,18 @@ import {
   Camera,
   Share2,
   Video,
+  Anchor,
+  Compass,
+  Ship,
+  Star,
+  Award,
+  ShieldCheck,
+  TreePine,
+  Trees,
+  CheckCircle2,
+  Fish,
+  HeartHandshake,
+  Info,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -49,6 +61,18 @@ const iconMap: Record<string, LucideIcon | React.ComponentType<{ className?: str
   Camera,
   Share2,
   Video,
+  Anchor,
+  Compass,
+  Ship,
+  Star,
+  Award,
+  ShieldCheck,
+  TreePine,
+  Trees,
+  CheckCircle2,
+  Fish,
+  HeartHandshake,
+  Info,
   Facebook: FaFacebook,
   Instagram: FaInstagram,
   Whatsapp: FaWhatsapp,
@@ -61,3 +85,4 @@ const iconMap: Record<string, LucideIcon | React.ComponentType<{ className?: str
 export function getIcon(name: string): LucideIcon | React.ComponentType<{ className?: string }> {
   return iconMap[name] ?? Home;
 }
+

@@ -61,6 +61,11 @@ export function TourListSection({
           {visibleTours.map((tour, idx) => {
             const slug = getTourSlug(tour);
             const targetHref = `/tours/${slug}`;
+            const canShowBadge = tour.showBadge !== false && Boolean(tour.badge);
+            const canShowDuration = tour.showDuration !== false && Boolean(tour.duration);
+            const canShowRating = tour.showRating !== false && tour.rating > 0;
+            const canShowTitle = tour.showTitle !== false && Boolean(tour.title);
+            const canShowPrice = tour.showPrice !== false && Boolean(tour.price || tour.priceLabel);
 
             return (
               <article
@@ -79,7 +84,7 @@ export function TourListSection({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
 
                   {/* Duration Badge on top-left */}
-                  {tour.duration && (
+                  {canShowDuration && (
                     <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 rounded-lg bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-2.5 py-1 text-xs font-semibold text-slate-800 dark:text-slate-100 shadow-sm">
                       <Clock className="h-3.5 w-3.5 text-slate-500" />
                       <span>{tour.duration}</span>
@@ -87,7 +92,7 @@ export function TourListSection({
                   )}
 
                   {/* Rating / Special Badge on top-right */}
-                  {tour.badge && (
+                  {canShowBadge && (
                     <span
                       className="absolute top-4 right-4 z-10 rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-white shadow-sm"
                       style={{ backgroundColor: primaryColor }}
@@ -101,7 +106,7 @@ export function TourListSection({
                 <div className="p-6 md:p-7 flex-1 flex flex-col justify-between">
                   <div>
                     {/* Rating Stars */}
-                    {tour.rating > 0 && (
+                    {canShowRating && (
                       <div className="flex items-center gap-1.5 mb-2.5">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
@@ -122,11 +127,13 @@ export function TourListSection({
                       </div>
                     )}
 
-                    <Link href={targetHref} className="block">
-                      <h3 className="font-serif text-xl font-bold text-foreground leading-snug tracking-tight group-hover:text-primary transition-colors line-clamp-2">
-                        {tour.title}
-                      </h3>
-                    </Link>
+                    {canShowTitle && (
+                      <Link href={targetHref} className="block">
+                        <h3 className="font-serif text-xl font-bold text-foreground leading-snug tracking-tight group-hover:text-primary transition-colors line-clamp-2">
+                          {tour.title}
+                        </h3>
+                      </Link>
+                    )}
 
                     <p className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-3">
                       {tour.description}
@@ -135,9 +142,13 @@ export function TourListSection({
 
                   {/* Bottom Bar: Price on Left, View -> on Right */}
                   <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground font-medium italic">
-                      {tour.price || tour.priceLabel || 'Contact for pricing'}
-                    </span>
+                    {canShowPrice ? (
+                      <span className="text-xs text-muted-foreground font-medium italic">
+                        {tour.price || tour.priceLabel || 'Contact for pricing'}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
                     <Link
                       href={targetHref}
                       className="inline-flex items-center gap-1 text-xs font-semibold transition-transform group-hover:translate-x-0.5"

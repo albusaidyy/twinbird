@@ -97,7 +97,7 @@ export function TourGalleryHeader({
         <div className="flex flex-col items-center text-center mb-6 max-w-3xl mx-auto space-y-2.5">
           {/* Eyebrow / Badge & Duration Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {tour.badge && (
+            {tour.showBadge !== false && tour.badge && (
               <span
                 className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-white ring-1 ring-white/30 backdrop-blur-sm"
                 style={{ backgroundColor: `${primaryColor}66` }}
@@ -105,13 +105,13 @@ export function TourGalleryHeader({
                 {tour.badge}
               </span>
             )}
-            {tour.duration && (
+            {tour.showDuration !== false && tour.duration && (
               <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 text-[11px] font-medium text-white/90 ring-1 ring-white/20">
                 <Clock className="h-3 w-3 text-white/80" />
                 <span>{tour.duration}</span>
               </span>
             )}
-            {tour.rating > 0 && (
+            {tour.showRating !== false && tour.rating > 0 && (
               <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white/90 ring-1 ring-white/20">
                 <Star className="h-3 w-3 fill-current text-amber-300" />
                 <span>{tour.rating.toFixed(1)}</span>
@@ -120,9 +120,11 @@ export function TourGalleryHeader({
           </div>
 
           {/* Headline */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight tracking-tight drop-shadow-md">
-            {tour.title}
-          </h1>
+          {tour.showTitle !== false && (
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white leading-tight tracking-tight drop-shadow-md">
+              {tour.title}
+            </h1>
+          )}
 
           {/* Subtitle */}
           {tour.description && (

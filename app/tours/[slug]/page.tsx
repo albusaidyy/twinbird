@@ -77,9 +77,13 @@ export default function SingleTourPage({
       {/* Quick Info Bar */}
       <TourQuickInfoBar
         duration={tour.duration}
+        showDuration={tour.showDuration}
         location={tour.location}
+        showLocation={tour.showLocation}
         schedule={tour.schedule}
+        showSchedule={tour.showSchedule}
         groupType={tour.groupType}
+        showGroupType={tour.showGroupType}
         primaryColor={primaryColor}
       />
 

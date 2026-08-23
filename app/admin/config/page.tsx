@@ -13,7 +13,7 @@ import { useAppConfig } from '@/components/providers/AppConfigProvider';
 import { saveAppConfig } from '@/lib/config/saveAppConfig';
 import { defaultConfig } from '@/config/default-config';
 import { uploadImage, getMediaLibrary, type MediaItem } from './actions';
-import type { AppConfig, NavItem, StatItem, TourItem, TourBookingFormConfig, DynamicFormField, FormFieldType, ReviewItem, WhyUsItem, GalleryItem, FooterLink, SocialLink } from '@/types/app-config';
+import type { AppConfig, NavItem, StatItem, TourItem, TourBookingFormConfig, DynamicFormField, FormFieldType, ReviewItem, WhyUsItem, GalleryItem, FooterLink, SocialLink, AboutValueItem, AboutTeamMember, StoryParagraphItem } from '@/types/app-config';
 import {
   CheckCircle,
   RotateCcw,
@@ -50,10 +50,34 @@ import {
   ArrowDown,
   Menu,
   PanelLeftClose,
+  Users,
+  FileText,
 } from 'lucide-react';
 
 // ─── Sidebar configuration ──────────────────────────────────────────────────────
-type SectionKey = 'branding' | 'navigation' | 'hero' | 'stats' | 'tours' | 'reviews' | 'whyus' | 'gallery' | 'cta' | 'footer' | 'tours-page-hero' | 'tours-page-list' | 'tours-page-booking' | 'contact-hero' | 'contact-details' | 'contact-faq';
+type SectionKey =
+  | 'branding'
+  | 'navigation'
+  | 'hero'
+  | 'stats'
+  | 'tours'
+  | 'reviews'
+  | 'whyus'
+  | 'gallery'
+  | 'cta'
+  | 'footer'
+  | 'tours-page-hero'
+  | 'tours-page-list'
+  | 'tours-page-booking'
+  | 'about-hero'
+  | 'about-story'
+  | 'about-values'
+  | 'about-team'
+  | 'about-impact'
+  | 'about-cta'
+  | 'contact-hero'
+  | 'contact-details'
+  | 'contact-faq';
 
 const APP_SETTINGS = [
   { key: 'branding' as SectionKey, label: 'Branding & Theme', Icon: Palette, description: 'Colors, app name, logo' },
@@ -89,9 +113,23 @@ const PAGES = [
     ],
   },
   {
+    id: 'about',
+    label: 'About',
+    Icon: Info,
+    href: '/about',
+    sections: [
+      { key: 'about-hero' as SectionKey,   label: 'Hero',              Icon: Layers,     description: 'About splash hero section' },
+      { key: 'about-story' as SectionKey,  label: 'Our Story',         Icon: FileText,   description: 'Heritage narrative & imagery' },
+      { key: 'about-values' as SectionKey, label: 'Core Values',       Icon: Star,       description: 'Company core values cards' },
+      { key: 'about-team' as SectionKey,   label: 'The Crew',          Icon: Users,      description: 'Skipper and guide profiles' },
+      { key: 'about-impact' as SectionKey, label: 'Impact & Partners', Icon: BarChart2,  description: 'Conservation stats & partners' },
+      { key: 'about-cta' as SectionKey,    label: 'CTA Banner',        Icon: Megaphone,  description: 'Bottom call-to-action banner' },
+    ],
+  },
+  {
     id: 'contact',
     label: 'Contact',
-    Icon: Info,
+    Icon: Phone,
     href: '/contact',
     sections: [
       { key: 'contact-hero' as SectionKey,     label: 'Hero',       Icon: Layers,  description: 'Contact splash section' },
@@ -817,17 +855,140 @@ function StatsEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
 
 function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
   const data = draft.homepage.tours;
+  const toursList = draft.homepage.tours?.items || [];
+
+  const toursPageNavLabel = draft.navigation?.find((l) => l.href === '/tours' || l.href.startsWith('/tours'))?.label || PAGES.find((p) => p.id === 'tours')?.label || 'Fishing Charters';
+  const toursSectionLabel = PAGES.find((p) => p.id === 'tours')?.sections.find((s) => s.key === 'tours-page-list')?.label || draft.toursPage?.tours?.title || 'Charter Packages';
+
   const updEnabled = (v: boolean) => set((p) => ({ ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, enabled: v } } }));
-  const updTour = (i: number, k: keyof TourItem, v: string | number | boolean) =>
+
+  const VISIBILITY_KEYS = new Set([
+    'enabled',
+    'showTitle',
+    'showBadge',
+    'showDuration',
+    'showRating',
+    'showPrice',
+    'showLocation',
+    'showSchedule',
+    'showGroupType',
+    'showIncluded',
+    'showNotIncluded',
+    'showWhyChoose',
+    'showKnowBeforeYouGo',
+  ]);
+
+  const updTour = (i: number, k: keyof TourItem, v: string | number | boolean | string[]) =>
     set((p) => {
-      const arr = [...p.homepage.tours.items];
-      arr[i] = { ...arr[i], [k]: v };
-      return { ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: arr } } };
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const currentItem = hpItems[i];
+      if (!currentItem) return p;
+
+      hpItems[i] = { ...currentItem, [k]: v };
+
+      if (!VISIBILITY_KEYS.has(k)) {
+        const tpIdx = tpItems.findIndex(
+          (t) => (t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title
+        );
+        if (tpIdx !== -1) {
+          tpItems[tpIdx] = { ...tpItems[tpIdx], [k]: v };
+        } else if (tpItems[i]) {
+          tpItems[i] = { ...tpItems[i], [k]: v };
+        }
+      }
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems } },
+      };
     });
+
   const addTour = () =>
-    set((p) => ({ ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: [...p.homepage.tours.items, { enabled: true, title: 'New Tour', badge: 'New', description: 'Desc', duration: '1 day', rating: 5, imageUrl: '/images/hero/hero.jpg' }] } } }));
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+      const uniqueId = `charter-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const newTour: TourItem = {
+        id: uniqueId,
+        enabled: true,
+        title: 'New Fishing Charter',
+        badge: 'Popular',
+        description: 'Experience premier big-game fishing on the Kenyan Coast...',
+        duration: 'Guided 6 hours Tour',
+        rating: 5,
+        imageUrl: '/images/hero/hero.jpg',
+        location: 'Watamu Marine Park, Kilifi County',
+        showLocation: true,
+        schedule: 'Morning Slots (November To March)',
+        showSchedule: true,
+        groupType: 'Families · Private · Groups',
+        showGroupType: true,
+        price: 'Contact for pricing',
+        overview: 'Experience premier big-game fishing along the Kenyan Coast with full gear and experienced crew.',
+        included: ['Professional skipper & crew', 'Tackle & bait', 'Refreshments & lunch'],
+        showIncluded: true,
+        notIncluded: ['Crew gratuities and tips (optional)', 'Hotel pickup & return transfers', 'Personal swimwear & towels'],
+        showNotIncluded: true,
+        whyChoose: ['Decades of local fishing experience', 'Modern rigged tournament boat'],
+        showWhyChoose: true,
+        knowBeforeYouGo: ['Departure: 6:00 AM', 'What to bring: Sunscreen, hat, sunglasses'],
+        showKnowBeforeYouGo: true,
+        showTitle: true,
+        showBadge: true,
+        showDuration: true,
+        showRating: true,
+        showPrice: true,
+      };
+      const newHpItems = [...hpItems, { ...newTour }];
+      const newTpItems = [...tpItems, { ...newTour }];
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: newHpItems } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: newTpItems } },
+      };
+    });
+
   const rmTour = (i: number) =>
-    set((p) => ({ ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: p.homepage.tours.items.filter((_, idx) => idx !== i) } } }));
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const currentItem = hpItems[i];
+      if (!currentItem) return p;
+
+      const newHp = hpItems.filter((_, idx) => idx !== i);
+      const newTp = tpItems.filter(
+        (t) => !((t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title)
+      );
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: newHp } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: newTp } },
+      };
+    });
+
+  const moveTour = (i: number, dir: -1 | 1) =>
+    set((p) => {
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const target = i + dir;
+      if (target < 0 || target >= hpItems.length) return p;
+
+      const tempHp = hpItems[i];
+      hpItems[i] = hpItems[target];
+      hpItems[target] = tempHp;
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems } },
+      };
+    });
 
   return (
     <div className="space-y-6">
@@ -839,55 +1000,205 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
         onChange={(k, v) => set((p) => ({ ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, [k]: v } } }))} 
       />
 
-      {data.items.map((t, i) => (
-        <div key={i} className="relative rounded-lg border border-border p-5 pt-10 bg-card">
-          <div className="absolute top-2 left-4 right-2 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
-              <span className="text-xs text-muted-foreground">{t.enabled ? 'Shown' : 'Hidden'}</span>
-            </div>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => rmTour(i)}>
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-          <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: t.enabled ? 1 : 0.5 }}>
-            <div className="grid grid-cols-2 gap-3">
-              <FieldRow label="Title" id={`t-title-${i}`}>
-                <Input id={`t-title-${i}`} value={t.title} onChange={(e) => updTour(i, 'title', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-              <FieldRow label="Badge" id={`t-badge-${i}`}>
-                <Input id={`t-badge-${i}`} value={t.badge} onChange={(e) => updTour(i, 'badge', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-              <FieldRow label="Duration" id={`t-dur-${i}`}>
-                <Input id={`t-dur-${i}`} value={t.duration} onChange={(e) => updTour(i, 'duration', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-              <FieldRow label="Rating (0–5)" id={`t-rating-${i}`}>
-                <Input id={`t-rating-${i}`} type="number" min={0} max={5} step={0.1}
-                  value={t.rating} onChange={(e) => updTour(i, 'rating', parseFloat(e.target.value) || 0)} disabled={!t.enabled} />
-              </FieldRow>
-            </div>
-            <FieldRow label="Tour Image" id={`t-img-${i}`}>
-              <ImageUploaderField
-                id={`t-img-${i}`}
-                value={t.imageUrl}
-                onChange={(url) => updTour(i, 'imageUrl', url)}
-                folder="tours"
-                placeholder="Upload or choose tour image..."
-                disabled={!t.enabled}
-              />
-            </FieldRow>
-            <FieldRow label="Description" id={`t-desc-${i}`}>
-              <textarea id={`t-desc-${i}`} rows={2} value={t.description}
-                onChange={(e) => updTour(i, 'description', e.target.value)}
-                disabled={!t.enabled}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50" />
-            </FieldRow>
-          </div>
+      <div className="flex items-start gap-2.5 rounded-lg border border-primary/25 bg-primary/5 p-3.5 text-xs text-muted-foreground">
+        <Ship className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+        <div className="space-y-1">
+          <p className="font-semibold text-foreground">Connected to {toursPageNavLabel} Directory</p>
+          <p>
+            The charters listed below are automatically synced with your <strong>{toursPageNavLabel}</strong> directory (`/tours`) and individual charter pages (`/tours/[slug]`).
+          </p>
         </div>
-      ))}
-      <Button variant="outline" className="w-full gap-2" onClick={addTour}>
-        <Plus className="h-4 w-4" /> Add Tour
-      </Button>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-semibold">Charter Packages ({toursList.length})</h4>
+          <Button variant="outline" size="sm" className="h-8 gap-1" onClick={addTour}>
+            <Plus className="h-3.5 w-3.5" /> Add Charter
+          </Button>
+        </div>
+
+        {toursList.map((t, i) => (
+          <div key={i} className="relative rounded-lg border border-border p-5 pt-11 bg-card shadow-xs">
+            <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Charter #{i + 1} {!t.enabled && '(Hidden)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={i === 0}
+                  onClick={() => moveTour(i, -1)}
+                  title="Move up"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={i === toursList.length - 1}
+                  onClick={() => moveTour(i, 1)}
+                  title="Move down"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                  onClick={() => rmTour(i)}
+                  title="Delete charter"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: t.enabled ? 1 : 0.5 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showTitle !== false}
+                    onCheckedChange={(v) => updTour(i, 'showTitle', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Title On/Off"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Title" id={`t-title-${i}`}>
+                      <Input
+                        id={`t-title-${i}`}
+                        value={t.title}
+                        onChange={(e) => updTour(i, 'title', e.target.value)}
+                        disabled={!t.enabled || t.showTitle === false}
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showBadge !== false}
+                    onCheckedChange={(v) => updTour(i, 'showBadge', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Badge On/Off"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Badge" id={`t-badge-${i}`}>
+                      <Input
+                        id={`t-badge-${i}`}
+                        value={t.badge}
+                        onChange={(e) => updTour(i, 'badge', e.target.value)}
+                        disabled={!t.enabled || t.showBadge === false}
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showDuration !== false}
+                    onCheckedChange={(v) => updTour(i, 'showDuration', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Duration On/Off"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Duration (e.g. Guided 6 - 8 hours Tour)" id={`t-dur-${i}`}>
+                      <Input
+                        id={`t-dur-${i}`}
+                        value={t.duration}
+                        onChange={(e) => updTour(i, 'duration', e.target.value)}
+                        disabled={!t.enabled || t.showDuration === false}
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showRating !== false}
+                    onCheckedChange={(v) => updTour(i, 'showRating', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Rating On/Off"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Rating (0–5)" id={`t-rating-${i}`}>
+                      <Input
+                        id={`t-rating-${i}`}
+                        type="number"
+                        min={0}
+                        max={5}
+                        step={0.1}
+                        value={t.rating}
+                        onChange={(e) => updTour(i, 'rating', parseFloat(e.target.value) || 0)}
+                        disabled={!t.enabled || t.showRating === false}
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showPrice !== false}
+                    onCheckedChange={(v) => updTour(i, 'showPrice', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Pricing On/Off"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Price Text" id={`t-price-${i}`}>
+                      <Input
+                        id={`t-price-${i}`}
+                        value={t.price || ''}
+                        placeholder="Contact for pricing"
+                        onChange={(e) => updTour(i, 'price', e.target.value)}
+                        disabled={!t.enabled || t.showPrice === false}
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <FieldRow label="Custom URL (Leave blank for auto /tours/[slug])" id={`t-href-${i}`}>
+                  <Input id={`t-href-${i}`} value={t.href || ''} placeholder="/tours/..." onChange={(e) => updTour(i, 'href', e.target.value)} disabled={!t.enabled} />
+                </FieldRow>
+              </div>
+              <FieldRow label="Tour Image" id={`t-img-${i}`}>
+                <ImageUploaderField
+                  id={`t-img-${i}`}
+                  value={t.imageUrl}
+                  onChange={(url) => updTour(i, 'imageUrl', url)}
+                  folder="tours"
+                  placeholder="Upload or choose tour image..."
+                  disabled={!t.enabled}
+                />
+              </FieldRow>
+              <FieldRow label="Description" id={`t-desc-${i}`}>
+                <textarea id={`t-desc-${i}`} rows={2} value={t.description}
+                  onChange={(e) => updTour(i, 'description', e.target.value)}
+                  disabled={!t.enabled}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50" />
+              </FieldRow>
+
+              <div className="rounded-md bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground border border-border/50">
+                Single charter deep page details (inclusions, itinerary, single-page carousel) are managed under <strong>{toursPageNavLabel} &rarr; {toursSectionLabel}</strong>.
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -972,6 +1283,17 @@ function GalleryEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConf
       const currentGallery = p.homepage.gallery || defaultConfig.homepage.gallery;
       return { ...p, homepage: { ...p.homepage, gallery: { ...currentGallery, items: currentGallery.items.filter((_, idx) => idx !== i) } } };
     });
+  const moveItem = (i: number, dir: -1 | 1) =>
+    set((p) => {
+      const currentGallery = p.homepage.gallery || defaultConfig.homepage.gallery;
+      const target = i + dir;
+      if (target < 0 || target >= currentGallery.items.length) return p;
+      const arr = [...currentGallery.items];
+      const temp = arr[i];
+      arr[i] = arr[target];
+      arr[target] = temp;
+      return { ...p, homepage: { ...p.homepage, gallery: { ...currentGallery, items: arr } } };
+    });
 
   return (
     <div className="space-y-6">
@@ -992,37 +1314,76 @@ function GalleryEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConf
         })} 
       />
 
-      {data.items.map((img, i) => (
-        <div key={i} className="relative rounded-lg border border-border p-5 pt-10 bg-card">
-          <div className="absolute top-2 left-4 right-2 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Switch checked={img.enabled} onCheckedChange={(v) => updItem(i, 'enabled', v)} />
-              <span className="text-xs text-muted-foreground">{img.enabled ? 'Shown' : 'Hidden'}</span>
-            </div>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => rmItem(i)}>
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-          <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: img.enabled ? 1 : 0.5 }}>
-            <FieldRow label="Gallery Photo" id={`g-img-${i}`}>
-              <ImageUploaderField
-                id={`g-img-${i}`}
-                value={img.imageUrl}
-                onChange={(url) => updItem(i, 'imageUrl', url)}
-                folder="gallery"
-                placeholder="Upload or choose gallery photo..."
-                disabled={!img.enabled}
-              />
-            </FieldRow>
-            <FieldRow label="Caption" id={`g-cap-${i}`}>
-              <Input id={`g-cap-${i}`} value={img.caption} onChange={(e) => updItem(i, 'caption', e.target.value)} disabled={!img.enabled} />
-            </FieldRow>
-          </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-semibold">Gallery Photos ({data.items.length})</h4>
+          <Button variant="outline" size="sm" className="h-8 gap-1" onClick={addItem}>
+            <Plus className="h-3.5 w-3.5" /> Add Image
+          </Button>
         </div>
-      ))}
-      <Button variant="outline" className="w-full gap-2" onClick={addItem}>
-        <Plus className="h-4 w-4" /> Add Image
-      </Button>
+
+        {data.items.map((img, i) => (
+          <div key={i} className="relative rounded-lg border border-border p-5 pt-11 bg-card shadow-xs">
+            <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Switch checked={img.enabled} onCheckedChange={(v) => updItem(i, 'enabled', v)} />
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Photo #{i + 1} {!img.enabled && '(Hidden)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={i === 0}
+                  onClick={() => moveItem(i, -1)}
+                  title="Move up"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={i === data.items.length - 1}
+                  onClick={() => moveItem(i, 1)}
+                  title="Move down"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                  onClick={() => rmItem(i)}
+                  title="Delete photo"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: img.enabled ? 1 : 0.5 }}>
+              <FieldRow label="Gallery Photo" id={`g-img-${i}`}>
+                <ImageUploaderField
+                  id={`g-img-${i}`}
+                  value={img.imageUrl}
+                  onChange={(url) => updItem(i, 'imageUrl', url)}
+                  folder="gallery"
+                  placeholder="Upload or choose gallery photo..."
+                  disabled={!img.enabled}
+                />
+              </FieldRow>
+              <FieldRow label="Caption" id={`g-cap-${i}`}>
+                <Input id={`g-cap-${i}`} value={img.caption} onChange={(e) => updItem(i, 'caption', e.target.value)} disabled={!img.enabled} />
+              </FieldRow>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -1554,6 +1915,12 @@ export default function AdminConfigPage() {
             {active === 'tours-page-hero' && <ToursPageHeroEditor {...editorProps} />}
             {active === 'tours-page-list' && <ToursPageListEditor {...editorProps} />}
             {active === 'tours-page-booking' && <ToursBookingFormEditor {...editorProps} />}
+            {active === 'about-hero'      && <AboutHeroEditor {...editorProps} />}
+            {active === 'about-story'     && <AboutStoryEditor {...editorProps} />}
+            {active === 'about-values'    && <AboutValuesEditor {...editorProps} />}
+            {active === 'about-team'      && <AboutTeamEditor {...editorProps} />}
+            {active === 'about-impact'    && <AboutImpactEditor {...editorProps} />}
+            {active === 'about-cta'       && <AboutCTAEditor {...editorProps} />}
             {active === 'contact-hero'    && <ContactHeroEditor {...editorProps} />}
             {active === 'contact-details' && <ContactEditor {...editorProps} />}
             {active === 'contact-faq'     && <FAQEditor {...editorProps} />}
@@ -1622,61 +1989,106 @@ function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 }
 
 function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
-  const data = draft.toursPage?.tours || defaultConfig.toursPage!.tours;
+  const currentToursPage = draft.toursPage || defaultConfig.toursPage!;
+  const data = currentToursPage.tours;
+  const homeLabel = PAGES.find((p) => p.id === 'home')?.label || 'Home';
+  const homeToursSectionLabel = PAGES.find((p) => p.id === 'home')?.sections.find((s) => s.key === 'tours')?.label || draft.homepage?.tours?.title || 'Featured Tours';
+
   const updEnabled = (v: boolean) => set((p) => {
     const current = p.toursPage || defaultConfig.toursPage!;
     return { ...p, toursPage: { ...current, tours: { ...current.tours, enabled: v } } };
   });
+
+  const VISIBILITY_KEYS = new Set([
+    'enabled',
+    'showTitle',
+    'showBadge',
+    'showDuration',
+    'showRating',
+    'showPrice',
+    'showLocation',
+    'showSchedule',
+    'showGroupType',
+    'showIncluded',
+    'showNotIncluded',
+    'showWhyChoose',
+    'showKnowBeforeYouGo',
+  ]);
+
   const updTour = (i: number, k: keyof TourItem, v: string | number | boolean | string[]) =>
     set((p) => {
-      const current = p.toursPage || defaultConfig.toursPage!;
-      const arr = [...current.tours.items];
-      arr[i] = { ...arr[i], [k]: v };
-      return { ...p, toursPage: { ...current, tours: { ...current.tours, items: arr } } };
-    });
-  const addTour = () =>
-    set((p) => {
-      const current = p.toursPage || defaultConfig.toursPage!;
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const currentItem = tpItems[i];
+      if (!currentItem) return p;
+
+      tpItems[i] = { ...currentItem, [k]: v };
+
+      if (!VISIBILITY_KEYS.has(k)) {
+        const hpIdx = hpItems.findIndex(
+          (t) => (t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title
+        );
+        if (hpIdx !== -1) {
+          hpItems[hpIdx] = { ...hpItems[hpIdx], [k]: v };
+        } else if (hpItems[i]) {
+          hpItems[i] = { ...hpItems[i], [k]: v };
+        }
+      }
+
       return {
         ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems } },
+      };
+    });
+
+  const rmTour = (i: number) =>
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const currentItem = tpItems[i];
+      if (!currentItem) return p;
+
+      const newTp = tpItems.filter((_, idx) => idx !== i);
+      const newHp = hpItems.filter(
+        (t) => !((t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title)
+      );
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: newHp } },
         toursPage: {
-          ...current,
+          ...currentToursPage,
           tours: {
-            ...current.tours,
-            items: [
-              ...current.tours.items,
-              {
-                enabled: true,
-                title: 'New Fishing Charter',
-                badge: 'Popular',
-                description: 'Custom charter description...',
-                duration: 'Guided 6 hours Tour',
-                rating: 5,
-                imageUrl: '/images/hero/hero.jpg',
-                location: 'Watamu Marine Park, Kilifi County',
-                schedule: 'Morning Slots (November To March)',
-                groupType: 'Families · Private · Groups',
-                price: 'Contact for pricing',
-                overview: 'Full overview of this fishing charter experience...',
-                included: ['Professional skipper & crew', 'Tackle & bait', 'Refreshments & lunch'],
-                whyChoose: ['Decades of local fishing experience', 'Modern rigged tournament boat'],
-                knowBeforeYouGo: ['Departure: 6:00 AM', 'What to bring: Sunscreen, hat, sunglasses'],
-              },
-            ],
+            ...currentToursPage.tours,
+            items: newTp,
           },
         },
       };
     });
-  const rmTour = (i: number) =>
+
+  const moveTour = (i: number, dir: -1 | 1) =>
     set((p) => {
       const current = p.toursPage || defaultConfig.toursPage!;
+      const tpItems = [...(current.tours?.items || [])];
+      const target = i + dir;
+      if (target < 0 || target >= tpItems.length) return p;
+
+      const tempTp = tpItems[i];
+      tpItems[i] = tpItems[target];
+      tpItems[target] = tempTp;
+
       return {
         ...p,
         toursPage: {
           ...current,
           tours: {
             ...current.tours,
-            items: current.tours.items.filter((_, idx) => idx !== i),
+            items: tpItems,
           },
         },
       };
@@ -1698,63 +2110,175 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
         })} 
       />
 
-      {data.items.map((t, i) => (
-        <div key={i} className="relative rounded-lg border border-border p-5 pt-10 bg-card">
-          <div className="absolute top-2 left-4 right-2 flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
-              <span className="text-xs text-muted-foreground">{t.enabled ? 'Shown' : 'Hidden'}</span>
+      <div className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3.5 text-xs text-muted-foreground">
+        <Info className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
+        <div className="space-y-1">
+          <p className="font-semibold text-foreground">Charter Card Attributes Managed in {homeToursSectionLabel}</p>
+          <p>
+            Card titles, pricing, ratings, badges, and cover thumbnails are edited under <strong>{homeLabel} &rarr; {homeToursSectionLabel}</strong>. Below, expand each charter to configure its full single-page details (overview, inclusions, itinerary, hero banner, and photo carousel).
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-semibold">Charter Packages ({data.items.length})</h4>
+        </div>
+
+        {data.items.map((t, i) => (
+          <div key={i} className="relative rounded-lg border border-border p-5 pt-11 bg-card shadow-xs">
+            <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Charter #{i + 1} {!t.enabled && '(Hidden)'}
+                </span>
+                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                  Card info read-only
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={i === 0}
+                  onClick={() => moveTour(i, -1)}
+                  title="Move up"
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={i === data.items.length - 1}
+                  onClick={() => moveTour(i, 1)}
+                  title="Move down"
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                  onClick={() => rmTour(i)}
+                  title="Delete charter"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:bg-destructive/10" onClick={() => rmTour(i)}>
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-          <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: t.enabled ? 1 : 0.5 }}>
-            <div className="grid grid-cols-2 gap-3">
-              <FieldRow label="Title" id={`tp-title-${i}`}>
-                <Input id={`tp-title-${i}`} value={t.title} onChange={(e) => updTour(i, 'title', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-              <FieldRow label="Badge" id={`tp-badge-${i}`}>
-                <Input id={`tp-badge-${i}`} value={t.badge} onChange={(e) => updTour(i, 'badge', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-              <FieldRow label="Duration (e.g. Guided 6 - 8 hours Tour)" id={`tp-dur-${i}`}>
-                <Input id={`tp-dur-${i}`} value={t.duration} onChange={(e) => updTour(i, 'duration', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-              <FieldRow label="Rating (0–5)" id={`tp-rating-${i}`}>
-                <Input id={`tp-rating-${i}`} type="number" min={0} max={5} step={0.1}
-                  value={t.rating} onChange={(e) => updTour(i, 'rating', parseFloat(e.target.value) || 0)} disabled={!t.enabled} />
-              </FieldRow>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <FieldRow label="Price Text" id={`tp-price-${i}`}>
-                <Input id={`tp-price-${i}`} value={t.price || ''} placeholder="Contact for pricing" onChange={(e) => updTour(i, 'price', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-              <FieldRow label="Custom URL (Leave blank for auto /tours/[slug])" id={`tp-href-${i}`}>
-                <Input id={`tp-href-${i}`} value={t.href || ''} placeholder="/tours/..." onChange={(e) => updTour(i, 'href', e.target.value)} disabled={!t.enabled} />
-              </FieldRow>
-            </div>
+            <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: t.enabled ? 1 : 0.5 }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showTitle !== false}
+                    onCheckedChange={(v) => updTour(i, 'showTitle', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Title On/Off on Listing Page"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Title" id={`tp-title-${i}`}>
+                      <Input id={`tp-title-${i}`} value={t.title} disabled={true} className="bg-muted/40 cursor-not-allowed" />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showBadge !== false}
+                    onCheckedChange={(v) => updTour(i, 'showBadge', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Badge On/Off on Listing Page"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Badge" id={`tp-badge-${i}`}>
+                      <Input id={`tp-badge-${i}`} value={t.badge} disabled={true} className="bg-muted/40 cursor-not-allowed" />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showDuration !== false}
+                    onCheckedChange={(v) => updTour(i, 'showDuration', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Duration On/Off on Listing Page"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Duration" id={`tp-dur-${i}`}>
+                      <Input id={`tp-dur-${i}`} value={t.duration} disabled={true} className="bg-muted/40 cursor-not-allowed" />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showRating !== false}
+                    onCheckedChange={(v) => updTour(i, 'showRating', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Rating On/Off on Listing Page"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Rating (0–5)" id={`tp-rating-${i}`}>
+                      <Input id={`tp-rating-${i}`} type="number" min={0} max={5} step={0.1}
+                        value={t.rating} disabled={true} className="bg-muted/40 cursor-not-allowed" />
+                    </FieldRow>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showPrice !== false}
+                    onCheckedChange={(v) => updTour(i, 'showPrice', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Pricing On/Off on Listing Page"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Price Text" id={`tp-price-${i}`}>
+                      <Input id={`tp-price-${i}`} value={t.price || ''} placeholder="Contact for pricing" disabled={true} className="bg-muted/40 cursor-not-allowed" />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <FieldRow label="Custom URL" id={`tp-href-${i}`}>
+                  <Input id={`tp-href-${i}`} value={t.href || ''} placeholder="/tours/..." disabled={true} className="bg-muted/40 cursor-not-allowed" />
+                </FieldRow>
+              </div>
             <FieldRow label="Charter Card & Gallery Main Image" id={`tp-img-${i}`}>
               <ImageUploaderField
                 id={`tp-img-${i}`}
                 value={t.imageUrl}
                 onChange={(url) => updTour(i, 'imageUrl', url)}
                 folder="tours"
-                placeholder="Upload or choose charter image..."
-                disabled={!t.enabled}
+                placeholder="Cover photo..."
+                disabled={true}
               />
             </FieldRow>
             <FieldRow label="Card Short Description" id={`tp-desc-${i}`}>
               <textarea id={`tp-desc-${i}`} rows={2} value={t.description}
-                onChange={(e) => updTour(i, 'description', e.target.value)}
-                disabled={!t.enabled}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50" />
+                disabled={true}
+                className="w-full rounded-md border border-input bg-muted/40 px-3 py-2 text-sm shadow-sm resize-none disabled:opacity-75 cursor-not-allowed" />
             </FieldRow>
 
             {/* Single Tour Page Details Accordion */}
-            <details className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
+            <details open className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
               <summary className="cursor-pointer text-xs font-semibold text-foreground flex items-center justify-between select-none">
-                <span>Single Charter Page Details (Overview, Included, Location, Info)</span>
-                <span className="text-[10px] text-muted-foreground font-mono">▼ Expand</span>
+                <span className="flex items-center gap-1.5 text-primary font-bold">
+                  <Ship className="h-3.5 w-3.5" /> Single Charter Page Details (Overview, Included, Location, Info, Carousel)
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono">▼ Collapse / Expand</span>
               </summary>
               
               <div className="space-y-4 pt-3 border-t border-border/60">
@@ -1892,33 +2416,68 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <FieldRow label="Location Strip Text" id={`tp-loc-${i}`}>
-                    <Input
-                      id={`tp-loc-${i}`}
-                      value={t.location || ''}
-                      placeholder="e.g. Watamu Marine Park, Kilifi County"
-                      onChange={(e) => updTour(i, 'location', e.target.value)}
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showLocation !== false}
+                      onCheckedChange={(v) => updTour(i, 'showLocation', v)}
                       disabled={!t.enabled}
+                      className="mt-8"
+                      title="Toggle Location Strip Text On/Off"
                     />
-                  </FieldRow>
-                  <FieldRow label="Schedule / Season Text" id={`tp-sched-${i}`}>
-                    <Input
-                      id={`tp-sched-${i}`}
-                      value={t.schedule || ''}
-                      placeholder="e.g. Morning Slots (November To March)"
-                      onChange={(e) => updTour(i, 'schedule', e.target.value)}
+                    <div className="flex-1">
+                      <FieldRow label="Location Strip Text" id={`tp-loc-${i}`}>
+                        <Input
+                          id={`tp-loc-${i}`}
+                          value={t.location || ''}
+                          placeholder="e.g. Watamu Marine Park, Kilifi County"
+                          onChange={(e) => updTour(i, 'location', e.target.value)}
+                          disabled={!t.enabled || t.showLocation === false}
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showSchedule !== false}
+                      onCheckedChange={(v) => updTour(i, 'showSchedule', v)}
                       disabled={!t.enabled}
+                      className="mt-8"
+                      title="Toggle Schedule Strip Text On/Off"
                     />
-                  </FieldRow>
-                  <FieldRow label="Group Suitability Text" id={`tp-grp-${i}`}>
-                    <Input
-                      id={`tp-grp-${i}`}
-                      value={t.groupType || ''}
-                      placeholder="e.g. Families · Private · Groups"
-                      onChange={(e) => updTour(i, 'groupType', e.target.value)}
+                    <div className="flex-1">
+                      <FieldRow label="Schedule / Season Text" id={`tp-sched-${i}`}>
+                        <Input
+                          id={`tp-sched-${i}`}
+                          value={t.schedule || ''}
+                          placeholder="e.g. Morning Slots (November To March)"
+                          onChange={(e) => updTour(i, 'schedule', e.target.value)}
+                          disabled={!t.enabled || t.showSchedule === false}
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showGroupType !== false}
+                      onCheckedChange={(v) => updTour(i, 'showGroupType', v)}
                       disabled={!t.enabled}
+                      className="mt-8"
+                      title="Toggle Group Suitability Text On/Off"
                     />
-                  </FieldRow>
+                    <div className="flex-1">
+                      <FieldRow label="Group Suitability Text" id={`tp-grp-${i}`}>
+                        <Input
+                          id={`tp-grp-${i}`}
+                          value={t.groupType || ''}
+                          placeholder="e.g. Families · Private · Groups"
+                          onChange={(e) => updTour(i, 'groupType', e.target.value)}
+                          disabled={!t.enabled || t.showGroupType === false}
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
                 </div>
 
                 <FieldRow label="Full Tour Overview (Main Article)" id={`tp-over-${i}`}>
@@ -1933,76 +2492,139 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   />
                 </FieldRow>
 
-                <FieldRow label="What's Included (1 item per line)" id={`tp-inc-${i}`}>
-                  <textarea
-                    id={`tp-inc-${i}`}
-                    rows={4}
-                    value={(t.included || []).join('\n')}
-                    placeholder="Heavy tackle Penn & Shimano rods&#10;Live bait & lures&#10;Marine park entry permits&#10;Seafood lunch & drinks"
-                    onChange={(e) =>
-                      updTour(
-                        i,
-                        'included',
-                        e.target.value
-                          .split('\n')
-                          .map((s) => s.trim())
-                          .filter(Boolean)
-                      )
-                    }
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showIncluded !== false}
+                    onCheckedChange={(v) => updTour(i, 'showIncluded', v)}
                     disabled={!t.enabled}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                    className="mt-8"
+                    title="Toggle What's Included On/Off"
                   />
-                </FieldRow>
+                  <div className="flex-1">
+                    <FieldRow label="What's Included (1 item per line)" id={`tp-inc-${i}`}>
+                      <textarea
+                        id={`tp-inc-${i}`}
+                        rows={3}
+                        value={(t.included || []).join('\n')}
+                        placeholder="Heavy tackle Penn & Shimano rods&#10;Live bait & lures&#10;Marine park entry permits&#10;Seafood lunch & drinks"
+                        onChange={(e) =>
+                          updTour(
+                            i,
+                            'included',
+                            e.target.value
+                              .split('\n')
+                              .map((s) => s.trim())
+                              .filter(Boolean)
+                          )
+                        }
+                        disabled={!t.enabled || t.showIncluded === false}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
 
-                <FieldRow label="Why Choose This Tour (1 item per line)" id={`tp-why-${i}`}>
-                  <textarea
-                    id={`tp-why-${i}`}
-                    rows={3}
-                    value={(t.whyChoose || []).join('\n')}
-                    placeholder="Twin-engine sportfisher with fighting chair&#10;IGFA certified captain with 20+ years experience&#10;Strict billfish conservation policy"
-                    onChange={(e) =>
-                      updTour(
-                        i,
-                        'whyChoose',
-                        e.target.value
-                          .split('\n')
-                          .map((s) => s.trim())
-                          .filter(Boolean)
-                      )
-                    }
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showNotIncluded !== false}
+                    onCheckedChange={(v) => updTour(i, 'showNotIncluded', v)}
                     disabled={!t.enabled}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                    className="mt-8"
+                    title="Toggle What's Not Included On/Off"
                   />
-                </FieldRow>
+                  <div className="flex-1">
+                    <FieldRow label="What's Not Included (1 item per line)" id={`tp-notinc-${i}`}>
+                      <textarea
+                        id={`tp-notinc-${i}`}
+                        rows={3}
+                        value={(t.notIncluded || []).join('\n')}
+                        placeholder="Crew gratuities and tips (optional)&#10;Hotel pickup & return transfers&#10;Personal swimwear & towels&#10;Alcoholic beverages"
+                        onChange={(e) =>
+                          updTour(
+                            i,
+                            'notIncluded',
+                            e.target.value
+                              .split('\n')
+                              .map((s) => s.trim())
+                              .filter(Boolean)
+                          )
+                        }
+                        disabled={!t.enabled || t.showNotIncluded === false}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
 
-                <FieldRow label="Know Before You Go (1 item per line)" id={`tp-know-${i}`}>
-                  <textarea
-                    id={`tp-know-${i}`}
-                    rows={3}
-                    value={(t.knowBeforeYouGo || []).join('\n')}
-                    placeholder="Departure: 6:00 AM from Watamu Marine Park Gate&#10;Duration: Approx. 8 hours&#10;What to bring: Polarized sunglasses, reef-safe sunscreen"
-                    onChange={(e) =>
-                      updTour(
-                        i,
-                        'knowBeforeYouGo',
-                        e.target.value
-                          .split('\n')
-                          .map((s) => s.trim())
-                          .filter(Boolean)
-                      )
-                    }
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showWhyChoose !== false}
+                    onCheckedChange={(v) => updTour(i, 'showWhyChoose', v)}
                     disabled={!t.enabled}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                    className="mt-8"
+                    title="Toggle Why Choose This Tour On/Off"
                   />
-                </FieldRow>
+                  <div className="flex-1">
+                    <FieldRow label="Why Choose This Tour (1 item per line)" id={`tp-why-${i}`}>
+                      <textarea
+                        id={`tp-why-${i}`}
+                        rows={3}
+                        value={(t.whyChoose || []).join('\n')}
+                        placeholder="Twin-engine sportfisher with fighting chair&#10;IGFA certified captain with 20+ years experience&#10;Strict billfish conservation policy"
+                        onChange={(e) =>
+                          updTour(
+                            i,
+                            'whyChoose',
+                            e.target.value
+                              .split('\n')
+                              .map((s) => s.trim())
+                              .filter(Boolean)
+                          )
+                        }
+                        disabled={!t.enabled || t.showWhyChoose === false}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
+
+                <div className="flex gap-2.5 items-start">
+                  <Switch
+                    checked={t.showKnowBeforeYouGo !== false}
+                    onCheckedChange={(v) => updTour(i, 'showKnowBeforeYouGo', v)}
+                    disabled={!t.enabled}
+                    className="mt-8"
+                    title="Toggle Know Before You Go On/Off"
+                  />
+                  <div className="flex-1">
+                    <FieldRow label="Know Before You Go (1 item per line)" id={`tp-know-${i}`}>
+                      <textarea
+                        id={`tp-know-${i}`}
+                        rows={3}
+                        value={(t.knowBeforeYouGo || []).join('\n')}
+                        placeholder="Departure: 6:00 AM from Watamu Marine Park Gate&#10;Duration: Approx. 8 hours&#10;What to bring: Polarized sunglasses, reef-safe sunscreen"
+                        onChange={(e) =>
+                          updTour(
+                            i,
+                            'knowBeforeYouGo',
+                            e.target.value
+                              .split('\n')
+                              .map((s) => s.trim())
+                              .filter(Boolean)
+                          )
+                        }
+                        disabled={!t.enabled || t.showKnowBeforeYouGo === false}
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                      />
+                    </FieldRow>
+                  </div>
+                </div>
               </div>
             </details>
           </div>
         </div>
       ))}
-      <Button variant="outline" className="w-full gap-2" onClick={addTour}>
-        <Plus className="h-4 w-4" /> Add Fishing Charter
-      </Button>
+    </div>
     </div>
   );
 }
@@ -2892,3 +3514,701 @@ function FAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) 
     </div>
   );
 }
+
+// ─── About Page Editors ──────────────────────────────────────────────────────
+function AboutHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const about = draft.aboutPage || defaultConfig.aboutPage!;
+  const h = about.hero;
+  const upd = <K extends keyof AppConfig['homepage']['hero']>(k: K, v: AppConfig['homepage']['hero'][K]) =>
+    set((p) => {
+      const current = p.aboutPage || defaultConfig.aboutPage!;
+      return { ...p, aboutPage: { ...current, hero: { ...current.hero, [k]: v } } };
+    });
+
+  return (
+    <div className="space-y-5">
+      <SectionToggle title="About Hero Section" enabled={h.enabled} onChange={(v) => upd('enabled', v)} />
+      <BackgroundColorPicker value={h.backgroundColor} onChange={(v) => upd('backgroundColor', v)} />
+
+      <FieldRow label="Section Height" id="abh-size">
+        <select
+          id="abh-size"
+          value={h.size || 'large'}
+          onChange={(e) => upd('size', e.target.value as 'small' | 'medium' | 'large' | 'fullscreen')}
+          className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <option value="small">Small (50vh)</option>
+          <option value="medium">Medium (70vh)</option>
+          <option value="large">Large (85vh)</option>
+          <option value="fullscreen">Fullscreen (100vh)</option>
+        </select>
+      </FieldRow>
+
+      <div className="flex gap-4 items-start">
+        <Switch checked={h.showEyebrow} onCheckedChange={(v) => upd('showEyebrow', v)} className="mt-8" />
+        <div className="flex-1">
+          <FieldRow label="Eyebrow badge text" id="abh-eyebrow">
+            <Input id="abh-eyebrow" value={h.eyebrow} onChange={(e) => upd('eyebrow', e.target.value)} disabled={!h.showEyebrow} />
+          </FieldRow>
+        </div>
+      </div>
+      <Separator />
+
+      <FieldRow label="Headline" id="abh-headline">
+        <Input id="abh-headline" value={h.headline} onChange={(e) => upd('headline', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Italic / highlight text" id="abh-italic">
+        <Input id="abh-italic" value={h.italicText} onChange={(e) => upd('italicText', e.target.value)} />
+      </FieldRow>
+
+      <div className="flex gap-4 items-start">
+        <Switch checked={h.showSubtitle} onCheckedChange={(v) => upd('showSubtitle', v)} className="mt-8" />
+        <div className="flex-1">
+          <FieldRow label="Subtitle" id="abh-subtitle">
+            <textarea
+              id="abh-subtitle"
+              rows={3}
+              value={h.subtitle}
+              onChange={(e) => upd('subtitle', e.target.value)}
+              disabled={!h.showSubtitle}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+            />
+          </FieldRow>
+        </div>
+      </div>
+
+      <Separator />
+      <FieldRow label="Background image" id="abh-image">
+        <ImageUploaderField
+          id="abh-image"
+          value={h.imageUrl}
+          onChange={(url) => upd('imageUrl', url)}
+          folder="hero"
+          placeholder="Upload or choose hero image..."
+        />
+      </FieldRow>
+    </div>
+  );
+}
+
+function AboutStoryEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const about = draft.aboutPage || defaultConfig.aboutPage!;
+  const s = about.story;
+  const rawParagraphs =
+    s.paragraphs && s.paragraphs.length > 0
+      ? s.paragraphs
+      : ([s.paragraph1, s.paragraph2].filter(Boolean) as string[]);
+
+  const paragraphs: StoryParagraphItem[] = rawParagraphs.map((p) =>
+    typeof p === 'string' ? { enabled: true, text: p } : p
+  );
+
+  const upd = <K extends keyof typeof s>(k: K, v: (typeof s)[K]) =>
+    set((p) => {
+      const current = p.aboutPage || defaultConfig.aboutPage!;
+      return { ...p, aboutPage: { ...current, story: { ...current.story, [k]: v } } };
+    });
+
+  const addParagraph = () => {
+    upd('paragraphs', [...paragraphs, { enabled: true, text: '' }]);
+  };
+
+  const updateParagraph = (idx: number, patch: Partial<StoryParagraphItem>) => {
+    const updated = [...paragraphs];
+    updated[idx] = { ...updated[idx], ...patch };
+    upd('paragraphs', updated);
+  };
+
+  const removeParagraph = (idx: number) => {
+    const updated = paragraphs.filter((_, i) => i !== idx);
+    upd('paragraphs', updated);
+  };
+
+  const moveParagraph = (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= paragraphs.length) return;
+    const arr = [...paragraphs];
+    const [temp] = arr.splice(idx, 1);
+    arr.splice(target, 0, temp);
+    upd('paragraphs', arr);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="Our Story Section" enabled={s.enabled} onChange={(v) => upd('enabled', v)} />
+      <BackgroundColorPicker value={s.backgroundColor} onChange={(v) => upd('backgroundColor', v)} />
+
+      <FieldRow label="Eyebrow text" id="abs-eyebrow">
+        <Input id="abs-eyebrow" value={s.eyebrow || ''} onChange={(e) => upd('eyebrow', e.target.value)} />
+      </FieldRow>
+
+      <FieldRow label="Section Title" id="abs-title">
+        <Input id="abs-title" value={s.title} onChange={(e) => upd('title', e.target.value)} />
+      </FieldRow>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-semibold">Story Paragraphs ({paragraphs.length})</h4>
+            <p className="text-xs text-muted-foreground">Add, toggle on/off, reorder, or delete narrative paragraphs.</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={addParagraph} className="h-8 gap-1">
+            <Plus className="h-3.5 w-3.5" /> Add Paragraph
+          </Button>
+        </div>
+
+        {paragraphs.map((para, idx) => (
+          <div key={idx} className="border rounded-lg p-3 bg-card shadow-sm space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={para.enabled}
+                  onCheckedChange={(checked) => updateParagraph(idx, { enabled: checked })}
+                />
+                <span className="text-xs font-semibold text-muted-foreground">
+                  Paragraph #{idx + 1} {!para.enabled && '(Disabled)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="h-7 w-7" disabled={idx === 0} onClick={() => moveParagraph(idx, -1)}>
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" disabled={idx === paragraphs.length - 1} onClick={() => moveParagraph(idx, 1)}>
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => removeParagraph(idx)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <textarea
+              rows={3}
+              value={para.text}
+              disabled={!para.enabled}
+              onChange={(e) => updateParagraph(idx, { text: e.target.value })}
+              placeholder="Write a paragraph about your journey, heritage, or mission..."
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+            />
+          </div>
+        ))}
+      </div>
+
+      <Separator />
+      <FieldRow label="Side Image" id="abs-image">
+        <ImageUploaderField
+          id="abs-image"
+          value={s.imageUrl}
+          onChange={(url) => upd('imageUrl', url)}
+          folder="about"
+          placeholder="Upload or choose story image..."
+        />
+      </FieldRow>
+
+      <FieldRow label="Image Alt Description" id="abs-alt">
+        <Input id="abs-alt" value={s.imageAlt || ''} onChange={(e) => upd('imageAlt', e.target.value)} />
+      </FieldRow>
+    </div>
+  );
+}
+
+function AboutValuesEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const about = draft.aboutPage || defaultConfig.aboutPage!;
+  const v = about.values;
+  const upd = <K extends keyof typeof v>(k: K, val: (typeof v)[K]) =>
+    set((p) => {
+      const current = p.aboutPage || defaultConfig.aboutPage!;
+      return { ...p, aboutPage: { ...current, values: { ...current.values, [k]: val } } };
+    });
+
+  const addItem = () => {
+    const newItem: AboutValueItem = {
+      enabled: true,
+      icon: 'Star',
+      title: 'New Value',
+      description: 'Describe this core value and how it guides your voyages.',
+    };
+    upd('items', [...v.items, newItem]);
+  };
+
+  const removeItem = (idx: number) => {
+    upd('items', v.items.filter((_, i) => i !== idx));
+  };
+
+  const moveItem = (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= v.items.length) return;
+    const arr = [...v.items];
+    const [temp] = arr.splice(idx, 1);
+    arr.splice(target, 0, temp);
+    upd('items', arr);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="Core Values Section" enabled={v.enabled} onChange={(val) => upd('enabled', val)} />
+      <BackgroundColorPicker value={v.backgroundColor} onChange={(val) => upd('backgroundColor', val)} />
+
+      <FieldRow label="Eyebrow text" id="abv-eyebrow">
+        <Input id="abv-eyebrow" value={v.eyebrow || ''} onChange={(e) => upd('eyebrow', e.target.value)} />
+      </FieldRow>
+
+      <FieldRow label="Section Title" id="abv-title">
+        <Input id="abv-title" value={v.title || ''} onChange={(e) => upd('title', e.target.value)} />
+      </FieldRow>
+
+      <FieldRow label="Section Subtitle" id="abv-sub">
+        <textarea
+          id="abv-sub"
+          rows={2}
+          value={v.subtitle || ''}
+          onChange={(e) => upd('subtitle', e.target.value)}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
+      </FieldRow>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-semibold">Value Cards ({v.items.length})</h4>
+          <Button size="sm" variant="outline" onClick={addItem} className="h-8 gap-1">
+            <Plus className="h-3.5 w-3.5" /> Add Card
+          </Button>
+        </div>
+
+        {v.items.map((item, idx) => (
+          <div key={idx} className="border rounded-lg p-4 bg-card shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={item.enabled}
+                  onCheckedChange={(checked) => {
+                    const arr = [...v.items];
+                    arr[idx] = { ...item, enabled: checked };
+                    upd('items', arr);
+                  }}
+                />
+                <span className="text-sm font-semibold">Card #{idx + 1}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="h-7 w-7" disabled={idx === 0} onClick={() => moveItem(idx, -1)}>
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" disabled={idx === v.items.length - 1} onClick={() => moveItem(idx, 1)}>
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => removeItem(idx)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FieldRow label="Lucide Icon Name" id={`abv-icon-${idx}`}>
+                <Input
+                  id={`abv-icon-${idx}`}
+                  value={item.icon}
+                  placeholder="Anchor, Compass, Users, Star..."
+                  onChange={(e) => {
+                    const arr = [...v.items];
+                    arr[idx] = { ...item, icon: e.target.value };
+                    upd('items', arr);
+                  }}
+                />
+              </FieldRow>
+              <FieldRow label="Title" id={`abv-title-${idx}`}>
+                <Input
+                  id={`abv-title-${idx}`}
+                  value={item.title}
+                  onChange={(e) => {
+                    const arr = [...v.items];
+                    arr[idx] = { ...item, title: e.target.value };
+                    upd('items', arr);
+                  }}
+                />
+              </FieldRow>
+            </div>
+
+            <FieldRow label="Description" id={`abv-desc-${idx}`}>
+              <textarea
+                id={`abv-desc-${idx}`}
+                rows={2}
+                value={item.description}
+                onChange={(e) => {
+                  const arr = [...v.items];
+                  arr[idx] = { ...item, description: e.target.value };
+                  upd('items', arr);
+                }}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              />
+            </FieldRow>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AboutTeamEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const about = draft.aboutPage || defaultConfig.aboutPage!;
+  const t = about.team;
+  const upd = <K extends keyof typeof t>(k: K, val: (typeof t)[K]) =>
+    set((p) => {
+      const current = p.aboutPage || defaultConfig.aboutPage!;
+      return { ...p, aboutPage: { ...current, team: { ...current.team, [k]: val } } };
+    });
+
+  const addMember = () => {
+    const newMember: AboutTeamMember = {
+      enabled: true,
+      name: 'Captain Alex M.',
+      role: 'First Mate & Guide',
+      quote: '"The sea has a story to tell every day."',
+      imageUrl: '/images/hero/hero.jpg',
+    };
+    upd('items', [...t.items, newMember]);
+  };
+
+  const removeMember = (idx: number) => {
+    upd('items', t.items.filter((_, i) => i !== idx));
+  };
+
+  const moveMember = (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= t.items.length) return;
+    const arr = [...t.items];
+    const [temp] = arr.splice(idx, 1);
+    arr.splice(target, 0, temp);
+    upd('items', arr);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="The Crew / Storytellers Section" enabled={t.enabled} onChange={(val) => upd('enabled', val)} />
+      <BackgroundColorPicker value={t.backgroundColor} onChange={(val) => upd('backgroundColor', val)} />
+
+      <FieldRow label="Eyebrow text" id="abt-eyebrow">
+        <Input id="abt-eyebrow" value={t.eyebrow || ''} onChange={(e) => upd('eyebrow', e.target.value)} />
+      </FieldRow>
+
+      <FieldRow label="Section Title" id="abt-title">
+        <Input id="abt-title" value={t.title || ''} onChange={(e) => upd('title', e.target.value)} />
+      </FieldRow>
+
+      <FieldRow label="Section Subtitle" id="abt-sub">
+        <textarea
+          id="abt-sub"
+          rows={2}
+          value={t.subtitle || ''}
+          onChange={(e) => upd('subtitle', e.target.value)}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
+      </FieldRow>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h4 className="text-sm font-semibold">Crew Members ({t.items.length})</h4>
+          <Button size="sm" variant="outline" onClick={addMember} className="h-8 gap-1">
+            <Plus className="h-3.5 w-3.5" /> Add Member
+          </Button>
+        </div>
+
+        {t.items.map((member, idx) => (
+          <div key={idx} className="border rounded-lg p-4 bg-card shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={member.enabled}
+                  onCheckedChange={(checked) => {
+                    const arr = [...t.items];
+                    arr[idx] = { ...member, enabled: checked };
+                    upd('items', arr);
+                  }}
+                />
+                <span className="text-sm font-semibold">{member.name || `Member #${idx + 1}`}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="h-7 w-7" disabled={idx === 0} onClick={() => moveMember(idx, -1)}>
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7" disabled={idx === t.items.length - 1} onClick={() => moveMember(idx, 1)}>
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => removeMember(idx)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FieldRow label="Name" id={`abt-name-${idx}`}>
+                <Input
+                  id={`abt-name-${idx}`}
+                  value={member.name}
+                  onChange={(e) => {
+                    const arr = [...t.items];
+                    arr[idx] = { ...member, name: e.target.value };
+                    upd('items', arr);
+                  }}
+                />
+              </FieldRow>
+              <FieldRow label="Role / Badge" id={`abt-role-${idx}`}>
+                <Input
+                  id={`abt-role-${idx}`}
+                  value={member.role}
+                  placeholder="Head Skipper, Marine Biologist..."
+                  onChange={(e) => {
+                    const arr = [...t.items];
+                    arr[idx] = { ...member, role: e.target.value };
+                    upd('items', arr);
+                  }}
+                />
+              </FieldRow>
+            </div>
+
+            <FieldRow label="Quote / Philosophy" id={`abt-quote-${idx}`}>
+              <Input
+                id={`abt-quote-${idx}`}
+                value={member.quote}
+                onChange={(e) => {
+                  const arr = [...t.items];
+                  arr[idx] = { ...member, quote: e.target.value };
+                  upd('items', arr);
+                }}
+              />
+            </FieldRow>
+
+            <FieldRow label="Portrait Image" id={`abt-img-${idx}`}>
+              <ImageUploaderField
+                id={`abt-img-${idx}`}
+                value={member.imageUrl}
+                onChange={(url) => {
+                  const arr = [...t.items];
+                  arr[idx] = { ...member, imageUrl: url };
+                  upd('items', arr);
+                }}
+                folder="team"
+                placeholder="Upload or select portrait..."
+              />
+            </FieldRow>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AboutImpactEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const about = draft.aboutPage || defaultConfig.aboutPage!;
+  const imp = about.impact;
+  const upd = <K extends keyof typeof imp>(k: K, val: (typeof imp)[K]) =>
+    set((p) => {
+      const current = p.aboutPage || defaultConfig.aboutPage!;
+      return { ...p, aboutPage: { ...current, impact: { ...current.impact, [k]: val } } };
+    });
+
+  return (
+    <div className="space-y-8">
+      <SectionToggle title="Impact & Partners Section" enabled={imp.enabled} onChange={(v) => upd('enabled', v)} />
+      <BackgroundColorPicker
+        value={imp.backgroundColor || '#0f172a'}
+        onChange={(v) => upd('backgroundColor', v)}
+        desc="Dark theme recommended for impact contrast (e.g. #0f172a)."
+      />
+
+      <div className="space-y-4 border-b pb-6">
+        <h4 className="text-sm font-semibold">Left Column (Narrative & Stats)</h4>
+
+        <FieldRow label="Section Title" id="abi-title">
+          <Input id="abi-title" value={imp.title} onChange={(e) => upd('title', e.target.value)} />
+        </FieldRow>
+
+        <FieldRow label="Section Subtitle" id="abi-sub">
+          <textarea
+            id="abi-sub"
+            rows={2}
+            value={imp.subtitle}
+            onChange={(e) => upd('subtitle', e.target.value)}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+          />
+        </FieldRow>
+
+        <div className="space-y-3 pt-2">
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Impact Metrics (4 Counters)</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {imp.stats.map((st, idx) => (
+              <div key={idx} className="border rounded-md p-3 bg-card space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">Metric #{idx + 1}</span>
+                  <Switch
+                    checked={st.enabled}
+                    onCheckedChange={(chk) => {
+                      const arr = [...imp.stats];
+                      arr[idx] = { ...st, enabled: chk };
+                      upd('stats', arr);
+                    }}
+                  />
+                </div>
+                <Input
+                  value={st.value}
+                  placeholder="1,200+"
+                  onChange={(e) => {
+                    const arr = [...imp.stats];
+                    arr[idx] = { ...st, value: e.target.value };
+                    upd('stats', arr);
+                  }}
+                  className="font-bold font-mono text-sm"
+                />
+                <Input
+                  value={st.label}
+                  placeholder="BILLFISH TAGGED"
+                  onChange={(e) => {
+                    const arr = [...imp.stats];
+                    arr[idx] = { ...st, label: e.target.value };
+                    upd('stats', arr);
+                  }}
+                  className="text-xs uppercase"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="text-sm font-semibold">Right Column (Global Partners Card)</h4>
+
+        <FieldRow label="Card Title" id="abi-part-title">
+          <Input
+            id="abi-part-title"
+            value={imp.partnersCard.title}
+            onChange={(e) => upd('partnersCard', { ...imp.partnersCard, title: e.target.value })}
+          />
+        </FieldRow>
+
+        <FieldRow label="Card Icon (Lucide)" id="abi-part-icon">
+          <Input
+            id="abi-part-icon"
+            value={imp.partnersCard.icon || 'ShieldCheck'}
+            onChange={(e) => upd('partnersCard', { ...imp.partnersCard, icon: e.target.value })}
+          />
+        </FieldRow>
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground uppercase">Partner Badges (comma separated)</label>
+          <Input
+            value={imp.partnersCard.partners.join(', ')}
+            placeholder="The Billfish Foundation, Kenya Wildlife Service..."
+            onChange={(e) => {
+              const partners = e.target.value
+                .split(',')
+                .map((p) => p.trim())
+                .filter(Boolean);
+              upd('partnersCard', { ...imp.partnersCard, partners });
+            }}
+          />
+          <p className="text-xs text-muted-foreground">Separate partner names with commas.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AboutCTAEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const about = draft.aboutPage || defaultConfig.aboutPage!;
+  const cta = about.cta;
+  const upd = <K extends keyof typeof cta>(k: K, val: (typeof cta)[K]) =>
+    set((p) => {
+      const current = p.aboutPage || defaultConfig.aboutPage!;
+      return { ...p, aboutPage: { ...current, cta: { ...current.cta, [k]: val } } };
+    });
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="CTA Banner Section" enabled={cta.enabled} onChange={(v) => upd('enabled', v)} />
+      <BackgroundColorPicker value={cta.backgroundColor} onChange={(v) => upd('backgroundColor', v)} />
+
+      <FieldRow label="Banner Title" id="abcta-title">
+        <Input id="abcta-title" value={cta.title} onChange={(e) => upd('title', e.target.value)} />
+      </FieldRow>
+
+      <FieldRow label="Banner Subtitle" id="abcta-sub">
+        <textarea
+          id="abcta-sub"
+          rows={3}
+          value={cta.subtitle}
+          onChange={(e) => upd('subtitle', e.target.value)}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
+      </FieldRow>
+
+      <Separator />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Primary CTA */}
+        <div className="border rounded-lg p-4 bg-card space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold">Primary Button</h4>
+            <Switch
+              checked={cta.primaryCta.enabled}
+              onCheckedChange={(checked) =>
+                upd('primaryCta', { ...cta.primaryCta, enabled: checked })
+              }
+            />
+          </div>
+          <FieldRow label="Button Label" id="abcta-p-lbl">
+            <Input
+              id="abcta-p-lbl"
+              value={cta.primaryCta.label}
+              onChange={(e) => upd('primaryCta', { ...cta.primaryCta, label: e.target.value })}
+              disabled={!cta.primaryCta.enabled}
+            />
+          </FieldRow>
+          <FieldRow label="Button Link" id="abcta-p-href">
+            <Input
+              id="abcta-p-href"
+              value={cta.primaryCta.href}
+              onChange={(e) => upd('primaryCta', { ...cta.primaryCta, href: e.target.value })}
+              disabled={!cta.primaryCta.enabled}
+            />
+          </FieldRow>
+        </div>
+
+        {/* Secondary CTA */}
+        <div className="border rounded-lg p-4 bg-card space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-semibold">Secondary Button</h4>
+            <Switch
+              checked={cta.secondaryCta.enabled}
+              onCheckedChange={(checked) =>
+                upd('secondaryCta', { ...cta.secondaryCta, enabled: checked })
+              }
+            />
+          </div>
+          <FieldRow label="Button Label" id="abcta-s-lbl">
+            <Input
+              id="abcta-s-lbl"
+              value={cta.secondaryCta.label}
+              onChange={(e) => upd('secondaryCta', { ...cta.secondaryCta, label: e.target.value })}
+              disabled={!cta.secondaryCta.enabled}
+            />
+          </FieldRow>
+          <FieldRow label="Button Link" id="abcta-s-href">
+            <Input
+              id="abcta-s-href"
+              value={cta.secondaryCta.href}
+              onChange={(e) => upd('secondaryCta', { ...cta.secondaryCta, href: e.target.value })}
+              disabled={!cta.secondaryCta.enabled}
+            />
+          </FieldRow>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+

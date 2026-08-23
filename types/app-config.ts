@@ -59,25 +59,38 @@ export interface TourItem {
   id?: string;
   slug?: string;
   enabled: boolean;
-  badge: string;
   title: string;
+  showTitle?: boolean;
+  badge: string;
+  showBadge?: boolean;
   description: string;
   duration: string;
+  showDuration?: boolean;
   rating: number;
+  showRating?: boolean;
+  price?: string;
+  showPrice?: boolean;
+  priceLabel?: string;
   imageUrl: string;
   heroImageUrl?: string;
   heroBackgroundColor?: string;
   indicatorColor?: string;
   gallery?: string[];
   location?: string;
+  showLocation?: boolean;
   schedule?: string;
+  showSchedule?: boolean;
   groupType?: string;
+  showGroupType?: boolean;
   overview?: string;
   included?: string[];
+  showIncluded?: boolean;
+  notIncluded?: string[];
+  showNotIncluded?: boolean;
   whyChoose?: string[];
+  showWhyChoose?: boolean;
   knowBeforeYouGo?: string[];
-  price?: string;
-  priceLabel?: string;
+  showKnowBeforeYouGo?: boolean;
   href?: string;
 }
 
@@ -238,6 +251,80 @@ export interface ContactPageConfig {
   faq: SectionList<FAQItem>;
 }
 
+// ─── About Page ───────────────────────────────────────────────────────────────
+export interface StoryParagraphItem {
+  enabled: boolean;
+  text: string;
+}
+
+export interface AboutStorySection {
+  enabled: boolean;
+  backgroundColor?: string;
+  eyebrow?: string;
+  title: string;
+  paragraphs: (string | StoryParagraphItem)[];
+  paragraph1?: string;
+  paragraph2?: string;
+  imageUrl: string;
+  imageAlt?: string;
+}
+
+export interface AboutValueItem {
+  enabled: boolean;
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface AboutTeamMember {
+  enabled: boolean;
+  name: string;
+  role: string;
+  quote: string;
+  imageUrl: string;
+}
+
+export interface AboutImpactPartnerCard {
+  title: string;
+  icon?: string;
+  partners: string[];
+}
+
+export interface AboutImpactSection {
+  enabled: boolean;
+  backgroundColor?: string;
+  title: string;
+  subtitle: string;
+  stats: StatItem[];
+  partnersCard: AboutImpactPartnerCard;
+}
+
+export interface AboutCTASection {
+  enabled: boolean;
+  backgroundColor?: string;
+  title: string;
+  subtitle: string;
+  primaryCta: {
+    enabled: boolean;
+    label: string;
+    href: string;
+  };
+  secondaryCta: {
+    enabled: boolean;
+    label: string;
+    href: string;
+  };
+}
+
+export interface AboutPageConfig {
+  hero: HeroSection;
+  story: AboutStorySection;
+  values: SectionList<AboutValueItem>;
+  team: SectionList<AboutTeamMember>;
+  impact: AboutImpactSection;
+  cta: AboutCTASection;
+}
+
 // ─── Root config ───────────────────────────────────────────────────────────────
 export interface AppConfig {
   branding: Branding;
@@ -246,4 +333,6 @@ export interface AppConfig {
   homepage: HomepageConfig;
   toursPage?: ToursPageConfig;
   contactPage: ContactPageConfig;
+  aboutPage?: AboutPageConfig;
 }
+

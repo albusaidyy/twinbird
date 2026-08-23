@@ -17,6 +17,7 @@ import type {
   WhyUsItem,
   GalleryItem,
   CTABannerSection,
+  SectionList,
 } from '@/types/app-config';
 import { defaultConfig } from '@/config/default-config';
 import { getTourSlug } from '@/lib/tour-utils';
@@ -56,7 +57,7 @@ function StatsBar({ data, primaryColor }: { data: { enabled: boolean; background
 }
 
 // ─── Featured Tours ───────────────────────────────────────────────────────────
-function FeaturedTours({ data, primaryColor, accentColor }: { data: { enabled: boolean; backgroundColor?: string; items: TourItem[]; title?: string; subtitle?: string; eyebrow?: string }; primaryColor: string; accentColor: string }) {
+function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<TourItem>; primaryColor: string; accentColor: string }) {
   if (!data.enabled) return null;
   const visibleTours = data.items.filter(t => t.enabled);
   if (visibleTours.length === 0) return null;
@@ -100,6 +101,11 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: { enabled: b
           {visibleTours.map((tour) => {
             const slug = getTourSlug(tour);
             const targetHref = `/tours/${slug}`;
+            const canShowBadge = tour.showBadge !== false && Boolean(tour.badge);
+            const canShowDuration = tour.showDuration !== false && Boolean(tour.duration);
+            const canShowRating = tour.showRating !== false && tour.rating > 0;
+            const canShowTitle = tour.showTitle !== false && Boolean(tour.title);
+            const canShowPrice = tour.showPrice !== false && Boolean(tour.price || tour.priceLabel);
 
             return (
               <article
@@ -115,28 +121,49 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: { enabled: b
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                     priority={true}
                   />
-                  <span
-                    className="absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold text-white shadow"
-                    style={{ backgroundColor: primaryColor }}
-                  >
-                    {tour.badge}
-                  </span>
+                  {canShowBadge && (
+                    <span
+                      className="absolute top-3 left-3 rounded-full px-3 py-1 text-xs font-semibold text-white shadow"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      {tour.badge}
+                    </span>
+                  )}
                 </Link>
                 <div className="p-5">
-                  <div className="flex items-center gap-1 mb-2">
-                    <Star className="h-3.5 w-3.5" style={{ fill: accentColor, color: accentColor }} />
-                    <span className="text-xs font-semibold text-foreground">{tour.rating}</span>
-                    <span className="text-xs text-muted-foreground ml-1">· {tour.duration}</span>
-                  </div>
-                  <Link href={targetHref} className="block">
-                    <h3 className="font-bold text-foreground text-base hover:text-primary transition-colors">
-                      {tour.title}
-                    </h3>
-                  </Link>
+                  {(canShowRating || canShowDuration) && (
+                    <div className="flex items-center gap-1 mb-2">
+                      {canShowRating && (
+                        <>
+                          <Star className="h-3.5 w-3.5" style={{ fill: accentColor, color: accentColor }} />
+                          <span className="text-xs font-semibold text-foreground">{tour.rating}</span>
+                        </>
+                      )}
+                      {canShowDuration && (
+                        <span className="text-xs text-muted-foreground ml-1">
+                          {canShowRating ? `· ${tour.duration}` : tour.duration}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {canShowTitle && (
+                    <Link href={targetHref} className="block">
+                      <h3 className="font-bold text-foreground text-base hover:text-primary transition-colors">
+                        {tour.title}
+                      </h3>
+                    </Link>
+                  )}
                   <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed line-clamp-2">
                     {tour.description}
                   </p>
                   <div className="mt-4 flex items-center justify-between">
+                    {canShowPrice ? (
+                      <span className="text-xs text-muted-foreground font-medium italic">
+                        {tour.price || tour.priceLabel}
+                      </span>
+                    ) : (
+                      <span />
+                    )}
                     <Link
                       href={targetHref}
                       className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-80"
@@ -397,8 +424,20 @@ function Gallery({ data, primaryColor }: { data: { enabled: boolean; backgroundC
             const walk = (x - startX) * 1.5; // Drag speed multiplier
             scrollRef.current.scrollLeft = scrollLeftPos - walk;
           }}
+          onTouchStart={(e) => {
+            setIsDragging(true);
+            setStartX(e.touches[0].pageX - (scrollRef.current?.offsetLeft || 0));
+            setScrollLeftPos(scrollRef.current?.scrollLeft || 0);
+          }}
+          onTouchEnd={() => setIsDragging(false)}
+          onTouchMove={(e) => {
+            if (!isDragging || !scrollRef.current) return;
+            const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
+            const walk = (x - startX) * 1.5;
+            scrollRef.current.scrollLeft = scrollLeftPos - walk;
+          }}
           className={`w-full flex gap-6 overflow-x-auto pb-8 ${isDragging ? '' : 'snap-x snap-mandatory'} hide-scrollbar select-none`} 
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', cursor: isDragging ? 'grabbing' : 'grab' }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', scrollBehavior: isDragging ? 'auto' : 'smooth', cursor: isDragging ? 'grabbing' : 'grab' }}
         >
           {displayItems.map((item, i) => {
             return (
@@ -498,7 +537,12 @@ export default function HomePage() {
   const renderSection = (key: string) => {
     switch (key) {
       case 'stats':   return <StatsBar key={key} data={hp.stats} primaryColor={primaryColor} />;
-      case 'tours':   return <FeaturedTours key={key} data={hp.tours} primaryColor={primaryColor} accentColor={accentColor} />;
+      case 'tours': {
+        const charterItems = (config.toursPage?.tours?.items && config.toursPage.tours.items.length > 0)
+          ? config.toursPage.tours.items
+          : (hp.tours?.items || defaultConfig.toursPage!.tours.items);
+        return <FeaturedTours key={key} data={{ ...hp.tours, items: charterItems }} primaryColor={primaryColor} accentColor={accentColor} />;
+      }
       case 'whyus':   return <WhyUs key={key} data={hp.whyUs} primaryColor={primaryColor} accentColor={accentColor} fallbackImageUrl={hp.hero.imageUrl} />;
       case 'reviews': return <Reviews key={key} data={hp.reviews} primaryColor={primaryColor} accentColor={accentColor} />;
       case 'gallery': return <Gallery key={key} data={hp.gallery || defaultConfig.homepage.gallery} primaryColor={primaryColor} />;

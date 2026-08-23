@@ -13,7 +13,8 @@ export default function ContactPage() {
   const { primaryColor, appName, logoUrl } = config.branding;
   
   const contactPage = config.contactPage || defaultConfig.contactPage;
-  const tourNames = config.homepage.tours.items.filter(t => t.enabled).map(t => t.title);
+  const charterItems = config.toursPage?.tours?.items || config.homepage.tours.items;
+  const tourNames = charterItems.filter(t => t.enabled).map(t => t.title);
   const subjects = ['General Inquiry', ...tourNames, 'Feedback'];
 
   return (

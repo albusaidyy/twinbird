@@ -176,7 +176,7 @@ export async function getMediaLibrary(
   try {
     const foldersToFetch: string[] = [];
     if (includeAll) {
-      foldersToFetch.push('uploads', 'hero', 'brand/logos', 'brand/favicons', 'tours', 'gallery', 'whyus', 'contact-hero');
+      foldersToFetch.push('uploads', 'hero', 'brand/logos', 'brand/favicons', 'tours', 'gallery', 'whyus', 'contact-hero', 'about', 'team');
     } else {
       if (folder) foldersToFetch.push(folder);
       if (folder && !folder.startsWith('images/') && !folder.startsWith('brand/')) {
