@@ -1,13 +1,24 @@
 /**
- * One-time script to create the initial admin user in Supabase via Better Auth.
- * Run once after setup: npx tsx scripts/seed-admin.ts
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Seed Initial Admin User Script
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Creates the initial admin account in Supabase using Better Auth.
  *
- * Set these env vars before running:
- *   DATABASE_URL=...
- *   BETTER_AUTH_SECRET=...
- *   BETTER_AUTH_URL=http://localhost:3000
- *   ADMIN_EMAIL=your@email.com
- *   ADMIN_PASSWORD=yourpassword
+ * 📌 HOW TO RUN:
+ *   npx tsx scripts/seed-admin.ts
+ *
+ * 📋 PREREQUISITES / REQUIRED ENV VARS (in your .env or .env.local):
+ *   DATABASE_URL=postgresql://postgres:[password]@db.[ref].supabase.co:5432/postgres
+ *   BETTER_AUTH_SECRET=your-secret-key-at-least-32-chars
+ *   BETTER_AUTH_URL=http://localhost:3000   (or your production URL)
+ *   ADMIN_EMAIL=admin@example.com
+ *   ADMIN_PASSWORD=your_secure_password
+ *   ADMIN_NAME="Admin"                     (optional, defaults to "Admin")
+ *
+ * 💡 WHAT IT DOES:
+ *   - Calls Better Auth signUpEmail to insert the admin user and hash the password.
+ *   - If the user already exists, it safely detects it and skips re-creation.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { config } from 'dotenv';

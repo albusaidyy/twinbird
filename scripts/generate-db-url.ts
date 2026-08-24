@@ -1,3 +1,14 @@
+/**
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Interactive DATABASE_URL Connection String Helper
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Prompts for your plain Supabase database password, URL-encodes special
+ * characters, and formats the exact `DATABASE_URL=...` line for your `.env`.
+ *
+ * 📌 HOW TO RUN:
+ *   npx tsx scripts/generate-db-url.ts
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
 import * as readline from 'readline';
 
 const rl = readline.createInterface({

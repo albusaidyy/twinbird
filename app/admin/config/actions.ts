@@ -299,4 +299,165 @@ export async function getAdminConfig(): Promise<AppConfig | null> {
   return (data?.config as AppConfig) ?? null;
 }
 
+/**
+ * Saves a versioned snapshot of the given config to `site_config_versions`.
+ *
+ * Run once in your Supabase SQL Editor to create the table:
+ *
+ *   create table if not exists site_config_versions (
+ *     id          uuid        primary key default gen_random_uuid(),
+ *     config      jsonb       not null,
+ *     label       text,
+ *     created_at  timestamptz not null default now(),
+ *     created_by  text
+ *   );
+ */
+export async function saveConfigVersion(
+  config: AppConfig,
+  label?: string
+): Promise<{ id: string; created_at: string } | { error: string }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { error: 'Unauthorized' };
+
+  const { data, error } = await supabase
+    .from('site_config_versions')
+    .insert({
+      config,
+      label: label ?? `Snapshot before reset — ${new Date().toLocaleString('en-GB', { timeZone: 'Africa/Nairobi' })}`,
+      created_by: session.user.email,
+    })
+    .select('id, created_at')
+    .single();
+
+  if (error) return { error: error.message };
+  return { id: data.id as string, created_at: data.created_at as string };
+}
+
+export interface ConfigVersionSummary {
+  id: string;
+  label: string | null;
+  created_at: string;
+  created_by: string | null;
+}
+
+/** Returns the list of config version snapshots, newest first. */
+export async function getConfigVersions(): Promise<ConfigVersionSummary[]> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return [];
+
+  const { data, error } = await supabase
+    .from('site_config_versions')
+    .select('id, label, created_at, created_by')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error || !data) return [];
+  return data as ConfigVersionSummary[];
+}
+
+/** Returns the full config snapshot for a given version id. */
+export async function getConfigVersion(id: string): Promise<AppConfig | null> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return null;
+
+  const { data, error } = await supabase
+    .from('site_config_versions')
+    .select('config')
+    .eq('id', id)
+    .single();
+
+  if (error || !data) return null;
+  return data.config as AppConfig;
+}
+
+/**
+ * Restores a specific version snapshot:
+ * 1. Automatically snapshots current live config to `site_config_versions` before restoring.
+ * 2. Updates `site_config` with the target snapshot's config.
+ * 3. Returns the restored AppConfig.
+ */
+export async function restoreConfigVersion(
+  versionId: string,
+  currentConfigToBackup?: AppConfig
+): Promise<{ success: true; config: AppConfig; backupId?: string } | { error: string }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { error: 'Unauthorized' };
+
+  // 1. Fetch the target version to restore
+  const { data: targetVersion, error: fetchErr } = await supabase
+    .from('site_config_versions')
+    .select('id, config, label, created_at')
+    .eq('id', versionId)
+    .single();
+
+  if (fetchErr || !targetVersion) {
+    return { error: 'Target version not found' };
+  }
+
+  const restoredConfig = targetVersion.config as AppConfig;
+
+  // 2. Backup current config before restoring
+  let currentConfig = currentConfigToBackup;
+  if (!currentConfig) {
+    const { data: liveData } = await supabase
+      .from('site_config')
+      .select('config')
+      .eq('id', 'main')
+      .single();
+    if (liveData?.config) {
+      currentConfig = liveData.config as AppConfig;
+    }
+  }
+
+  let backupId: string | undefined;
+  if (currentConfig) {
+    const timeStr = new Date().toLocaleString('en-GB', { timeZone: 'Africa/Nairobi' });
+    const targetLabel = targetVersion.label || `Snapshot ${new Date(targetVersion.created_at).toLocaleDateString()}`;
+    const { data: backupData } = await supabase
+      .from('site_config_versions')
+      .insert({
+        config: currentConfig,
+        label: `Auto-backup before restoring [${targetLabel}] — ${timeStr}`,
+        created_by: session.user.email,
+      })
+      .select('id')
+      .single();
+
+    if (backupData) {
+      backupId = backupData.id as string;
+    }
+  }
+
+  // 3. Update live site_config
+  const { error: updateErr } = await supabase
+    .from('site_config')
+    .upsert({
+      id: 'main',
+      config: restoredConfig,
+      updated_at: new Date().toISOString(),
+      updated_by: session.user.email,
+    });
+
+  if (updateErr) {
+    return { error: `Failed to restore config: ${updateErr.message}` };
+  }
+
+  return { success: true, config: restoredConfig, backupId };
+}
+
+/** Deletes a version snapshot by ID. */
+export async function deleteConfigVersion(id: string): Promise<{ success: boolean } | { error: string }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { error: 'Unauthorized' };
+
+  const { error } = await supabase
+    .from('site_config_versions')
+    .delete()
+    .eq('id', id);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+
 
