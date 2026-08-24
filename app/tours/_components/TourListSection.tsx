@@ -19,7 +19,7 @@ export function TourListSection({
 }) {
   if (!data || data.enabled === false) return null;
 
-  const visibleTours = (data.items || []).filter((t) => t.enabled);
+  const visibleTours = (data.items || []).filter((t) => t.enabled && !t.deleted);
   if (visibleTours.length === 0) return null;
 
   const isDark = isColorDark(data.backgroundColor || '#f5f5f0');

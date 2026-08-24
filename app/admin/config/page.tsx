@@ -29,6 +29,7 @@ import {
   ExternalLink,
   Plus,
   Trash2,
+  AlertTriangle,
   LayoutDashboard,
   Info,
   Phone,
@@ -866,9 +867,93 @@ function StatsEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
   );
 }
 
+// ─── Tour matching helper across both sections ─────────────────────────────────
+function isTourMatch(a: TourItem, b: TourItem, aIdx?: number, bIdx?: number): boolean {
+  if (a.id && b.id) return a.id === b.id;
+  if (a.slug && b.slug) return a.slug === b.slug;
+  if (a.title && b.title && a.title.trim().toLowerCase() === b.title.trim().toLowerCase()) return true;
+  if (aIdx !== undefined && bIdx !== undefined) return aIdx === bIdx;
+  return false;
+}
+
+// ─── Reusable Delete Confirmation Dialog ───────────────────────────────────────
+function TourDeleteConfirmDialog({
+  isOpen,
+  type,
+  tourTitle,
+  onConfirm,
+  onCancel,
+}: {
+  isOpen: boolean;
+  type: 'soft' | 'permanent';
+  tourTitle: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  const isPermanent = type === 'permanent';
+
+  const modalContent = (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+        <div className="flex items-start gap-3.5">
+          <div
+            className={`p-2.5 rounded-full shrink-0 ${
+              isPermanent ? 'bg-destructive/15 text-destructive' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'
+            }`}
+          >
+            {isPermanent ? <Trash2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-foreground">
+              {isPermanent ? 'Permanently Delete Charter?' : 'Soft-Delete Charter?'}
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {isPermanent ? (
+                <>
+                  Are you sure you want to permanently delete <strong className="text-foreground">{tourTitle}</strong>? This action <span className="font-semibold text-destructive">cannot be undone</span> and will completely erase this charter package from both the Featured Tours and Charters Listing.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to soft-delete <strong className="text-foreground">{tourTitle}</strong>? It will become <span className="font-semibold text-foreground">inactive and greyed out</span> on both the Featured Tours and Charters Listing, and will be hidden from public visitors. You can restore it anytime or permanently delete it later.
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-border/60">
+          <Button type="button" variant="outline" size="sm" onClick={onCancel} className="text-xs h-8">
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant={isPermanent ? 'destructive' : 'default'}
+            size="sm"
+            onClick={onConfirm}
+            className={`text-xs h-8 gap-1.5 ${!isPermanent ? 'bg-amber-600 hover:bg-amber-700 text-white' : ''}`}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            {isPermanent ? 'Delete Forever' : 'Soft Delete'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
+}
+
 function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
   const data = draft.homepage.tours;
   const toursList = draft.homepage.tours?.items || [];
+  const [deletePrompt, setDeletePrompt] = useState<{ type: 'soft' | 'permanent'; tour: TourItem; index: number } | null>(null);
 
   const toursPageNavLabel = draft.navigation?.find((l) => l.href === '/tours' || l.href.startsWith('/tours'))?.label || PAGES.find((p) => p.id === 'tours')?.label || 'Fishing Charters';
   const toursSectionLabel = PAGES.find((p) => p.id === 'tours')?.sections.find((s) => s.key === 'tours-page-list')?.label || draft.toursPage?.tours?.title || 'Charter Packages';
@@ -903,9 +988,7 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
       hpItems[i] = { ...currentItem, [k]: v };
 
       if (!VISIBILITY_KEYS.has(k)) {
-        const tpIdx = tpItems.findIndex(
-          (t) => (t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title
-        );
+        const tpIdx = tpItems.findIndex((t, idx) => isTourMatch(t, currentItem, idx, i));
         if (tpIdx !== -1) {
           tpItems[tpIdx] = { ...tpItems[tpIdx], [k]: v };
         } else if (tpItems[i]) {
@@ -929,6 +1012,7 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
       const newTour: TourItem = {
         id: uniqueId,
         enabled: true,
+        deleted: false,
         title: 'New Fishing Charter',
         badge: 'Popular',
         description: 'Experience premier big-game fishing on the Kenyan Coast...',
@@ -966,24 +1050,54 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
       };
     });
 
-  const rmTour = (i: number) =>
+  const softDeleteTour = (targetTour: TourItem, targetIndex: number) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
       const hpItems = [...(p.homepage?.tours?.items || [])];
       const tpItems = [...(currentToursPage.tours?.items || [])];
 
-      const currentItem = hpItems[i];
-      if (!currentItem) return p;
-
-      const newHp = hpItems.filter((_, idx) => idx !== i);
-      const newTp = tpItems.filter(
-        (t) => !((t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title)
-      );
+      const markSoftDeleted = (t: TourItem, idx: number) =>
+        isTourMatch(t, targetTour, idx, targetIndex)
+          ? { ...t, deleted: true, enabled: false, deletedAt: new Date().toISOString() }
+          : t;
 
       return {
         ...p,
-        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: newHp } },
-        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: newTp } },
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.map(markSoftDeleted) } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.map(markSoftDeleted) } },
+      };
+    });
+
+  const restoreTour = (targetTour: TourItem, targetIndex: number) =>
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const markRestored = (t: TourItem, idx: number) =>
+        isTourMatch(t, targetTour, idx, targetIndex)
+          ? { ...t, deleted: false, enabled: true, deletedAt: undefined }
+          : t;
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.map(markRestored) } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.map(markRestored) } },
+      };
+    });
+
+  const permanentDeleteTour = (targetTour: TourItem, targetIndex: number) =>
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const notTarget = (t: TourItem, idx: number) => !isTourMatch(t, targetTour, idx, targetIndex);
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.filter(notTarget) } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.filter(notTarget) } },
       };
     });
 
@@ -1005,6 +1119,23 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
 
   return (
     <div className="space-y-6">
+      {deletePrompt && (
+        <TourDeleteConfirmDialog
+          isOpen={true}
+          type={deletePrompt.type}
+          tourTitle={deletePrompt.tour.title}
+          onConfirm={() => {
+            if (deletePrompt.type === 'soft') {
+              softDeleteTour(deletePrompt.tour, deletePrompt.index);
+            } else {
+              permanentDeleteTour(deletePrompt.tour, deletePrompt.index);
+            }
+            setDeletePrompt(null);
+          }}
+          onCancel={() => setDeletePrompt(null)}
+        />
+      )}
+
       <SectionToggle title="Featured Tours" enabled={data.enabled} onChange={updEnabled} />
       <BackgroundColorPicker value={data.backgroundColor} onChange={(v) => set((p) => ({ ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, backgroundColor: v } } }))} />
       
@@ -1031,186 +1162,232 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
           </Button>
         </div>
 
-        {toursList.map((t, i) => (
-          <div key={i} className="relative rounded-lg border border-border p-5 pt-11 bg-card shadow-xs">
-            <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
-                <span className="text-xs font-semibold text-muted-foreground">
-                  Charter #{i + 1} {!t.enabled && '(Hidden)'}
-                </span>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={i === 0}
-                  onClick={() => moveTour(i, -1)}
-                  title="Move up"
-                >
-                  <ArrowUp className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={i === toursList.length - 1}
-                  onClick={() => moveTour(i, 1)}
-                  title="Move down"
-                >
-                  <ArrowDown className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                  onClick={() => rmTour(i)}
-                  title="Delete charter"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: t.enabled ? 1 : 0.5 }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showTitle !== false}
-                    onCheckedChange={(v) => updTour(i, 'showTitle', v)}
-                    disabled={!t.enabled}
-                    className="mt-8"
-                    title="Toggle Title On/Off"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Title" id={`t-title-${i}`}>
-                      <Input
-                        id={`t-title-${i}`}
-                        value={t.title}
-                        onChange={(e) => updTour(i, 'title', e.target.value)}
-                        disabled={!t.enabled || t.showTitle === false}
-                      />
-                    </FieldRow>
-                  </div>
+        {toursList.map((t, i) => {
+          const isDeleted = Boolean(t.deleted);
+          return (
+            <div
+              key={t.id || `tour-${i}`}
+              className={`relative rounded-lg border p-5 pt-11 transition-all ${
+                isDeleted
+                  ? 'border-dashed border-destructive/40 bg-muted/30 opacity-60'
+                  : 'border-border bg-card shadow-xs'
+              }`}
+            >
+              <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  {!isDeleted ? (
+                    <>
+                      <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Charter #{i + 1} {!t.enabled && '(Hidden)'}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded">
+                      <Trash2 className="h-3 w-3" /> Inactive / Soft-Deleted
+                    </span>
+                  )}
                 </div>
-
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showBadge !== false}
-                    onCheckedChange={(v) => updTour(i, 'showBadge', v)}
-                    disabled={!t.enabled}
-                    className="mt-8"
-                    title="Toggle Badge On/Off"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Badge" id={`t-badge-${i}`}>
-                      <Input
-                        id={`t-badge-${i}`}
-                        value={t.badge}
-                        onChange={(e) => updTour(i, 'badge', e.target.value)}
-                        disabled={!t.enabled || t.showBadge === false}
-                      />
-                    </FieldRow>
-                  </div>
-                </div>
-
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showDuration !== false}
-                    onCheckedChange={(v) => updTour(i, 'showDuration', v)}
-                    disabled={!t.enabled}
-                    className="mt-8"
-                    title="Toggle Duration On/Off"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Duration (e.g. Guided 6 - 8 hours Tour)" id={`t-dur-${i}`}>
-                      <Input
-                        id={`t-dur-${i}`}
-                        value={t.duration}
-                        onChange={(e) => updTour(i, 'duration', e.target.value)}
-                        disabled={!t.enabled || t.showDuration === false}
-                      />
-                    </FieldRow>
-                  </div>
-                </div>
-
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showRating !== false}
-                    onCheckedChange={(v) => updTour(i, 'showRating', v)}
-                    disabled={!t.enabled}
-                    className="mt-8"
-                    title="Toggle Rating On/Off"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Rating (0–5)" id={`t-rating-${i}`}>
-                      <Input
-                        id={`t-rating-${i}`}
-                        type="number"
-                        min={0}
-                        max={5}
-                        step={0.1}
-                        value={t.rating}
-                        onChange={(e) => updTour(i, 'rating', parseFloat(e.target.value) || 0)}
-                        disabled={!t.enabled || t.showRating === false}
-                      />
-                    </FieldRow>
-                  </div>
+                <div className="flex items-center gap-0.5">
+                  {!isDeleted ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        disabled={i === 0}
+                        onClick={() => moveTour(i, -1)}
+                        title="Move up"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        disabled={i === toursList.length - 1}
+                        onClick={() => moveTour(i, 1)}
+                        title="Move down"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeletePrompt({ type: 'soft', tour: t, index: i })}
+                        title="Soft delete charter (move to inactive)"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => restoreTour(t, i)}
+                        title="Restore charter"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" /> Restore
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => setDeletePrompt({ type: 'permanent', tour: t, index: i })}
+                        title="Permanently delete charter"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete Forever
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
+              <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: isDeleted ? 0.6 : t.enabled ? 1 : 0.5 }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showTitle !== false}
+                      onCheckedChange={(v) => updTour(i, 'showTitle', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Title On/Off"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Title" id={`t-title-${i}`}>
+                        <Input
+                          id={`t-title-${i}`}
+                          value={t.title}
+                          onChange={(e) => updTour(i, 'title', e.target.value)}
+                          disabled={!t.enabled || isDeleted || t.showTitle === false}
+                          className={isDeleted ? 'line-through text-muted-foreground' : ''}
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showPrice !== false}
-                    onCheckedChange={(v) => updTour(i, 'showPrice', v)}
-                    disabled={!t.enabled}
-                    className="mt-8"
-                    title="Toggle Pricing On/Off"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Price Text" id={`t-price-${i}`}>
-                      <Input
-                        id={`t-price-${i}`}
-                        value={t.price || ''}
-                        placeholder="Contact for pricing"
-                        onChange={(e) => updTour(i, 'price', e.target.value)}
-                        disabled={!t.enabled || t.showPrice === false}
-                      />
-                    </FieldRow>
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showBadge !== false}
+                      onCheckedChange={(v) => updTour(i, 'showBadge', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Badge On/Off"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Badge" id={`t-badge-${i}`}>
+                        <Input
+                          id={`t-badge-${i}`}
+                          value={t.badge}
+                          onChange={(e) => updTour(i, 'badge', e.target.value)}
+                          disabled={!t.enabled || isDeleted || t.showBadge === false}
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showDuration !== false}
+                      onCheckedChange={(v) => updTour(i, 'showDuration', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Duration On/Off"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Duration (e.g. Guided 6 - 8 hours Tour)" id={`t-dur-${i}`}>
+                        <Input
+                          id={`t-dur-${i}`}
+                          value={t.duration}
+                          onChange={(e) => updTour(i, 'duration', e.target.value)}
+                          disabled={!t.enabled || isDeleted || t.showDuration === false}
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showRating !== false}
+                      onCheckedChange={(v) => updTour(i, 'showRating', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Rating On/Off"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Rating (0–5)" id={`t-rating-${i}`}>
+                        <Input
+                          id={`t-rating-${i}`}
+                          type="number"
+                          min={0}
+                          max={5}
+                          step={0.1}
+                          value={t.rating}
+                          onChange={(e) => updTour(i, 'rating', parseFloat(e.target.value) || 0)}
+                          disabled={!t.enabled || isDeleted || t.showRating === false}
+                        />
+                      </FieldRow>
+                    </div>
                   </div>
                 </div>
 
-                <FieldRow label="Custom URL (Leave blank for auto /tours/[slug])" id={`t-href-${i}`}>
-                  <Input id={`t-href-${i}`} value={t.href || ''} placeholder="/tours/..." onChange={(e) => updTour(i, 'href', e.target.value)} disabled={!t.enabled} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showPrice !== false}
+                      onCheckedChange={(v) => updTour(i, 'showPrice', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Pricing On/Off"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Price Text" id={`t-price-${i}`}>
+                        <Input
+                          id={`t-price-${i}`}
+                          value={t.price || ''}
+                          placeholder="Contact for pricing"
+                          onChange={(e) => updTour(i, 'price', e.target.value)}
+                          disabled={!t.enabled || isDeleted || t.showPrice === false}
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
+
+                  <FieldRow label="Custom URL (Leave blank for auto /tours/[slug])" id={`t-href-${i}`}>
+                    <Input id={`t-href-${i}`} value={t.href || ''} placeholder="/tours/..." onChange={(e) => updTour(i, 'href', e.target.value)} disabled={!t.enabled || isDeleted} />
+                  </FieldRow>
+                </div>
+                <FieldRow label="Tour Image" id={`t-img-${i}`}>
+                  <ImageUploaderField
+                    id={`t-img-${i}`}
+                    value={t.imageUrl}
+                    onChange={(url) => updTour(i, 'imageUrl', url)}
+                    folder="tours"
+                    placeholder="Upload or choose tour image..."
+                    disabled={!t.enabled || isDeleted}
+                  />
                 </FieldRow>
-              </div>
-              <FieldRow label="Tour Image" id={`t-img-${i}`}>
-                <ImageUploaderField
-                  id={`t-img-${i}`}
-                  value={t.imageUrl}
-                  onChange={(url) => updTour(i, 'imageUrl', url)}
-                  folder="tours"
-                  placeholder="Upload or choose tour image..."
-                  disabled={!t.enabled}
-                />
-              </FieldRow>
-              <FieldRow label="Description" id={`t-desc-${i}`}>
-                <textarea id={`t-desc-${i}`} rows={2} value={t.description}
-                  onChange={(e) => updTour(i, 'description', e.target.value)}
-                  disabled={!t.enabled}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50" />
-              </FieldRow>
+                <FieldRow label="Description" id={`t-desc-${i}`}>
+                  <textarea id={`t-desc-${i}`} rows={2} value={t.description}
+                    onChange={(e) => updTour(i, 'description', e.target.value)}
+                    disabled={!t.enabled || isDeleted}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50" />
+                </FieldRow>
 
-              <div className="rounded-md bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground border border-border/50">
-                Single charter deep page details (inclusions, itinerary, single-page carousel) are managed under <strong>{toursPageNavLabel} &rarr; {toursSectionLabel}</strong>.
+                <div className="rounded-md bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground border border-border/50">
+                  Single charter deep page details (inclusions, itinerary, single-page carousel) are managed under <strong>{toursPageNavLabel} &rarr; {toursSectionLabel}</strong>.
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -2036,6 +2213,8 @@ function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
   const currentToursPage = draft.toursPage || defaultConfig.toursPage!;
   const data = currentToursPage.tours;
+  const [deletePrompt, setDeletePrompt] = useState<{ type: 'soft' | 'permanent'; tour: TourItem; index: number } | null>(null);
+
   const homeLabel = PAGES.find((p) => p.id === 'home')?.label || 'Home';
   const homeToursSectionLabel = PAGES.find((p) => p.id === 'home')?.sections.find((s) => s.key === 'tours')?.label || draft.homepage?.tours?.title || 'Featured Tours';
 
@@ -2072,9 +2251,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
       tpItems[i] = { ...currentItem, [k]: v };
 
       if (!VISIBILITY_KEYS.has(k)) {
-        const hpIdx = hpItems.findIndex(
-          (t) => (t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title
-        );
+        const hpIdx = hpItems.findIndex((t, idx) => isTourMatch(t, currentItem, idx, i));
         if (hpIdx !== -1) {
           hpItems[hpIdx] = { ...hpItems[hpIdx], [k]: v };
         } else if (hpItems[i]) {
@@ -2089,30 +2266,54 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
       };
     });
 
-  const rmTour = (i: number) =>
+  const softDeleteTour = (targetTour: TourItem, targetIndex: number) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
       const hpItems = [...(p.homepage?.tours?.items || [])];
       const tpItems = [...(currentToursPage.tours?.items || [])];
 
-      const currentItem = tpItems[i];
-      if (!currentItem) return p;
-
-      const newTp = tpItems.filter((_, idx) => idx !== i);
-      const newHp = hpItems.filter(
-        (t) => !((t.id && t.id === currentItem.id) || (t.slug && t.slug === currentItem.slug) || t.title === currentItem.title)
-      );
+      const markSoftDeleted = (t: TourItem, idx: number) =>
+        isTourMatch(t, targetTour, idx, targetIndex)
+          ? { ...t, deleted: true, enabled: false, deletedAt: new Date().toISOString() }
+          : t;
 
       return {
         ...p,
-        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: newHp } },
-        toursPage: {
-          ...currentToursPage,
-          tours: {
-            ...currentToursPage.tours,
-            items: newTp,
-          },
-        },
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.map(markSoftDeleted) } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.map(markSoftDeleted) } },
+      };
+    });
+
+  const restoreTour = (targetTour: TourItem, targetIndex: number) =>
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const markRestored = (t: TourItem, idx: number) =>
+        isTourMatch(t, targetTour, idx, targetIndex)
+          ? { ...t, deleted: false, enabled: true, deletedAt: undefined }
+          : t;
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.map(markRestored) } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.map(markRestored) } },
+      };
+    });
+
+  const permanentDeleteTour = (targetTour: TourItem, targetIndex: number) =>
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+
+      const notTarget = (t: TourItem, idx: number) => !isTourMatch(t, targetTour, idx, targetIndex);
+
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.filter(notTarget) } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.filter(notTarget) } },
       };
     });
 
@@ -2141,6 +2342,23 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 
   return (
     <div className="space-y-6">
+      {deletePrompt && (
+        <TourDeleteConfirmDialog
+          isOpen={true}
+          type={deletePrompt.type}
+          tourTitle={deletePrompt.tour.title}
+          onConfirm={() => {
+            if (deletePrompt.type === 'soft') {
+              softDeleteTour(deletePrompt.tour, deletePrompt.index);
+            } else {
+              permanentDeleteTour(deletePrompt.tour, deletePrompt.index);
+            }
+            setDeletePrompt(null);
+          }}
+          onCancel={() => setDeletePrompt(null)}
+        />
+      )}
+
       <SectionToggle title="Charters Listing Section" enabled={data.enabled} onChange={updEnabled} />
       <BackgroundColorPicker value={data.backgroundColor} onChange={(v) => set((p) => {
         const current = p.toursPage || defaultConfig.toursPage!;
@@ -2170,75 +2388,119 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
           <h4 className="text-sm font-semibold">Charter Packages ({data.items.length})</h4>
         </div>
 
-        {data.items.map((t, i) => (
-          <div key={i} className="relative rounded-lg border border-border p-5 pt-11 bg-card shadow-xs">
-            <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
-                <span className="text-xs font-semibold text-muted-foreground">
-                  Charter #{i + 1} {!t.enabled && '(Hidden)'}
-                </span>
-                <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                  Card info read-only
-                </span>
-              </div>
-              <div className="flex items-center gap-0.5">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={i === 0}
-                  onClick={() => moveTour(i, -1)}
-                  title="Move up"
-                >
-                  <ArrowUp className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={i === data.items.length - 1}
-                  onClick={() => moveTour(i, 1)}
-                  title="Move down"
-                >
-                  <ArrowDown className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                  onClick={() => rmTour(i)}
-                  title="Delete charter"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: t.enabled ? 1 : 0.5 }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showTitle !== false}
-                    onCheckedChange={(v) => updTour(i, 'showTitle', v)}
-                    disabled={!t.enabled}
-                    className="mt-8"
-                    title="Toggle Title On/Off on Listing Page"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Title" id={`tp-title-${i}`}>
-                      <Input id={`tp-title-${i}`} value={t.title} disabled={true} className="bg-muted/40 cursor-not-allowed" />
-                    </FieldRow>
-                  </div>
+        {data.items.map((t, i) => {
+          const isDeleted = Boolean(t.deleted);
+          return (
+            <div
+              key={t.id || `tpl-${i}`}
+              className={`relative rounded-lg border p-5 pt-11 transition-all ${
+                isDeleted
+                  ? 'border-dashed border-destructive/40 bg-muted/30 opacity-60'
+                  : 'border-border bg-card shadow-xs'
+              }`}
+            >
+              <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  {!isDeleted ? (
+                    <>
+                      <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Charter #{i + 1} {!t.enabled && '(Hidden)'}
+                      </span>
+                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                        Card info read-only
+                      </span>
+                    </>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded">
+                      <Trash2 className="h-3 w-3" /> Inactive / Soft-Deleted
+                    </span>
+                  )}
                 </div>
+                <div className="flex items-center gap-0.5">
+                  {!isDeleted ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        disabled={i === 0}
+                        onClick={() => moveTour(i, -1)}
+                        title="Move up"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        disabled={i === data.items.length - 1}
+                        onClick={() => moveTour(i, 1)}
+                        title="Move down"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeletePrompt({ type: 'soft', tour: t, index: i })}
+                        title="Soft delete charter (move to inactive)"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => restoreTour(t, i)}
+                        title="Restore charter"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" /> Restore
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => setDeletePrompt({ type: 'permanent', tour: t, index: i })}
+                        title="Permanently delete charter"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" /> Delete Forever
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: isDeleted ? 0.6 : t.enabled ? 1 : 0.5 }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showTitle !== false}
+                      onCheckedChange={(v) => updTour(i, 'showTitle', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Title On/Off on Listing Page"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Title" id={`tp-title-${i}`}>
+                        <Input id={`tp-title-${i}`} value={t.title} disabled={true} className={`bg-muted/40 cursor-not-allowed ${isDeleted ? 'line-through text-muted-foreground' : ''}`} />
+                      </FieldRow>
+                    </div>
+                  </div>
 
                 <div className="flex gap-2.5 items-start">
                   <Switch
                     checked={t.showBadge !== false}
                     onCheckedChange={(v) => updTour(i, 'showBadge', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle Badge On/Off on Listing Page"
                   />
@@ -2253,7 +2515,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <Switch
                     checked={t.showDuration !== false}
                     onCheckedChange={(v) => updTour(i, 'showDuration', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle Duration On/Off on Listing Page"
                   />
@@ -2268,7 +2530,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <Switch
                     checked={t.showRating !== false}
                     onCheckedChange={(v) => updTour(i, 'showRating', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle Rating On/Off on Listing Page"
                   />
@@ -2286,7 +2548,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <Switch
                     checked={t.showPrice !== false}
                     onCheckedChange={(v) => updTour(i, 'showPrice', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle Pricing On/Off on Listing Page"
                   />
@@ -2318,7 +2580,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
             </FieldRow>
 
             {/* Single Tour Page Details Accordion */}
-            <details open className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
+            <details open={!isDeleted} className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
               <summary className="cursor-pointer text-xs font-semibold text-foreground flex items-center justify-between select-none">
                 <span className="flex items-center gap-1.5 text-primary font-bold">
                   <Ship className="h-3.5 w-3.5" /> Single Charter Page Details (Overview, Included, Location, Info, Carousel)
@@ -2350,7 +2612,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                       onChange={(url) => updTour(i, 'heroImageUrl', url)}
                       folder="hero"
                       placeholder="Select hero background image (Optional)..."
-                      disabled={!t.enabled}
+                      disabled={!t.enabled || isDeleted}
                     />
                     <p className="text-[10px] text-muted-foreground mt-1">Optional hero backdrop image with dark ambient gradient overlay.</p>
                   </FieldRow>
@@ -2374,7 +2636,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                           const currentGallery = t.gallery && t.gallery.length > 0 ? t.gallery : [baseImg, baseImg, baseImg];
                           updTour(i, 'gallery', [...currentGallery, '/images/hero/hero.jpg']);
                         }}
-                        disabled={!t.enabled}
+                        disabled={!t.enabled || isDeleted}
                         className="gap-1.5 h-7 text-xs"
                       >
                         <Plus className="h-3 w-3" /> Add Carousel Photo
@@ -2415,7 +2677,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                                 onChange={updGalleryImg}
                                 folder="tours"
                                 placeholder="Choose carousel photo..."
-                                disabled={!t.enabled}
+                                disabled={!t.enabled || isDeleted}
                               />
                             </div>
                             <div className="flex items-center gap-0.5">
@@ -2424,7 +2686,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7"
-                                disabled={gIdx === 0 || !t.enabled}
+                                disabled={gIdx === 0 || !t.enabled || isDeleted}
                                 onClick={() => moveGalleryImg('up')}
                                 title="Move up"
                               >
@@ -2435,7 +2697,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7"
-                                disabled={gIdx === currentGallery.length - 1 || !t.enabled}
+                                disabled={gIdx === currentGallery.length - 1 || !t.enabled || isDeleted}
                                 onClick={() => moveGalleryImg('down')}
                                 title="Move down"
                               >
@@ -2446,7 +2708,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                                disabled={!t.enabled || currentGallery.length <= 1}
+                                disabled={!t.enabled || currentGallery.length <= 1 || isDeleted}
                                 onClick={removeGalleryImg}
                                 title="Delete photo"
                               >
@@ -2465,7 +2727,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                     <Switch
                       checked={t.showLocation !== false}
                       onCheckedChange={(v) => updTour(i, 'showLocation', v)}
-                      disabled={!t.enabled}
+                      disabled={!t.enabled || isDeleted}
                       className="mt-8"
                       title="Toggle Location Strip Text On/Off"
                     />
@@ -2476,7 +2738,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                           value={t.location || ''}
                           placeholder="e.g. Watamu Marine Park, Kilifi County"
                           onChange={(e) => updTour(i, 'location', e.target.value)}
-                          disabled={!t.enabled || t.showLocation === false}
+                          disabled={!t.enabled || isDeleted || t.showLocation === false}
                         />
                       </FieldRow>
                     </div>
@@ -2486,7 +2748,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                     <Switch
                       checked={t.showSchedule !== false}
                       onCheckedChange={(v) => updTour(i, 'showSchedule', v)}
-                      disabled={!t.enabled}
+                      disabled={!t.enabled || isDeleted}
                       className="mt-8"
                       title="Toggle Schedule Strip Text On/Off"
                     />
@@ -2497,7 +2759,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                           value={t.schedule || ''}
                           placeholder="e.g. Morning Slots (November To March)"
                           onChange={(e) => updTour(i, 'schedule', e.target.value)}
-                          disabled={!t.enabled || t.showSchedule === false}
+                          disabled={!t.enabled || isDeleted || t.showSchedule === false}
                         />
                       </FieldRow>
                     </div>
@@ -2507,7 +2769,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                     <Switch
                       checked={t.showGroupType !== false}
                       onCheckedChange={(v) => updTour(i, 'showGroupType', v)}
-                      disabled={!t.enabled}
+                      disabled={!t.enabled || isDeleted}
                       className="mt-8"
                       title="Toggle Group Suitability Text On/Off"
                     />
@@ -2518,7 +2780,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                           value={t.groupType || ''}
                           placeholder="e.g. Families · Private · Groups"
                           onChange={(e) => updTour(i, 'groupType', e.target.value)}
-                          disabled={!t.enabled || t.showGroupType === false}
+                          disabled={!t.enabled || isDeleted || t.showGroupType === false}
                         />
                       </FieldRow>
                     </div>
@@ -2532,7 +2794,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                     value={t.overview || ''}
                     placeholder="Full detailed narrative description for the single tour page..."
                     onChange={(e) => updTour(i, 'overview', e.target.value)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
                   />
                 </FieldRow>
@@ -2541,7 +2803,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <Switch
                     checked={t.showIncluded !== false}
                     onCheckedChange={(v) => updTour(i, 'showIncluded', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle What's Included On/Off"
                   />
@@ -2562,7 +2824,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                               .filter(Boolean)
                           )
                         }
-                        disabled={!t.enabled || t.showIncluded === false}
+                        disabled={!t.enabled || isDeleted || t.showIncluded === false}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                       />
                     </FieldRow>
@@ -2573,7 +2835,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <Switch
                     checked={t.showNotIncluded !== false}
                     onCheckedChange={(v) => updTour(i, 'showNotIncluded', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle What's Not Included On/Off"
                   />
@@ -2594,7 +2856,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                               .filter(Boolean)
                           )
                         }
-                        disabled={!t.enabled || t.showNotIncluded === false}
+                        disabled={!t.enabled || isDeleted || t.showNotIncluded === false}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                       />
                     </FieldRow>
@@ -2605,7 +2867,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <Switch
                     checked={t.showWhyChoose !== false}
                     onCheckedChange={(v) => updTour(i, 'showWhyChoose', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle Why Choose This Tour On/Off"
                   />
@@ -2626,7 +2888,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                               .filter(Boolean)
                           )
                         }
-                        disabled={!t.enabled || t.showWhyChoose === false}
+                        disabled={!t.enabled || isDeleted || t.showWhyChoose === false}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                       />
                     </FieldRow>
@@ -2637,7 +2899,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <Switch
                     checked={t.showKnowBeforeYouGo !== false}
                     onCheckedChange={(v) => updTour(i, 'showKnowBeforeYouGo', v)}
-                    disabled={!t.enabled}
+                    disabled={!t.enabled || isDeleted}
                     className="mt-8"
                     title="Toggle Know Before You Go On/Off"
                   />
@@ -2658,7 +2920,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                               .filter(Boolean)
                           )
                         }
-                        disabled={!t.enabled || t.showKnowBeforeYouGo === false}
+                        disabled={!t.enabled || isDeleted || t.showKnowBeforeYouGo === false}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                       />
                     </FieldRow>
@@ -2676,7 +2938,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                         value={t.metaTitle || ''}
                         placeholder={t.title ? `${t.title} | Sea Smoke Fishing Club` : 'e.g. Marlin Safari | Sea Smoke'}
                         onChange={(e) => updTour(i, 'metaTitle', e.target.value)}
-                        disabled={!t.enabled}
+                        disabled={!t.enabled || isDeleted}
                       />
                     </FieldRow>
                     <FieldRow label="Meta Description (Optional)" id={`tp-mdesc-${i}`}>
@@ -2686,7 +2948,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                         value={t.metaDescription || ''}
                         placeholder="Overrides default meta description for this single charter page..."
                         onChange={(e) => updTour(i, 'metaDescription', e.target.value)}
-                        disabled={!t.enabled}
+                        disabled={!t.enabled || isDeleted}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
                       />
                     </FieldRow>
@@ -2696,10 +2958,11 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
             </details>
           </div>
         </div>
-      ))}
+      );
+    })}
     </div>
-    </div>
-  );
+  </div>
+);
 }
 
 function ToursBookingFormEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {

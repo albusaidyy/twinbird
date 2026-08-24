@@ -44,7 +44,7 @@ export function ToursHeroCarousel({
 
   if (!hero || hero.enabled === false) return null;
 
-  const validTours = tours.filter((t) => t.enabled !== false);
+  const validTours = (tours || []).filter((t) => t.enabled !== false && !t.deleted);
   const carouselItems = validTours.length > 0
     ? validTours
     : [

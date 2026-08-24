@@ -23,10 +23,10 @@ export default function SingleTourPage({
   const { primaryColor, accentColor, appName, logoUrl } = config.branding;
 
   const toursPage = config.toursPage || defaultConfig.toursPage!;
-  const allTours = toursPage.tours.items;
+  const allTours = (toursPage.tours?.items || []).filter((t) => !t.deleted);
 
-  // Resolve matching tour or fallback to first tour
-  const tour = findTourBySlug(allTours, resolvedParams.slug) || allTours[0];
+  // Resolve matching tour
+  const tour = findTourBySlug(allTours, resolvedParams.slug);
 
   if (!tour) {
     return (

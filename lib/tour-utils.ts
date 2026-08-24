@@ -19,6 +19,7 @@ export function getTourSlug(tour: TourItem): string {
 export function findTourBySlug(tours: TourItem[], slug: string): TourItem | undefined {
   const decodedSlug = decodeURIComponent(slug).toLowerCase().trim();
   return tours.find((t) => {
+    if (t.deleted) return false;
     const tSlug = getTourSlug(t);
     return tSlug === decodedSlug || slugifyTour(t.title) === decodedSlug;
   });

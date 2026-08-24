@@ -59,7 +59,7 @@ function StatsBar({ data, primaryColor }: { data: { enabled: boolean; background
 // ─── Featured Tours ───────────────────────────────────────────────────────────
 function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<TourItem>; primaryColor: string; accentColor: string }) {
   if (!data.enabled) return null;
-  const visibleTours = data.items.filter(t => t.enabled);
+  const visibleTours = data.items.filter((t) => t.enabled && !t.deleted);
   if (visibleTours.length === 0) return null;
 
   const isDark = isColorDark(data.backgroundColor);
@@ -114,12 +114,11 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<
               >
                 <Link href={targetHref} className="block relative h-52 overflow-hidden">
                   <Image
-                    src={tour.imageUrl}
-                    alt={tour.title}
+                    src={tour.imageUrl || '/images/hero/hero.jpg'}
+                    alt={tour.title || 'Fishing Charter'}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    priority={true}
                   />
                   {canShowBadge && (
                     <span
@@ -442,7 +441,14 @@ function Gallery({ data, primaryColor }: { data: { enabled: boolean; backgroundC
           {displayItems.map((item, i) => {
             return (
               <div key={i} className="relative shrink-0 w-[80vw] md:w-[calc(50%-0.75rem)] lg:w-[calc(100%/3-1rem)] aspect-[3/4] max-h-[450px] snap-center rounded-2xl overflow-hidden group select-none">
-                <Image src={item.imageUrl} alt={item.caption} fill sizes="(max-width: 768px) 80vw, (max-width: 1024px) 50vw, 33vw" className="object-cover pointer-events-none" draggable={false} />
+                <Image
+                  src={item.imageUrl || '/images/hero/hero.jpg'}
+                  alt={item.caption || 'Catch photo'}
+                  fill
+                  sizes="(max-width: 768px) 80vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover pointer-events-none"
+                  draggable={false}
+                />
               </div>
             );
           })}
@@ -538,9 +544,7 @@ export default function HomePage() {
     switch (key) {
       case 'stats':   return <StatsBar key={key} data={hp.stats} primaryColor={primaryColor} />;
       case 'tours': {
-        const charterItems = (config.toursPage?.tours?.items && config.toursPage.tours.items.length > 0)
-          ? config.toursPage.tours.items
-          : (hp.tours?.items || defaultConfig.toursPage!.tours.items);
+        const charterItems = hp.tours?.items || [];
         return <FeaturedTours key={key} data={{ ...hp.tours, items: charterItems }} primaryColor={primaryColor} accentColor={accentColor} />;
       }
       case 'whyus':   return <WhyUs key={key} data={hp.whyUs} primaryColor={primaryColor} accentColor={accentColor} fallbackImageUrl={hp.hero.imageUrl} />;

@@ -14,7 +14,7 @@ export default function ContactPage() {
   
   const contactPage = config.contactPage || defaultConfig.contactPage;
   const charterItems = config.toursPage?.tours?.items || config.homepage.tours.items;
-  const tourNames = charterItems.filter(t => t.enabled).map(t => t.title);
+  const tourNames = charterItems.filter(t => t.enabled && !t.deleted).map(t => t.title);
   const subjects = ['General Inquiry', ...tourNames, 'Feedback'];
 
   return (

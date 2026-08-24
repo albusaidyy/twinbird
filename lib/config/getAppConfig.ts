@@ -44,27 +44,55 @@ export async function getAppConfig(): Promise<AppConfig> {
       });
     };
 
+    const hasSavedHpItems = Array.isArray(savedConfig.homepage?.tours?.items) && (savedConfig.homepage!.tours!.items!.length > 0);
+    const hasSavedTpItems = Array.isArray(savedConfig.toursPage?.tours?.items) && (savedConfig.toursPage!.tours!.items!.length > 0);
+
     const savedHpItems = sanitizeTours(savedConfig.homepage?.tours?.items);
     const savedTpItems = sanitizeTours(savedConfig.toursPage?.tours?.items);
-    const fallbackItems = defaultConfig.toursPage!.tours.items;
+    const fallbackItems = defaultConfig.homepage?.tours?.items || defaultConfig.toursPage?.tours?.items || [];
 
-    // Map of latest content values keyed by id, slug, or title
-    const contentMap = new Map<string, TourItem>();
-    const allItems = [...fallbackItems, ...(savedHpItems || []), ...(savedTpItems || [])];
-    for (const item of allItems) {
+    // The primary source of truth for the tours list is homepage.tours.items (Featured Tours).
+    // If no DB items exist yet, fall back to the defaults.
+    const rawBaseTours: TourItem[] = hasSavedHpItems
+      ? (savedHpItems || [])
+      : hasSavedTpItems
+      ? (savedTpItems || [])
+      : fallbackItems;
+
+    // Strip permanently-deleted items from the canonical list.
+    // Soft-deleted items are kept (they show as inactive in admin, hidden to public via filter).
+    const baseToursList: TourItem[] = rawBaseTours.filter((t) => !t.deleted);
+
+    // Map of single-charter deep page details from toursPage (and fallback defaults)
+    const pageDetailsMap = new Map<string, TourItem>();
+    const allDetailSources = [...fallbackItems, ...(savedTpItems || []), ...(savedHpItems || [])];
+    for (const item of allDetailSources) {
       const key = item.id || item.slug || item.title;
       if (key) {
-        contentMap.set(key, { ...(contentMap.get(key) || {}), ...item });
+        pageDetailsMap.set(key, { ...(pageDetailsMap.get(key) || {}), ...item });
       }
     }
 
-    const homepageTours = (savedHpItems || fallbackItems).map((item) => {
+    // Both homepage tours and listing tours stem from the base tours list,
+    // with listing tours fed the full single-charter page details.
+    const enrichTour = (item: TourItem): TourItem => {
       const key = item.id || item.slug || item.title;
-      const latestContent = key ? contentMap.get(key) : null;
+      const deepDetails = key ? pageDetailsMap.get(key) : null;
       return {
         ...item,
-        ...(latestContent || {}),
+        ...(deepDetails || {}),
+        // Retain card-level values from the base tour item
+        title: item.title,
+        badge: item.badge ?? deepDetails?.badge ?? '',
+        price: item.price !== undefined ? item.price : deepDetails?.price,
+        priceLabel: item.priceLabel !== undefined ? item.priceLabel : deepDetails?.priceLabel,
+        rating: item.rating !== undefined ? item.rating : (deepDetails?.rating ?? 5),
+        duration: item.duration ?? deepDetails?.duration ?? '',
+        imageUrl: item.imageUrl || deepDetails?.imageUrl || '/images/hero/hero.jpg',
+        description: item.description ?? deepDetails?.description ?? '',
         enabled: item.enabled !== undefined ? item.enabled : true,
+        deleted: item.deleted !== undefined ? item.deleted : deepDetails?.deleted !== undefined ? deepDetails.deleted : false,
+        deletedAt: item.deletedAt || deepDetails?.deletedAt,
         showTitle: item.showTitle !== undefined ? item.showTitle : true,
         showBadge: item.showBadge !== undefined ? item.showBadge : true,
         showDuration: item.showDuration !== undefined ? item.showDuration : true,
@@ -78,29 +106,10 @@ export async function getAppConfig(): Promise<AppConfig> {
         showWhyChoose: item.showWhyChoose !== undefined ? item.showWhyChoose : true,
         showKnowBeforeYouGo: item.showKnowBeforeYouGo !== undefined ? item.showKnowBeforeYouGo : true,
       };
-    });
+    };
 
-    const listingTours = (savedTpItems || fallbackItems).map((item) => {
-      const key = item.id || item.slug || item.title;
-      const latestContent = key ? contentMap.get(key) : null;
-      return {
-        ...item,
-        ...(latestContent || {}),
-        enabled: item.enabled !== undefined ? item.enabled : true,
-        showTitle: item.showTitle !== undefined ? item.showTitle : true,
-        showBadge: item.showBadge !== undefined ? item.showBadge : true,
-        showDuration: item.showDuration !== undefined ? item.showDuration : true,
-        showRating: item.showRating !== undefined ? item.showRating : true,
-        showPrice: item.showPrice !== undefined ? item.showPrice : true,
-        showLocation: item.showLocation !== undefined ? item.showLocation : true,
-        showSchedule: item.showSchedule !== undefined ? item.showSchedule : true,
-        showGroupType: item.showGroupType !== undefined ? item.showGroupType : true,
-        showIncluded: item.showIncluded !== undefined ? item.showIncluded : true,
-        showNotIncluded: item.showNotIncluded !== undefined ? item.showNotIncluded : true,
-        showWhyChoose: item.showWhyChoose !== undefined ? item.showWhyChoose : true,
-        showKnowBeforeYouGo: item.showKnowBeforeYouGo !== undefined ? item.showKnowBeforeYouGo : true,
-      };
-    });
+    const homepageTours = baseToursList.map(enrichTour);
+    const listingTours = baseToursList.map(enrichTour);
 
     // Merge with defaults so new page sections like toursPage are present
     const mergedConfig: AppConfig = {

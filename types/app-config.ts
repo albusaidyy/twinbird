@@ -60,6 +60,8 @@ export interface TourItem {
   id?: string;
   slug?: string;
   enabled: boolean;
+  deleted?: boolean;
+  deletedAt?: string;
   title: string;
   showTitle?: boolean;
   badge: string;
