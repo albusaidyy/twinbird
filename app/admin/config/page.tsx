@@ -1185,46 +1185,29 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
 
   const updEnabled = (v: boolean) => set((p) => ({ ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, enabled: v } } }));
 
-  const VISIBILITY_KEYS = new Set([
-    'enabled',
-    'showTitle',
-    'showBadge',
-    'showDuration',
-    'showRating',
-    'showPrice',
-    'showLocation',
-    'showSchedule',
-    'showGroupType',
-    'showIncluded',
-    'showNotIncluded',
-    'showWhyChoose',
-    'showKnowBeforeYouGo',
-  ]);
-
   const updTour = (i: number, k: keyof TourItem, v: string | number | boolean | string[]) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
-      const hpItems = [...(p.homepage?.tours?.items || [])];
-      const tpItems = [...(currentToursPage.tours?.items || [])];
+      const currentTours = currentToursPage.tours || defaultConfig.toursPage!.tours;
+      const hpItems = [...(p.homepage?.tours?.items || defaultConfig.homepage.tours.items)];
+      const tpItems = [...(currentTours.items || defaultConfig.toursPage!.tours.items)];
 
       const currentItem = hpItems[i];
       if (!currentItem) return p;
 
       hpItems[i] = { ...currentItem, [k]: v };
 
-      if (!VISIBILITY_KEYS.has(k)) {
-        const tpIdx = tpItems.findIndex((t, idx) => isTourMatch(t, currentItem, idx, i));
-        if (tpIdx !== -1) {
-          tpItems[tpIdx] = { ...tpItems[tpIdx], [k]: v };
-        } else if (tpItems[i]) {
-          tpItems[i] = { ...tpItems[i], [k]: v };
-        }
+      const tpIdx = tpItems.findIndex((t, idx) => isTourMatch(t, currentItem, idx, i));
+      if (tpIdx !== -1) {
+        tpItems[tpIdx] = { ...tpItems[tpIdx], [k]: v };
+      } else if (tpItems[i]) {
+        tpItems[i] = { ...tpItems[i], [k]: v };
       }
 
       return {
         ...p,
-        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems } },
-        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems } },
+        homepage: { ...p.homepage, tours: { ...(p.homepage?.tours || defaultConfig.homepage.tours), items: hpItems } },
+        toursPage: { ...currentToursPage, tours: { ...currentTours, items: tpItems } },
       };
     });
 
@@ -2052,6 +2035,24 @@ export default function AdminConfigPage() {
     
     // Clean up empty options in select fields before saving
     const cleanedDraft = JSON.parse(JSON.stringify(draft)) as AppConfig;
+
+    const deduplicateList = (items?: TourItem[]) => {
+      if (!items) return items;
+      const seen = new Set<string>();
+      return items.filter((item, idx) => {
+        const key = item.id || item.slug || (item.title ? item.title.trim().toLowerCase() : `t-${idx}`);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
+
+    if (cleanedDraft.homepage?.tours?.items) {
+      cleanedDraft.homepage.tours.items = deduplicateList(cleanedDraft.homepage.tours.items)!;
+    }
+    if (cleanedDraft.toursPage?.tours?.items) {
+      cleanedDraft.toursPage.tours.items = deduplicateList(cleanedDraft.toursPage.tours.items)!;
+    }
     
     if (cleanedDraft.toursPage?.bookingForm?.fields) {
       cleanedDraft.toursPage.bookingForm.fields.forEach(f => {
@@ -2575,7 +2576,8 @@ function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 
 function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
   const currentToursPage = draft.toursPage || defaultConfig.toursPage!;
-  const data = currentToursPage.tours;
+  const data = currentToursPage.tours || defaultConfig.toursPage!.tours;
+  const toursList = data.items || [];
   const [deletePrompt, setDeletePrompt] = useState<{ type: 'soft' | 'permanent'; tour: TourItem; index: number } | null>(null);
 
   const homeLabel = PAGES.find((p) => p.id === 'home')?.label || 'Home';
@@ -2583,57 +2585,42 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 
   const updEnabled = (v: boolean) => set((p) => {
     const current = p.toursPage || defaultConfig.toursPage!;
-    return { ...p, toursPage: { ...current, tours: { ...current.tours, enabled: v } } };
+    const currentTours = current.tours || defaultConfig.toursPage!.tours;
+    return { ...p, toursPage: { ...current, tours: { ...currentTours, enabled: v } } };
   });
-
-  const VISIBILITY_KEYS = new Set([
-    'enabled',
-    'showTitle',
-    'showBadge',
-    'showDuration',
-    'showRating',
-    'showPrice',
-    'showLocation',
-    'showSchedule',
-    'showGroupType',
-    'showIncluded',
-    'showNotIncluded',
-    'showWhyChoose',
-    'showKnowBeforeYouGo',
-  ]);
 
   const updTour = (i: number, k: keyof TourItem, v: string | number | boolean | string[]) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
-      const hpItems = [...(p.homepage?.tours?.items || [])];
-      const tpItems = [...(currentToursPage.tours?.items || [])];
+      const currentTours = currentToursPage.tours || defaultConfig.toursPage!.tours;
+      const hpItems = [...(p.homepage?.tours?.items || defaultConfig.homepage.tours.items)];
+      const tpItems = [...(currentTours.items || defaultConfig.toursPage!.tours.items)];
 
       const currentItem = tpItems[i];
       if (!currentItem) return p;
 
       tpItems[i] = { ...currentItem, [k]: v };
 
-      if (!VISIBILITY_KEYS.has(k)) {
-        const hpIdx = hpItems.findIndex((t, idx) => isTourMatch(t, currentItem, idx, i));
-        if (hpIdx !== -1) {
-          hpItems[hpIdx] = { ...hpItems[hpIdx], [k]: v };
-        } else if (hpItems[i]) {
-          hpItems[i] = { ...hpItems[i], [k]: v };
-        }
+      const hpIdx = hpItems.findIndex((t, idx) => isTourMatch(t, currentItem, idx, i));
+      if (hpIdx !== -1) {
+        hpItems[hpIdx] = { ...hpItems[hpIdx], [k]: v };
+      } else if (hpItems[i]) {
+        hpItems[i] = { ...hpItems[i], [k]: v };
       }
 
       return {
         ...p,
-        homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems } },
-        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems } },
+        homepage: { ...p.homepage, tours: { ...(p.homepage?.tours || defaultConfig.homepage.tours), items: hpItems } },
+        toursPage: { ...currentToursPage, tours: { ...currentTours, items: tpItems } },
       };
     });
 
   const softDeleteTour = (targetTour: TourItem, targetIndex: number) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
-      const hpItems = [...(p.homepage?.tours?.items || [])];
-      const tpItems = [...(currentToursPage.tours?.items || [])];
+      const currentTours = currentToursPage.tours || defaultConfig.toursPage!.tours;
+      const hpItems = [...(p.homepage?.tours?.items || defaultConfig.homepage.tours.items)];
+      const tpItems = [...(currentTours.items || defaultConfig.toursPage!.tours.items)];
 
       const markSoftDeleted = (t: TourItem, idx: number) =>
         isTourMatch(t, targetTour, idx, targetIndex)
@@ -2643,15 +2630,16 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
       return {
         ...p,
         homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.map(markSoftDeleted) } },
-        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.map(markSoftDeleted) } },
+        toursPage: { ...currentToursPage, tours: { ...currentTours, items: tpItems.map(markSoftDeleted) } },
       };
     });
 
   const restoreTour = (targetTour: TourItem, targetIndex: number) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
-      const hpItems = [...(p.homepage?.tours?.items || [])];
-      const tpItems = [...(currentToursPage.tours?.items || [])];
+      const currentTours = currentToursPage.tours || defaultConfig.toursPage!.tours;
+      const hpItems = [...(p.homepage?.tours?.items || defaultConfig.homepage.tours.items)];
+      const tpItems = [...(currentTours.items || defaultConfig.toursPage!.tours.items)];
 
       const markRestored = (t: TourItem, idx: number) =>
         isTourMatch(t, targetTour, idx, targetIndex)
@@ -2661,29 +2649,31 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
       return {
         ...p,
         homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.map(markRestored) } },
-        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.map(markRestored) } },
+        toursPage: { ...currentToursPage, tours: { ...currentTours, items: tpItems.map(markRestored) } },
       };
     });
 
   const permanentDeleteTour = (targetTour: TourItem, targetIndex: number) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
-      const hpItems = [...(p.homepage?.tours?.items || [])];
-      const tpItems = [...(currentToursPage.tours?.items || [])];
+      const currentTours = currentToursPage.tours || defaultConfig.toursPage!.tours;
+      const hpItems = [...(p.homepage?.tours?.items || defaultConfig.homepage.tours.items)];
+      const tpItems = [...(currentTours.items || defaultConfig.toursPage!.tours.items)];
 
       const notTarget = (t: TourItem, idx: number) => !isTourMatch(t, targetTour, idx, targetIndex);
 
       return {
         ...p,
         homepage: { ...p.homepage, tours: { ...p.homepage.tours, items: hpItems.filter(notTarget) } },
-        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: tpItems.filter(notTarget) } },
+        toursPage: { ...currentToursPage, tours: { ...currentTours, items: tpItems.filter(notTarget) } },
       };
     });
 
   const moveTour = (i: number, dir: -1 | 1) =>
     set((p) => {
       const current = p.toursPage || defaultConfig.toursPage!;
-      const tpItems = [...(current.tours?.items || [])];
+      const currentTours = current.tours || defaultConfig.toursPage!.tours;
+      const tpItems = [...(currentTours.items || defaultConfig.toursPage!.tours.items)];
       const target = i + dir;
       if (target < 0 || target >= tpItems.length) return p;
 
@@ -2696,7 +2686,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
         toursPage: {
           ...current,
           tours: {
-            ...current.tours,
+            ...currentTours,
             items: tpItems,
           },
         },
@@ -2748,10 +2738,10 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold">Charter Packages ({data.items.length})</h4>
+          <h4 className="text-sm font-semibold">Charter Packages ({toursList.length})</h4>
         </div>
 
-        {data.items.map((t, i) => {
+        {toursList.map((t, i) => {
           const isDeleted = Boolean(t.deleted);
           return (
             <div
@@ -2799,7 +2789,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7"
-                        disabled={i === data.items.length - 1}
+                        disabled={i === toursList.length - 1}
                         onClick={() => moveTour(i, 1)}
                         title="Move down"
                       >
@@ -2854,93 +2844,134 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                     />
                     <div className="flex-1">
                       <FieldRow label="Title" id={`tp-title-${i}`}>
-                        <Input id={`tp-title-${i}`} value={t.title} disabled={true} className={`bg-muted/40 cursor-not-allowed ${isDeleted ? 'line-through text-muted-foreground' : ''}`} />
+                        <Input
+                          id={`tp-title-${i}`}
+                          value={t.title}
+                          disabled={true}
+                          className={`bg-muted/40 cursor-not-allowed ${isDeleted ? 'line-through text-muted-foreground' : ''}`}
+                        />
                       </FieldRow>
                     </div>
                   </div>
 
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showBadge !== false}
-                    onCheckedChange={(v) => updTour(i, 'showBadge', v)}
-                    disabled={!t.enabled || isDeleted}
-                    className="mt-8"
-                    title="Toggle Badge On/Off on Listing Page"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Badge" id={`tp-badge-${i}`}>
-                      <Input id={`tp-badge-${i}`} value={t.badge} disabled={true} className="bg-muted/40 cursor-not-allowed" />
-                    </FieldRow>
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showBadge !== false}
+                      onCheckedChange={(v) => updTour(i, 'showBadge', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Badge On/Off on Listing Page"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Badge" id={`tp-badge-${i}`}>
+                        <Input
+                          id={`tp-badge-${i}`}
+                          value={t.badge || ''}
+                          disabled={true}
+                          className="bg-muted/40 cursor-not-allowed"
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showDuration !== false}
+                      onCheckedChange={(v) => updTour(i, 'showDuration', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Duration On/Off on Listing Page"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Duration" id={`tp-dur-${i}`}>
+                        <Input
+                          id={`tp-dur-${i}`}
+                          value={t.duration || ''}
+                          disabled={true}
+                          className="bg-muted/40 cursor-not-allowed"
+                        />
+                      </FieldRow>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showRating !== false}
+                      onCheckedChange={(v) => updTour(i, 'showRating', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Rating On/Off on Listing Page"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Rating (0–5)" id={`tp-rating-${i}`}>
+                        <Input
+                          id={`tp-rating-${i}`}
+                          type="number"
+                          min={0}
+                          max={5}
+                          step={0.1}
+                          value={t.rating}
+                          disabled={true}
+                          className="bg-muted/40 cursor-not-allowed"
+                        />
+                      </FieldRow>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showDuration !== false}
-                    onCheckedChange={(v) => updTour(i, 'showDuration', v)}
-                    disabled={!t.enabled || isDeleted}
-                    className="mt-8"
-                    title="Toggle Duration On/Off on Listing Page"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Duration" id={`tp-dur-${i}`}>
-                      <Input id={`tp-dur-${i}`} value={t.duration} disabled={true} className="bg-muted/40 cursor-not-allowed" />
-                    </FieldRow>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex gap-2.5 items-start">
+                    <Switch
+                      checked={t.showPrice !== false}
+                      onCheckedChange={(v) => updTour(i, 'showPrice', v)}
+                      disabled={!t.enabled || isDeleted}
+                      className="mt-8"
+                      title="Toggle Pricing On/Off on Listing Page"
+                    />
+                    <div className="flex-1">
+                      <FieldRow label="Price Text" id={`tp-price-${i}`}>
+                        <Input
+                          id={`tp-price-${i}`}
+                          value={t.price || ''}
+                          placeholder="Contact for pricing"
+                          disabled={true}
+                          className="bg-muted/40 cursor-not-allowed"
+                        />
+                      </FieldRow>
+                    </div>
                   </div>
+
+                  <FieldRow label="Custom URL" id={`tp-href-${i}`}>
+                    <Input
+                      id={`tp-href-${i}`}
+                      value={t.href || ''}
+                      placeholder="/tours/..."
+                      disabled={true}
+                      className="bg-muted/40 cursor-not-allowed"
+                    />
+                  </FieldRow>
                 </div>
 
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showRating !== false}
-                    onCheckedChange={(v) => updTour(i, 'showRating', v)}
-                    disabled={!t.enabled || isDeleted}
-                    className="mt-8"
-                    title="Toggle Rating On/Off on Listing Page"
+                <FieldRow label="Charter Card & Gallery Main Image" id={`tp-img-${i}`}>
+                  <ImageUploaderField
+                    id={`tp-img-${i}`}
+                    value={t.imageUrl}
+                    onChange={(url) => updTour(i, 'imageUrl', url)}
+                    folder="tours"
+                    placeholder="Cover photo..."
+                    disabled={true}
                   />
-                  <div className="flex-1">
-                    <FieldRow label="Rating (0–5)" id={`tp-rating-${i}`}>
-                      <Input id={`tp-rating-${i}`} type="number" min={0} max={5} step={0.1}
-                        value={t.rating} disabled={true} className="bg-muted/40 cursor-not-allowed" />
-                    </FieldRow>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex gap-2.5 items-start">
-                  <Switch
-                    checked={t.showPrice !== false}
-                    onCheckedChange={(v) => updTour(i, 'showPrice', v)}
-                    disabled={!t.enabled || isDeleted}
-                    className="mt-8"
-                    title="Toggle Pricing On/Off on Listing Page"
-                  />
-                  <div className="flex-1">
-                    <FieldRow label="Price Text" id={`tp-price-${i}`}>
-                      <Input id={`tp-price-${i}`} value={t.price || ''} placeholder="Contact for pricing" disabled={true} className="bg-muted/40 cursor-not-allowed" />
-                    </FieldRow>
-                  </div>
-                </div>
-
-                <FieldRow label="Custom URL" id={`tp-href-${i}`}>
-                  <Input id={`tp-href-${i}`} value={t.href || ''} placeholder="/tours/..." disabled={true} className="bg-muted/40 cursor-not-allowed" />
                 </FieldRow>
-              </div>
-            <FieldRow label="Charter Card & Gallery Main Image" id={`tp-img-${i}`}>
-              <ImageUploaderField
-                id={`tp-img-${i}`}
-                value={t.imageUrl}
-                onChange={(url) => updTour(i, 'imageUrl', url)}
-                folder="tours"
-                placeholder="Cover photo..."
-                disabled={true}
-              />
-            </FieldRow>
-            <FieldRow label="Card Short Description" id={`tp-desc-${i}`}>
-              <textarea id={`tp-desc-${i}`} rows={2} value={t.description}
-                disabled={true}
-                className="w-full rounded-md border border-input bg-muted/40 px-3 py-2 text-sm shadow-sm resize-none disabled:opacity-75 cursor-not-allowed" />
-            </FieldRow>
+
+                <FieldRow label="Card Short Description" id={`tp-desc-${i}`}>
+                  <textarea
+                    id={`tp-desc-${i}`}
+                    rows={2}
+                    value={t.description}
+                    disabled={true}
+                    className="w-full rounded-md border border-input bg-muted/40 px-3 py-2 text-sm shadow-sm resize-none disabled:opacity-75 cursor-not-allowed"
+                  />
+                </FieldRow>
 
             {/* Single Tour Page Details Accordion */}
             <details open={!isDeleted} className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
@@ -3085,67 +3116,98 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="flex gap-2.5 items-start">
-                    <Switch
-                      checked={t.showLocation !== false}
-                      onCheckedChange={(v) => updTour(i, 'showLocation', v)}
-                      disabled={!t.enabled || isDeleted}
-                      className="mt-8"
-                      title="Toggle Location Strip Text On/Off"
-                    />
-                    <div className="flex-1">
-                      <FieldRow label="Location Strip Text" id={`tp-loc-${i}`}>
-                        <Input
-                          id={`tp-loc-${i}`}
-                          value={t.location || ''}
-                          placeholder="e.g. Watamu Marine Park, Kilifi County"
-                          onChange={(e) => updTour(i, 'location', e.target.value)}
-                          disabled={!t.enabled || isDeleted || t.showLocation === false}
-                        />
-                      </FieldRow>
-                    </div>
+                {/* Quick Info Strip Bar (Hours, Location, Schedule, Group Suitability) */}
+                <div className="rounded-lg border border-border p-4 bg-background space-y-4">
+                  <div>
+                    <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">Quick Info Strip Bar (Hours, Location, Schedule, Group Suitability)</h5>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Configure the quick metadata pills displayed in the strip bar right below the single charter hero carousel.
+                    </p>
                   </div>
 
-                  <div className="flex gap-2.5 items-start">
-                    <Switch
-                      checked={t.showSchedule !== false}
-                      onCheckedChange={(v) => updTour(i, 'showSchedule', v)}
-                      disabled={!t.enabled || isDeleted}
-                      className="mt-8"
-                      title="Toggle Schedule Strip Text On/Off"
-                    />
-                    <div className="flex-1">
-                      <FieldRow label="Schedule / Season Text" id={`tp-sched-${i}`}>
-                        <Input
-                          id={`tp-sched-${i}`}
-                          value={t.schedule || ''}
-                          placeholder="e.g. Morning Slots (November To March)"
-                          onChange={(e) => updTour(i, 'schedule', e.target.value)}
-                          disabled={!t.enabled || isDeleted || t.showSchedule === false}
-                        />
-                      </FieldRow>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="flex gap-2.5 items-start">
+                      <Switch
+                        checked={t.showDuration !== false}
+                        onCheckedChange={(v) => updTour(i, 'showDuration', v)}
+                        disabled={!t.enabled || isDeleted}
+                        className="mt-8"
+                        title="Toggle Duration / Hours On/Off in Strip Bar"
+                      />
+                      <div className="flex-1">
+                        <FieldRow label="Hours / Duration" id={`tp-dur-strip-${i}`}>
+                          <Input
+                            id={`tp-dur-strip-${i}`}
+                            value={t.duration || ''}
+                            placeholder="e.g. Guided 6 - 8 hours Tour"
+                            onChange={(e) => updTour(i, 'duration', e.target.value)}
+                            disabled={!t.enabled || isDeleted || t.showDuration === false}
+                          />
+                        </FieldRow>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex gap-2.5 items-start">
-                    <Switch
-                      checked={t.showGroupType !== false}
-                      onCheckedChange={(v) => updTour(i, 'showGroupType', v)}
-                      disabled={!t.enabled || isDeleted}
-                      className="mt-8"
-                      title="Toggle Group Suitability Text On/Off"
-                    />
-                    <div className="flex-1">
-                      <FieldRow label="Group Suitability Text" id={`tp-grp-${i}`}>
-                        <Input
-                          id={`tp-grp-${i}`}
-                          value={t.groupType || ''}
-                          placeholder="e.g. Families · Private · Groups"
-                          onChange={(e) => updTour(i, 'groupType', e.target.value)}
-                          disabled={!t.enabled || isDeleted || t.showGroupType === false}
-                        />
-                      </FieldRow>
+                    <div className="flex gap-2.5 items-start">
+                      <Switch
+                        checked={t.showLocation !== false}
+                        onCheckedChange={(v) => updTour(i, 'showLocation', v)}
+                        disabled={!t.enabled || isDeleted}
+                        className="mt-8"
+                        title="Toggle Location Strip Text On/Off"
+                      />
+                      <div className="flex-1">
+                        <FieldRow label="Location Strip Text" id={`tp-loc-${i}`}>
+                          <Input
+                            id={`tp-loc-${i}`}
+                            value={t.location || ''}
+                            placeholder="e.g. Watamu Marine Park, Kilifi County"
+                            onChange={(e) => updTour(i, 'location', e.target.value)}
+                            disabled={!t.enabled || isDeleted || t.showLocation === false}
+                          />
+                        </FieldRow>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2.5 items-start">
+                      <Switch
+                        checked={t.showSchedule !== false}
+                        onCheckedChange={(v) => updTour(i, 'showSchedule', v)}
+                        disabled={!t.enabled || isDeleted}
+                        className="mt-8"
+                        title="Toggle Schedule Strip Text On/Off"
+                      />
+                      <div className="flex-1">
+                        <FieldRow label="Schedule / Season Text" id={`tp-sched-${i}`}>
+                          <Input
+                            id={`tp-sched-${i}`}
+                            value={t.schedule || ''}
+                            placeholder="e.g. Morning Slots (November To March)"
+                            onChange={(e) => updTour(i, 'schedule', e.target.value)}
+                            disabled={!t.enabled || isDeleted || t.showSchedule === false}
+                          />
+                        </FieldRow>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2.5 items-start">
+                      <Switch
+                        checked={t.showGroupType !== false}
+                        onCheckedChange={(v) => updTour(i, 'showGroupType', v)}
+                        disabled={!t.enabled || isDeleted}
+                        className="mt-8"
+                        title="Toggle Group Suitability Text On/Off"
+                      />
+                      <div className="flex-1">
+                        <FieldRow label="Group Suitability Text" id={`tp-grp-${i}`}>
+                          <Input
+                            id={`tp-grp-${i}`}
+                            value={t.groupType || ''}
+                            placeholder="e.g. Families · Private · Groups"
+                            onChange={(e) => updTour(i, 'groupType', e.target.value)}
+                            disabled={!t.enabled || isDeleted || t.showGroupType === false}
+                          />
+                        </FieldRow>
+                      </div>
                     </div>
                   </div>
                 </div>

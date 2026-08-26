@@ -44,72 +44,134 @@ export async function getAppConfig(): Promise<AppConfig> {
       });
     };
 
+    function isTourMatch(a: TourItem, b: TourItem, aIdx?: number, bIdx?: number): boolean {
+      if (a.id && b.id) return a.id === b.id;
+      if (a.slug && b.slug) return a.slug === b.slug;
+      if (a.title && b.title && a.title.trim().toLowerCase() === b.title.trim().toLowerCase()) return true;
+      if (aIdx !== undefined && bIdx !== undefined) return aIdx === bIdx;
+      return false;
+    }
+
     const hasSavedHpItems = Array.isArray(savedConfig.homepage?.tours?.items) && (savedConfig.homepage!.tours!.items!.length > 0);
     const hasSavedTpItems = Array.isArray(savedConfig.toursPage?.tours?.items) && (savedConfig.toursPage!.tours!.items!.length > 0);
 
-    const savedHpItems = sanitizeTours(savedConfig.homepage?.tours?.items);
-    const savedTpItems = sanitizeTours(savedConfig.toursPage?.tours?.items);
-    const fallbackItems = defaultConfig.homepage?.tours?.items || defaultConfig.toursPage?.tours?.items || [];
+    const savedHpItems = sanitizeTours(savedConfig.homepage?.tours?.items) || [];
+    const savedTpItems = sanitizeTours(savedConfig.toursPage?.tours?.items) || [];
+    const fallbackItems = defaultConfig.toursPage?.tours?.items || defaultConfig.homepage?.tours?.items || [];
 
-    // The primary source of truth for the tours list is homepage.tours.items (Featured Tours).
-    // If no DB items exist yet, fall back to the defaults.
+    const deduplicateTours = (items: TourItem[]): TourItem[] => {
+      const seen = new Set<string>();
+      const result: TourItem[] = [];
+      for (const item of items) {
+        const key = item.id || item.slug || (item.title ? item.title.trim().toLowerCase() : '');
+        if (key) {
+          if (!seen.has(key)) {
+            seen.add(key);
+            result.push(item);
+          }
+        } else {
+          result.push(item);
+        }
+      }
+      return result;
+    };
+
+    // The single canonical source of truth for the base tours list
     const rawBaseTours: TourItem[] = hasSavedHpItems
-      ? (savedHpItems || [])
+      ? savedHpItems
       : hasSavedTpItems
-      ? (savedTpItems || [])
+      ? savedTpItems
       : fallbackItems;
 
-    // Strip permanently-deleted items from the canonical list.
-    // Soft-deleted items are kept (they show as inactive in admin, hidden to public via filter).
-    const baseToursList: TourItem[] = rawBaseTours.filter((t) => !t.deleted);
+    const baseToursList = deduplicateTours(rawBaseTours);
 
-    // Map of single-charter deep page details from toursPage (and fallback defaults)
-    const pageDetailsMap = new Map<string, TourItem>();
-    const allDetailSources = [...fallbackItems, ...(savedTpItems || []), ...(savedHpItems || [])];
-    for (const item of allDetailSources) {
-      const key = item.id || item.slug || item.title;
-      if (key) {
-        pageDetailsMap.set(key, { ...(pageDetailsMap.get(key) || {}), ...item });
-      }
-    }
+    const findMatching = (list: TourItem[], target: TourItem, targetIdx: number): TourItem | undefined => {
+      return list.find((t, i) => isTourMatch(t, target, i, targetIdx));
+    };
 
-    // Both homepage tours and listing tours stem from the base tours list,
-    // with listing tours fed the full single-charter page details.
-    const enrichTour = (item: TourItem): TourItem => {
-      const key = item.id || item.slug || item.title;
-      const deepDetails = key ? pageDetailsMap.get(key) : null;
+    const buildEnrichedTour = (baseItem: TourItem, index: number, isListing: boolean): TourItem => {
+      const tpItem = findMatching(savedTpItems, baseItem, index);
+      const hpItem = findMatching(savedHpItems, baseItem, index);
+      const fbItem = findMatching(fallbackItems, baseItem, index);
+
+      // Deep page details priority: toursPage (tpItem) > homepage (hpItem) > fallback (fbItem) > baseItem
+      const deep = tpItem || hpItem || fbItem || baseItem;
+      const card = isListing
+        ? (tpItem || hpItem || fbItem || baseItem)
+        : (hpItem || tpItem || fbItem || baseItem);
+
       return {
-        ...item,
-        ...(deepDetails || {}),
-        // Retain card-level values from the base tour item
-        title: item.title,
-        badge: item.badge ?? deepDetails?.badge ?? '',
-        price: item.price !== undefined ? item.price : deepDetails?.price,
-        priceLabel: item.priceLabel !== undefined ? item.priceLabel : deepDetails?.priceLabel,
-        rating: item.rating !== undefined ? item.rating : (deepDetails?.rating ?? 5),
-        duration: item.duration ?? deepDetails?.duration ?? '',
-        imageUrl: item.imageUrl || deepDetails?.imageUrl || '/images/hero/hero.jpg',
-        description: item.description ?? deepDetails?.description ?? '',
-        enabled: item.enabled !== undefined ? item.enabled : true,
-        deleted: item.deleted !== undefined ? item.deleted : deepDetails?.deleted !== undefined ? deepDetails.deleted : false,
-        deletedAt: item.deletedAt || deepDetails?.deletedAt,
-        showTitle: item.showTitle !== undefined ? item.showTitle : true,
-        showBadge: item.showBadge !== undefined ? item.showBadge : true,
-        showDuration: item.showDuration !== undefined ? item.showDuration : true,
-        showRating: item.showRating !== undefined ? item.showRating : true,
-        showPrice: item.showPrice !== undefined ? item.showPrice : true,
-        showLocation: item.showLocation !== undefined ? item.showLocation : true,
-        showSchedule: item.showSchedule !== undefined ? item.showSchedule : true,
-        showGroupType: item.showGroupType !== undefined ? item.showGroupType : true,
-        showIncluded: item.showIncluded !== undefined ? item.showIncluded : true,
-        showNotIncluded: item.showNotIncluded !== undefined ? item.showNotIncluded : true,
-        showWhyChoose: item.showWhyChoose !== undefined ? item.showWhyChoose : true,
-        showKnowBeforeYouGo: item.showKnowBeforeYouGo !== undefined ? item.showKnowBeforeYouGo : true,
+        // Base defaults
+        ...(fbItem || {}),
+        ...baseItem,
+        ...(hpItem || {}),
+        ...(tpItem || {}),
+
+        // Identity
+        id: baseItem.id || deep.id || `charter-${index + 1}`,
+        slug: baseItem.slug || deep.slug || '',
+        title: hpItem?.title || baseItem.title || deep.title || '',
+        href: hpItem?.href || baseItem.href || deep.href,
+
+        // Card attributes (managed by main tour editor in Homepage / Featured Tours)
+        badge: hpItem?.badge !== undefined ? hpItem.badge : (card.badge ?? deep.badge ?? ''),
+        price: hpItem?.price !== undefined ? hpItem.price : (card.price ?? deep.price),
+        priceLabel: hpItem?.priceLabel !== undefined ? hpItem.priceLabel : (card.priceLabel ?? deep.priceLabel),
+        rating: hpItem?.rating !== undefined ? hpItem.rating : (card.rating ?? deep.rating ?? 5),
+        imageUrl: hpItem?.imageUrl || card.imageUrl || deep.imageUrl || '/images/hero/hero.jpg',
+        description: hpItem?.description !== undefined ? hpItem.description : (card.description ?? deep.description ?? ''),
+        enabled: isListing
+          ? (tpItem?.enabled !== undefined ? tpItem.enabled : (card.enabled ?? true))
+          : (hpItem?.enabled !== undefined ? hpItem.enabled : (card.enabled ?? true)),
+        deleted: baseItem.deleted !== undefined ? baseItem.deleted : (deep.deleted ?? false),
+        deletedAt: baseItem.deletedAt || deep.deletedAt,
+
+        // Card-level visibility toggles
+        showTitle: card.showTitle !== undefined ? card.showTitle : true,
+        showBadge: card.showBadge !== undefined ? card.showBadge : true,
+        showRating: card.showRating !== undefined ? card.showRating : true,
+        showPrice: card.showPrice !== undefined ? card.showPrice : true,
+
+        // Single charter excursion deep page fields
+        heroImageUrl: tpItem?.heroImageUrl ?? hpItem?.heroImageUrl ?? fbItem?.heroImageUrl,
+        heroBackgroundColor: tpItem?.heroBackgroundColor ?? hpItem?.heroBackgroundColor ?? fbItem?.heroBackgroundColor,
+        indicatorColor: tpItem?.indicatorColor ?? hpItem?.indicatorColor ?? fbItem?.indicatorColor,
+        gallery: tpItem?.gallery && tpItem.gallery.length > 0 ? tpItem.gallery : (hpItem?.gallery && hpItem.gallery.length > 0 ? hpItem.gallery : fbItem?.gallery),
+        overview: tpItem?.overview !== undefined ? tpItem.overview : (hpItem?.overview !== undefined ? hpItem.overview : fbItem?.overview),
+
+        // Quick info strip bar (Hours/Duration, Location, Schedule, Group Suitability)
+        duration: tpItem?.duration !== undefined ? tpItem.duration : (hpItem?.duration !== undefined ? hpItem.duration : (fbItem?.duration ?? baseItem.duration ?? '')),
+        showDuration: tpItem?.showDuration !== undefined ? tpItem.showDuration : (hpItem?.showDuration !== undefined ? hpItem.showDuration : (fbItem?.showDuration !== undefined ? fbItem.showDuration : true)),
+
+        location: tpItem?.location !== undefined ? tpItem.location : (hpItem?.location !== undefined ? hpItem.location : (fbItem?.location ?? baseItem.location ?? '')),
+        showLocation: tpItem?.showLocation !== undefined ? tpItem.showLocation : (hpItem?.showLocation !== undefined ? hpItem.showLocation : (fbItem?.showLocation !== undefined ? fbItem.showLocation : true)),
+
+        schedule: tpItem?.schedule !== undefined ? tpItem.schedule : (hpItem?.schedule !== undefined ? hpItem.schedule : (fbItem?.schedule ?? baseItem.schedule ?? '')),
+        showSchedule: tpItem?.showSchedule !== undefined ? tpItem.showSchedule : (hpItem?.showSchedule !== undefined ? hpItem.showSchedule : (fbItem?.showSchedule !== undefined ? fbItem.showSchedule : true)),
+
+        groupType: tpItem?.groupType !== undefined ? tpItem.groupType : (hpItem?.groupType !== undefined ? hpItem.groupType : (fbItem?.groupType ?? baseItem.groupType ?? '')),
+        showGroupType: tpItem?.showGroupType !== undefined ? tpItem.showGroupType : (hpItem?.showGroupType !== undefined ? hpItem.showGroupType : (fbItem?.showGroupType !== undefined ? fbItem.showGroupType : true)),
+
+        // Inclusions & Exclusions & Features
+        included: tpItem?.included !== undefined ? tpItem.included : (hpItem?.included !== undefined ? hpItem.included : fbItem?.included),
+        showIncluded: tpItem?.showIncluded !== undefined ? tpItem.showIncluded : (hpItem?.showIncluded !== undefined ? hpItem.showIncluded : (fbItem?.showIncluded !== undefined ? fbItem.showIncluded : true)),
+
+        notIncluded: tpItem?.notIncluded !== undefined ? tpItem.notIncluded : (hpItem?.notIncluded !== undefined ? hpItem.notIncluded : fbItem?.notIncluded),
+        showNotIncluded: tpItem?.showNotIncluded !== undefined ? tpItem.showNotIncluded : (hpItem?.showNotIncluded !== undefined ? hpItem.showNotIncluded : (fbItem?.showNotIncluded !== undefined ? fbItem.showNotIncluded : true)),
+
+        whyChoose: tpItem?.whyChoose !== undefined ? tpItem.whyChoose : (hpItem?.whyChoose !== undefined ? hpItem.whyChoose : fbItem?.whyChoose),
+        showWhyChoose: tpItem?.showWhyChoose !== undefined ? tpItem.showWhyChoose : (hpItem?.showWhyChoose !== undefined ? hpItem.showWhyChoose : (fbItem?.showWhyChoose !== undefined ? fbItem.showWhyChoose : true)),
+
+        knowBeforeYouGo: tpItem?.knowBeforeYouGo !== undefined ? tpItem.knowBeforeYouGo : (hpItem?.knowBeforeYouGo !== undefined ? hpItem.knowBeforeYouGo : fbItem?.knowBeforeYouGo),
+        showKnowBeforeYouGo: tpItem?.showKnowBeforeYouGo !== undefined ? tpItem.showKnowBeforeYouGo : (hpItem?.showKnowBeforeYouGo !== undefined ? hpItem.showKnowBeforeYouGo : (fbItem?.showKnowBeforeYouGo !== undefined ? fbItem.showKnowBeforeYouGo : true)),
+
+        metaTitle: tpItem?.metaTitle ?? hpItem?.metaTitle ?? fbItem?.metaTitle,
+        metaDescription: tpItem?.metaDescription ?? hpItem?.metaDescription ?? fbItem?.metaDescription,
       };
     };
 
-    const homepageTours = baseToursList.map(enrichTour);
-    const listingTours = baseToursList.map(enrichTour);
+    const listingTours = baseToursList.map((t, idx) => buildEnrichedTour(t, idx, true));
+    const homepageTours = baseToursList.map((t, idx) => buildEnrichedTour(t, idx, false));
 
     // Merge with defaults so new page sections like toursPage are present
     const mergedConfig: AppConfig = {

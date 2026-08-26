@@ -15,47 +15,40 @@ export function TourDetailsContent({
     tour.description ||
     'Experience an exhilarating day on the ocean with premier charter boats and tournament-grade sportfishing gear.';
 
-  const included =
-    tour.included && tour.included.length > 0
-      ? tour.included
-      : [
-          'Heavy and light sportfishing tackle, Shimano & Penn rods/reels',
-          'Live bait, teaser spreads, and custom trolling lures',
-          'Certified marine park permits and fishing licenses',
-          'Experienced skipper and professional first mate',
-          'Freshly prepared lunch and ice-cold refreshments',
-          'Garmin sonar GPS, safety life vests, and first-aid equipment',
-        ];
+  const defaultIncluded = [
+    'Heavy and light sportfishing tackle, Shimano & Penn rods/reels',
+    'Live bait, teaser spreads, and custom trolling lures',
+    'Certified marine park permits and fishing licenses',
+    'Experienced skipper and professional first mate',
+    'Freshly prepared lunch and ice-cold refreshments',
+    'Garmin sonar GPS, safety life vests, and first-aid equipment',
+  ];
 
-  const notIncluded =
-    tour.notIncluded && tour.notIncluded.length > 0
-      ? tour.notIncluded
-      : [
-          'Crew gratuities and tips (optional)',
-          'Hotel pickup & return transfers (available on request)',
-          'Personal swimwear & beach towels',
-          'Alcoholic spirits (BYOB welcome)',
-        ];
+  const defaultNotIncluded = [
+    'Crew gratuities and tips (optional)',
+    'Hotel pickup & return transfers (available on request)',
+    'Personal swimwear & beach towels',
+    'Alcoholic spirits (BYOB welcome)',
+  ];
 
-  const whyChoose =
-    tour.whyChoose && tour.whyChoose.length > 0
-      ? tour.whyChoose
-      : [
-          'Deep-sea sportfisher equipped with fighting chairs & shaded canopy',
-          'Experienced local captain with decades of sportfishing knowledge',
-          'Strict billfish conservation protocol with tagging and release',
-          'All-inclusive private charter with premium gear and catering',
-        ];
+  const defaultWhyChoose = [
+    'Deep-sea sportfisher equipped with fighting chairs & shaded canopy',
+    'Experienced local captain with decades of sportfishing knowledge',
+    'Strict billfish conservation protocol with tagging and release',
+    'All-inclusive private charter with premium gear and catering',
+  ];
 
-  const knowBeforeYouGo =
-    tour.knowBeforeYouGo && tour.knowBeforeYouGo.length > 0
-      ? tour.knowBeforeYouGo
-      : [
-          `Departure: Morning from Watamu Pier / Coastal Harbor`,
-          `Duration: Approx. ${tour.duration || '6 - 8 hours'}`,
-          'What to bring: Polarized sunglasses, reef-safe sunscreen, light jacket, deck shoes',
-          'Booking: Reserve in advance to secure your boat and crew',
-        ];
+  const defaultKnowBeforeYouGo = [
+    `Departure: Morning from Watamu Pier / Coastal Harbor`,
+    `Duration: Approx. ${tour.duration || '6 - 8 hours'}`,
+    'What to bring: Polarized sunglasses, reef-safe sunscreen, light jacket, deck shoes',
+    'Booking: Reserve in advance to secure your boat and crew',
+  ];
+
+  const included = tour.included !== undefined ? tour.included : defaultIncluded;
+  const notIncluded = tour.notIncluded !== undefined ? tour.notIncluded : defaultNotIncluded;
+  const whyChoose = tour.whyChoose !== undefined ? tour.whyChoose : defaultWhyChoose;
+  const knowBeforeYouGo = tour.knowBeforeYouGo !== undefined ? tour.knowBeforeYouGo : defaultKnowBeforeYouGo;
 
   const canShowIncluded = tour.showIncluded !== false && included.length > 0;
   const canShowNotIncluded = tour.showNotIncluded !== false && notIncluded.length > 0;
