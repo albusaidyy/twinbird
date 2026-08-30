@@ -42,7 +42,7 @@ export function AboutCTASection({ data, primaryColor }: AboutCTASectionProps) {
               className="rounded-full px-8 py-4 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
               style={{ backgroundColor: primaryColor }}
             >
-              {data.primaryCta.label || 'Book Your Charter'}
+              {data.primaryCta.label || 'Book Your Safari'}
             </Link>
           )}
 

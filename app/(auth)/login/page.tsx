@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
-import { Loader2, Fish } from 'lucide-react';
+import { Loader2, Compass } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,9 +54,9 @@ export default function LoginPage() {
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
           <div
             className="flex h-12 w-12 items-center justify-center rounded-xl"
-            style={{ backgroundColor: 'var(--color-primary, #193da9)' }}
+            style={{ backgroundColor: 'var(--color-primary, #1b4332)' }}
           >
-            <Fish className="h-6 w-6 text-white" />
+            <Compass className="h-6 w-6 text-white" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
             Admin Access

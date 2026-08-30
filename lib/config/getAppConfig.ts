@@ -15,7 +15,7 @@ export async function getAppConfig(): Promise<AppConfig> {
     const savedConfig = data.config as Partial<AppConfig>;
     if (!savedConfig.branding) return defaultConfig;
 
-    // Merge navigation: ensure default navigation items (e.g. 'tours') exist and order: Home, Fishing Charters, Contact
+    // Merge navigation: ensure default navigation items (e.g. 'tours') exist and order: Home, Safari Tours, About, Contact
     const savedNav = savedConfig.navigation || [];
     const savedNavKeys = new Set(savedNav.map((n) => n.key));
     const rawNav = [
@@ -23,7 +23,7 @@ export async function getAppConfig(): Promise<AppConfig> {
       ...defaultConfig.navigation.filter((n) => !savedNavKeys.has(n.key)),
     ];
 
-    const desiredOrder = ['home', 'tours', 'contact'];
+    const desiredOrder = ['home', 'tours', 'about', 'contact'];
     rawNav.sort((a, b) => {
       const aIdx = desiredOrder.indexOf(a.key);
       const bIdx = desiredOrder.indexOf(b.key);
@@ -108,7 +108,7 @@ export async function getAppConfig(): Promise<AppConfig> {
         ...(tpItem || {}),
 
         // Identity
-        id: baseItem.id || deep.id || `charter-${index + 1}`,
+        id: baseItem.id || deep.id || `safari-${index + 1}`,
         slug: baseItem.slug || deep.slug || '',
         title: hpItem?.title || baseItem.title || deep.title || '',
         href: hpItem?.href || baseItem.href || deep.href,
@@ -132,7 +132,7 @@ export async function getAppConfig(): Promise<AppConfig> {
         showRating: card.showRating !== undefined ? card.showRating : true,
         showPrice: card.showPrice !== undefined ? card.showPrice : true,
 
-        // Single charter excursion deep page fields
+        // Single safari excursion deep page fields
         heroImageUrl: tpItem?.heroImageUrl ?? hpItem?.heroImageUrl ?? fbItem?.heroImageUrl,
         heroBackgroundColor: tpItem?.heroBackgroundColor ?? hpItem?.heroBackgroundColor ?? fbItem?.heroBackgroundColor,
         indicatorColor: tpItem?.indicatorColor ?? hpItem?.indicatorColor ?? fbItem?.indicatorColor,

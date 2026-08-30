@@ -38,14 +38,14 @@ export default function SingleTourPage({
           nav={config.navigation}
         />
         <div className="py-40 text-center space-y-4 px-6">
-          <h1 className="text-3xl font-bold text-foreground">Charter Not Found</h1>
-          <p className="text-muted-foreground">The requested charter excursion could not be located.</p>
+          <h1 className="text-3xl font-bold text-foreground">Safari Tour Not Found</h1>
+          <p className="text-muted-foreground">The requested safari expedition could not be located.</p>
           <Link
             href="/tours"
             className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-semibold text-white shadow-md"
             style={{ backgroundColor: primaryColor }}
           >
-            <ArrowLeft className="h-4 w-4" /> Back to All Charters
+            <ArrowLeft className="h-4 w-4" /> Back to All Safaris
           </Link>
         </div>
         <Footer />
@@ -65,7 +65,7 @@ export default function SingleTourPage({
         nav={config.navigation}
       />
 
-      {/* Top Section: Hero Carousel for Single Charter */}
+      {/* Top Section: Hero Carousel for Single Safari Tour */}
       <TourGalleryHeader
         tour={tour}
         gallery={galleryImages}

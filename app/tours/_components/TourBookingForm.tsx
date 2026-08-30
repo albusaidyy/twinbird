@@ -62,7 +62,7 @@ export function TourBookingForm({
     try {
       // Map submission payload with labels for readable email body
       const payload: Record<string, string | boolean> = {
-        charter: tour.title,
+        safari: tour.title,
       };
 
       fields.forEach((f) => {
@@ -81,7 +81,7 @@ export function TourBookingForm({
           },
           body: JSON.stringify({
             access_key: accessKey,
-            subject: `Charter Reservation: ${tour.title} - ${customerName}`,
+            subject: `Safari Reservation: ${tour.title} - ${customerName}`,
             from_name: customerName,
             ...payload,
           }),
@@ -106,7 +106,7 @@ export function TourBookingForm({
     <div className="rounded-3xl bg-white dark:bg-zinc-900 p-6 md:p-8 shadow-xl border border-black/5 dark:border-white/10 sticky top-28">
       <div className="mb-6 border-b border-border/60 pb-4">
         <h3 className="font-serif text-2xl font-bold text-foreground">
-          {formConfig.title || 'Book This Charter'}
+          {formConfig.title || 'Reserve This Safari'}
         </h3>
         {formConfig.subtitle && (
           <p className="text-xs text-muted-foreground mt-1">
@@ -122,7 +122,7 @@ export function TourBookingForm({
           </div>
           <h4 className="text-lg font-bold text-foreground">Reservation Request Received!</h4>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Thank you for reaching out. Our charter crew will review your booking details for{' '}
+            Thank you for reaching out. Our safari team will review your booking details for{' '}
             <span className="font-semibold text-foreground">{tour.title}</span> and get back to you shortly.
           </p>
           <Button

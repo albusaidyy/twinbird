@@ -1,8 +1,8 @@
 {
   "branding": {
-    "appName": "Sea Smoke Kenya",
-    "primaryColor": "#193da9",
-    "accentColor": "#f6ab03",
+    "appName": "Safari Tours Kenya",
+    "primaryColor": "#1b4332",
+    "accentColor": "#d97706",
     "font": "inter",
     "logoUrl": "/brand/logos/logo.png",
     "faviconUrl": "/brand/favicons/favicon.ico",
@@ -14,6 +14,20 @@
       "label": "Home",
       "href": "/",
       "icon": "Home",
+      "enabled": true
+    },
+    {
+      "key": "tours",
+      "label": "Safari Tours",
+      "href": "/tours",
+      "icon": "Compass",
+      "enabled": true
+    },
+    {
+      "key": "about",
+      "label": "About Us",
+      "href": "/about",
+      "icon": "Info",
       "enabled": true
     },
     {
@@ -44,21 +58,21 @@
       "enabled": true,
       "size": "fullscreen",
       "showEyebrow": true,
-      "eyebrow": "Join the best on the water",
-      "headline": "Cast Your Line",
-      "italicText": "Into the Deep",
+      "eyebrow": "Unforgettable African Wildlife Safaris",
+      "headline": "Experience the Wild Heart",
+      "italicText": "of the African Savannah",
       "showSubtitle": true,
-      "subtitle": "Experience the thrill of deep sea fishing and connect with a community of passionate anglers. Whether you are a beginner or a seasoned pro, there is a spot for you in our club.",
+      "subtitle": "Embark on breathtaking 4x4 game drives, witness the iconic Big Five, and stay in world-class safari lodges with expert local naturalists across Kenya’s premier national parks.",
       "showPrimaryCta": true,
-      "primaryCtaLabel": "Join the Club",
-      "primaryCtaHref": "/bookings",
+      "primaryCtaLabel": "Explore Safari Packages",
+      "primaryCtaHref": "/tours",
       "showSecondaryCta": true,
-      "secondaryCtaLabel": "View Events",
-      "secondaryCtaHref": "/events",
-      "imageUrl": "/images/hero/hero.jpg"
+      "secondaryCtaLabel": "Plan Custom Safari",
+      "secondaryCtaHref": "/contact",
+      "imageUrl": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop"
     },
     "stats": {
-      "enabled": false,
+      "enabled": true,
       "backgroundColor": "#ffffff",
       "title": "",
       "subtitle": "",
@@ -67,164 +81,164 @@
         {
           "enabled": true,
           "value": "15+",
-          "label": "Years Active"
+          "label": "Years Guiding Safaris"
         },
         {
           "enabled": true,
-          "value": "500+",
-          "label": "Club Members"
+          "value": "12,000+",
+          "label": "Happy Travelers"
         },
         {
           "enabled": true,
-          "value": "100+",
-          "label": "Annual Events"
+          "value": "98%",
+          "label": "Big Five Sighting Rate"
         },
         {
           "enabled": true,
           "value": "4.9/5",
-          "label": "Community Rating"
+          "label": "Traveler Satisfaction"
         }
       ]
     },
     "tours": {
       "enabled": true,
       "backgroundColor": "#fafafa",
-      "eyebrow": "Our Fishing Charters",
-      "title": "Deep Sea Fishing Experiences",
-      "subtitle": "Book unforgettable deep sea fishing charters and guided tours. Catch trophy fish with expert captains.",
+      "eyebrow": "FEATURED SAFARIS",
+      "title": "Iconic Safari Packages",
+      "subtitle": "From thrilling 3-day Maasai Mara game drives to scenic Amboseli Kilimanjaro expeditions, explore our handcrafted African wildlife safaris.",
       "items": [
         {
           "enabled": true,
           "badge": "Most Popular",
-          "title": "Deep Sea Excursion",
-          "description": "Join us for a full day of deep sea fishing chasing marlin, tuna, and sailfish.",
+          "title": "3-Day Maasai Mara Big Five Wildlife Safari",
+          "description": "Track lions, leopards, elephants, buffalos, and rhinos across golden savannah plains in custom 4x4 vehicles.",
+          "duration": "3 Days / 2 Nights",
+          "rating": 5,
+          "imageUrl": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop"
+        },
+        {
+          "enabled": true,
+          "badge": "Spectacular Views",
+          "title": "2-Day Amboseli Kilimanjaro & Elephant Safari",
+          "description": "Witness legendary herds of free-ranging African elephants against the majestic backdrop of snow-capped Mount Kilimanjaro.",
+          "duration": "2 Days / 1 Night",
+          "rating": 4.9,
+          "imageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop"
+        },
+        {
+          "enabled": true,
+          "badge": "Rhino Sanctuary",
+          "title": "Lake Nakuru & Tsavo Wilderness Expedition",
+          "description": "Track endangered rhinos, marvel at flamingos, and encounter the red-dust savannah elephants across scenic viewpoints.",
           "duration": "Full Day",
-          "rating": 5,
-          "imageUrl": "/images/hero/hero.jpg"
-        },
-        {
-          "enabled": true,
-          "badge": "Beginner Friendly",
-          "title": "Inshore Catch & Release",
-          "description": "A relaxed half-day trip exploring the coastal waters, perfect for families and beginners.",
-          "duration": "Half Day",
           "rating": 4.8,
-          "imageUrl": "/images/hero/hero.jpg"
-        },
-        {
-          "enabled": true,
-          "badge": "Competitive",
-          "title": "Annual Summer Tournament",
-          "description": "Compete with fellow members in our biggest catch-and-release tournament of the year.",
-          "duration": "2 Days",
-          "rating": 5,
-          "imageUrl": "/images/hero/hero.jpg"
+          "imageUrl": "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop"
         }
       ]
     },
     "reviews": {
       "enabled": true,
       "backgroundColor": "#020617",
-      "eyebrow": "Excellent on TripAdvisor",
-      "title": "Guest reviews",
+      "eyebrow": "EXCELLENT ON TRIPADVISOR",
+      "title": "Guest Reviews & Safari Stories",
       "subtitle": "",
       "items": [
         {
           "enabled": true,
-          "quote": "Joining this club was the best decision I ever made. I have learned so much from the veteran anglers and made lifelong friends on the water.",
-          "name": "Michael Thompson",
-          "location": "Local Member"
+          "quote": "Our 3-day Maasai Mara safari exceeded all expectations! Our guide spotted a leopard in an acacia tree within hours of arriving. The luxury tented camp was unforgettable.",
+          "name": "David & Claire Roberts",
+          "location": "United Kingdom"
         },
         {
           "enabled": true,
-          "quote": "The deep sea excursions are incredibly well organized. The captains know exactly where the fish are biting. Highly recommend the summer tournament!",
-          "name": "Sarah Jenkins",
-          "location": "Tournament Winner"
+          "quote": "Seeing hundreds of elephants walking right in front of Mount Kilimanjaro in Amboseli was a lifelong dream come true. Flawless logistics and incredible hospitality.",
+          "name": "Marcus Vance",
+          "location": "United States"
         },
         {
           "enabled": true,
-          "quote": "A fantastic community that truly cares about marine conservation. They teach sustainable fishing practices to all new members.",
-          "name": "David & Lisa",
-          "location": "Family Members"
+          "quote": "The best travel experience of our lives. The 4x4 vehicle was extremely comfortable and our guide’s wildlife tracking skills were pure magic. 10/10 recommendation!",
+          "name": "Elena & Lucas",
+          "location": "Germany"
         }
       ]
     },
     "whyUs": {
       "enabled": true,
       "backgroundColor": "#ffffff",
-      "imageUrl": "https://plus.unsplash.com/premium_photo-1661762422433-b18f87b64341?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      "eyebrow": "Why Fish With Us",
-      "title": "Guided by expertise, inspired by the ocean",
+      "imageUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop",
+      "eyebrow": "WHY SAFARI WITH US",
+      "title": "Guided by Passion, Rooted in the Wilderness",
       "subtitle": "",
       "items": [
         {
           "enabled": true,
           "icon": "Shield",
-          "title": "Expert Community",
-          "body": "Learn from seasoned professionals with decades of experience on the local waters."
+          "title": "Expert Wildlife Trackers",
+          "body": "Our silver and gold-level certified guides possess decades of bushcraft experience and intimate knowledge of animal migration routes."
         },
         {
           "enabled": true,
-          "icon": "Globe",
-          "title": "Exclusive Events",
-          "body": "Get access to members-only tournaments, chartered trips, and gear demonstrations."
+          "icon": "Compass",
+          "title": "Custom 4x4 Safari Vehicles",
+          "body": "Travel in purpose-built 4x4 Safari Land Cruisers fitted with pop-up viewing roofs, individual charging sockets, and onboard coolers."
         },
         {
           "enabled": true,
           "icon": "Leaf",
-          "title": "Conservation First",
-          "body": "We practice and promote sustainable catch-and-release fishing to protect our oceans."
+          "title": "Conservation & Community",
+          "body": "We practice responsible, low-impact eco-tourism that directly finances park anti-poaching units and supports local community schools."
         }
       ]
     },
     "gallery": {
       "enabled": true,
       "backgroundColor": "#ffffff",
-      "indicatorColor": "#000000",
-      "title": "Catch Gallery",
+      "indicatorColor": "#d97706",
+      "title": "Safari Moments & Wildlife Gallery",
       "subtitle": "",
       "eyebrow": "",
       "items": [
         {
           "enabled": true,
-          "imageUrl": "/images/hero/hero.jpg",
-          "caption": "Giant Marlin Catch"
+          "imageUrl": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
+          "caption": "Maasai Mara Lion Pride"
         },
         {
           "enabled": true,
-          "imageUrl": "https://plus.unsplash.com/premium_photo-1661762422433-b18f87b64341?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          "caption": "Summer Tournament 2024"
+          "imageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+          "caption": "Amboseli Elephant Herd"
         },
         {
           "enabled": true,
-          "imageUrl": "https://images.unsplash.com/photo-1541742425281-c1d3fc8aff96?q=80&w=2012&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-          "caption": "Sunset Fishing"
+          "imageUrl": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop",
+          "caption": "Savannah Sunset Game Drive"
         },
         {
           "enabled": true,
-          "imageUrl": "/images/hero/hero.jpg",
-          "caption": "Group Trip"
+          "imageUrl": "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+          "caption": "Cheetah on the Lookout"
         }
       ]
     },
     "ctaBanner": {
-      "enabled": false,
-      "backgroundColor": "#193da9",
-      "headline": "Ready to Catch the Big One?",
-      "subtitle": "Become a member today and get access to exclusive events, trips, and premium gear discounts.",
-      "ctaLabel": "Join the Club Now",
-      "ctaHref": "/bookings"
+      "enabled": true,
+      "backgroundColor": "#1b4332",
+      "headline": "Ready for the Adventure of a Lifetime?",
+      "subtitle": "Reserve your private 4x4 safari or customize a bespoke wildlife itinerary with our expert safari specialists today.",
+      "ctaLabel": "Book Your Safari Now",
+      "ctaHref": "/tours"
     },
     "footer": {
       "enabled": true,
       "backgroundColor": "#020617",
-      "description": "A passionate community of anglers dedicated to the sport of fishing and marine conservation. Join us on the water.",
+      "description": "Premier African wildlife safari operator delivering bespoke Big Five game drives, luxury tented camps, and ethical conservation safaris across Kenya.",
       "contact": {
-        "location": "Coastal Harbor Marina, Dock 4",
-        "phone": "+1 (555) 019-8372",
-        "email": "info@seasmokefishingclub.com",
-        "workingDays": "Mon - Sun: 5:00 AM - 8:00 PM",
-        "workingHours": "Always on the water"
+        "location": "Wildlife Plaza, Langata Road, Nairobi, Kenya",
+        "phone": "+254 700 123 456",
+        "email": "info@safaritourskenya.com",
+        "workingDays": "Mon - Sun: 7:00 AM - 9:00 PM EAT",
+        "workingHours": "24/7 Safari Support Desk"
       },
       "socials": {
         "enabled": true,
@@ -261,13 +275,18 @@
           },
           {
             "enabled": true,
-            "label": "Events",
-            "href": "#"
+            "label": "Safari Packages",
+            "href": "/tours"
           },
           {
             "enabled": true,
-            "label": "Membership",
-            "href": "#"
+            "label": "About Us",
+            "href": "/about"
+          },
+          {
+            "enabled": true,
+            "label": "Contact & Reservations",
+            "href": "/contact"
           }
         ]
       },
@@ -276,28 +295,28 @@
         "items": [
           {
             "enabled": true,
-            "label": "Deep Sea Charter",
-            "href": "#"
+            "label": "Maasai Mara Big Five",
+            "href": "/tours/maasai-mara-big-five-3day-wildlife-safari"
           },
           {
             "enabled": true,
-            "label": "Inshore Fishing",
-            "href": "#"
+            "label": "Amboseli Kilimanjaro Safari",
+            "href": "/tours/amboseli-kilimanjaro-elephant-safari"
           },
           {
             "enabled": true,
-            "label": "Tournament Entry",
-            "href": "#"
+            "label": "Lake Nakuru Rhino Sanctuary",
+            "href": "/tours/lake-nakuru-tsavo-rhino-wildlife-safari"
           },
           {
             "enabled": true,
-            "label": "Beginner Classes",
-            "href": "#"
+            "label": "Great Migration Safaris",
+            "href": "/tours"
           },
           {
             "enabled": true,
-            "label": "Gear Rental",
-            "href": "#"
+            "label": "Custom Private Safari",
+            "href": "/contact"
           }
         ]
       },
@@ -316,7 +335,7 @@
           },
           {
             "enabled": true,
-            "label": "Club Rules",
+            "label": "Safari Travel Advisory",
             "href": "#"
           }
         ]
@@ -330,56 +349,61 @@
       "showEyebrow": true,
       "eyebrow": "Get in Touch",
       "headline": "Let's plan your",
-      "italicText": "adventure",
+      "italicText": "dream safari",
       "showSubtitle": true,
-      "subtitle": "Have a question about our charters or want to book a trip? Our team is ready to help you plan your perfect day on the water.",
+      "subtitle": "Have a question about our safari packages or want to create a custom private itinerary? Our safari specialists are ready to help you plan your dream adventure.",
       "showPrimaryCta": false,
       "primaryCtaLabel": "",
       "primaryCtaHref": "",
       "showSecondaryCta": false,
       "secondaryCtaLabel": "",
       "secondaryCtaHref": "",
-      "imageUrl": "/images/hero/hero.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop",
       "size": "medium"
     },
     "contact": {
       "enabled": true,
       "backgroundColor": "#f5f5f0",
-      "location": "Mombasa, Kenya",
-      "locationLink": "https://maps.google.com/?q=Mombasa",
-      "phone": "+254 123 456 789",
-      "email": "info@seasmokekenya.com",
-      "whatsapp": "+254 123 456 789",
+      "location": "Nairobi & Maasai Mara, Kenya",
+      "locationLink": "https://maps.google.com/?q=Nairobi+Kenya",
+      "phone": "+254 700 123 456",
+      "email": "info@safaritourskenya.com",
+      "whatsapp": "+254 700 123 456",
       "tripAdvisorLink": "https://tripadvisor.com"
     },
     "form": {
       "enabled": true,
       "backgroundColor": "#ffffff",
-      "title": "Send a message",
-      "buttonText": "Submit request",
+      "title": "Send a Safari Inquiry",
+      "buttonText": "Submit Safari Request",
       "accessKey": ""
     },
     "faq": {
       "enabled": true,
       "backgroundColor": "#f5f5f0",
-      "title": "Commonly asked questions",
+      "title": "Frequently Asked Safari Questions",
       "subtitle": "",
       "eyebrow": "QUICK ANSWERS",
       "items": [
         {
           "enabled": true,
-          "question": "What is the best time for deep sea fishing?",
-          "answer": "The peak season runs from August to March when Marlin and Sailfish are most abundant in Kenyan waters."
+          "question": "When is the best time of year to see the Great Migration?",
+          "answer": "The Great Wildebeest Migration typically reaches Kenya’s Maasai Mara from July through October, when over 1.5 million wildebeest and zebras cross the Mara River."
         },
         {
           "enabled": true,
-          "question": "Do I need to bring my own fishing gear?",
-          "answer": "No, all premium rods, reels, and tackle are provided on our charters. However, you're welcome to bring your favorite gear."
+          "question": "What type of vehicles are used for game drives?",
+          "answer": "We use custom-built 4x4 Safari Land Cruisers equipped with pop-up roofs for 360-degree game viewing, high-clearance suspension, onboard charging ports, and coolers."
         },
         {
           "enabled": true,
-          "question": "Is it catch and release?",
-          "answer": "We strictly enforce a catch-and-release policy for all Billfish (Marlin, Sailfish) to support marine conservation efforts."
+          "question": "What should I pack for an African safari?",
+          "answer": "We recommend neutral-toned clothing (khaki, tan, olive), a warm jacket for chilly morning game drives, a wide-brim hat, sunscreen, binoculars, and insect repellent."
+        },
+        {
+          "enabled": true,
+          "question": "Are airport and hotel pickup transfers included?",
+          "answer": "Yes! All our multi-day safari packages include complimentary round-trip transfers from your hotel or Jomo Kenyatta International Airport (NBO) in Nairobi."
         }
       ]
     }

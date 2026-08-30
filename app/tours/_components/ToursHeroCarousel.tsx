@@ -49,10 +49,10 @@ export function ToursHeroCarousel({
     ? validTours
     : [
         {
-          title: 'Big Game Marlin & Sailfish Safari',
+          title: 'Maasai Mara Big Five Wildlife Safari',
           badge: 'Most Popular',
           imageUrl: hero.imageUrl || '/images/hero/hero.jpg',
-          duration: '8h',
+          duration: '3 Days / 2 Nights',
           rating: 5,
         } as TourItem,
       ];

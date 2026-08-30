@@ -3,12 +3,12 @@ import { getAppConfig } from '@/lib/config/getAppConfig';
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getAppConfig();
-  const appName = config.branding.appName || 'Sea Smoke Fishing Club';
-  const pageTitle = config.toursPage?.metaTitle || 'Fishing Charters & Packages';
+  const appName = config.branding.appName || 'Safari Tours Kenya';
+  const pageTitle = config.toursPage?.metaTitle || 'Safari Packages & Wildlife Game Drives';
   const description =
     config.toursPage?.metaDescription ||
     config.branding.metaDescription ||
-    'Explore our fleet of sportfishing charter packages, from inshore light tackle to full-day offshore marlin safaris in Watamu, Kenya.';
+    'Explore our luxury African wildlife safaris, Big Five game drives, and national park expeditions in Maasai Mara, Amboseli, and Tsavo.';
 
   return {
     title: `${pageTitle} | ${appName}`,

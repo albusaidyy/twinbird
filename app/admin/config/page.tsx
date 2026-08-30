@@ -54,7 +54,6 @@ import {
   Search,
   HardDrive,
   Cloud,
-  Ship,
   Compass,
   Calendar,
   ArrowUp,
@@ -124,13 +123,13 @@ const PAGES = [
   },
   {
     id: 'tours',
-    label: 'Fishing Charters',
-    Icon: Ship,
+    label: 'Safari Tours',
+    Icon: Compass,
     href: '/tours',
     sections: [
-      { key: 'tours-page-hero' as SectionKey, label: 'Hero', Icon: Layers, description: 'Fishing Charters splash hero' },
-      { key: 'tours-page-list' as SectionKey, label: 'Charters Listing', Icon: Map, description: 'Fishing charter packages & cards' },
-      { key: 'tours-page-booking' as SectionKey, label: 'Booking Form', Icon: Calendar, description: 'Single charter reservation form settings' },
+      { key: 'tours-page-hero' as SectionKey, label: 'Hero', Icon: Layers, description: 'Safari Tours splash hero' },
+      { key: 'tours-page-list' as SectionKey, label: 'Safaris Listing', Icon: Map, description: 'Safari packages & cards' },
+      { key: 'tours-page-booking' as SectionKey, label: 'Booking Form', Icon: Calendar, description: 'Single safari reservation form settings' },
     ],
   },
   {
@@ -585,7 +584,7 @@ function BrandingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCon
           id="b-meta-desc"
           rows={3}
           value={b.metaDescription || ''}
-          placeholder="e.g. Premier big-game sportfishing charters, marlin & sailfish safaris, and coastal expeditions on the Kenyan Coast."
+          placeholder="e.g. Premier African wildlife safaris, Big Five game drives, and luxury bush expeditions in Kenya."
           onChange={(e) => upd('metaDescription', e.target.value)}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
         />
@@ -654,7 +653,7 @@ function BrandingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCon
 function slugifyNavRoute(label: string): string {
   const trimmed = label.trim().toLowerCase();
   if (trimmed === 'home' || trimmed === 'main' || trimmed === '') return '/';
-  if (trimmed === 'fishing charters' || trimmed === 'charters' || trimmed === 'tours') return '/tours';
+  if (trimmed === 'fishing charters' || trimmed === 'charters' || trimmed === 'tours' || trimmed === 'safari' || trimmed === 'safaris' || trimmed === 'safari tours') return '/tours';
   if (trimmed === 'about' || trimmed === 'about us' || trimmed === 'our story') return '/about';
   if (trimmed === 'contact' || trimmed === 'contact us' || trimmed === 'booking' || trimmed === 'book') return '/contact';
 
@@ -667,7 +666,7 @@ function slugifyNavRoute(label: string): string {
 
 const NAV_PRESETS = [
   { label: 'Home', href: '/' },
-  { label: 'Charters', href: '/tours' },
+  { label: 'Safaris', href: '/tours' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ];
@@ -754,7 +753,7 @@ function NavigationEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppC
       <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground flex items-start gap-2">
         <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
         <p>
-          <strong>Dynamic Auto-Sync:</strong> Typing in <em>Label</em> automatically generates the route slug (e.g. &ldquo;Fishing Charters&rdquo; &rarr; <code className="bg-muted px-1 rounded font-mono text-[11px]">/tours</code> or custom slug). Click the <strong>🔗 Link Icon</strong> to toggle between auto-generation and custom manual URLs.
+          <strong>Dynamic Auto-Sync:</strong> Typing in <em>Label</em> automatically generates the route slug (e.g. &ldquo;Safari Tours&rdquo; &rarr; <code className="bg-muted px-1 rounded font-mono text-[11px]">/tours</code> or custom slug). Click the <strong>🔗 Link Icon</strong> to toggle between auto-generation and custom manual URLs.
         </p>
       </div>
 
@@ -778,7 +777,7 @@ function NavigationEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppC
                       value={item.label}
                       onChange={(e) => handleLabelChange(idx, e.target.value)}
                       disabled={!item.enabled}
-                      placeholder="e.g. Fishing Charters"
+                      placeholder="e.g. Safari Tours"
                       className="text-xs font-medium"
                     />
                   </FieldRow>
@@ -1137,16 +1136,16 @@ function TourDeleteConfirmDialog({
           </div>
           <div className="space-y-1">
             <h3 className="text-base font-semibold text-foreground">
-              {isPermanent ? 'Permanently Delete Charter?' : 'Soft-Delete Charter?'}
+              {isPermanent ? 'Permanently Delete Safari Package?' : 'Soft-Delete Safari Package?'}
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               {isPermanent ? (
                 <>
-                  Are you sure you want to permanently delete <strong className="text-foreground">{tourTitle}</strong>? This action <span className="font-semibold text-destructive">cannot be undone</span> and will completely erase this charter package from both the Featured Tours and Charters Listing.
+                  Are you sure you want to permanently delete <strong className="text-foreground">{tourTitle}</strong>? This action <span className="font-semibold text-destructive">cannot be undone</span> and will completely erase this safari package from both the Featured Safaris and Safaris Listing.
                 </>
               ) : (
                 <>
-                  Are you sure you want to soft-delete <strong className="text-foreground">{tourTitle}</strong>? It will become <span className="font-semibold text-foreground">inactive and greyed out</span> on both the Featured Tours and Charters Listing, and will be hidden from public visitors. You can restore it anytime or permanently delete it later.
+                  Are you sure you want to soft-delete <strong className="text-foreground">{tourTitle}</strong>? It will become <span className="font-semibold text-foreground">inactive and greyed out</span> on both the Featured Safaris and Safaris Listing, and will be hidden from public visitors. You can restore it anytime or permanently delete it later.
                 </>
               )}
             </p>
@@ -1180,8 +1179,8 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
   const toursList = draft.homepage.tours?.items || [];
   const [deletePrompt, setDeletePrompt] = useState<{ type: 'soft' | 'permanent'; tour: TourItem; index: number } | null>(null);
 
-  const toursPageNavLabel = draft.navigation?.find((l) => l.href === '/tours' || l.href.startsWith('/tours'))?.label || PAGES.find((p) => p.id === 'tours')?.label || 'Fishing Charters';
-  const toursSectionLabel = PAGES.find((p) => p.id === 'tours')?.sections.find((s) => s.key === 'tours-page-list')?.label || draft.toursPage?.tours?.title || 'Charter Packages';
+  const toursPageNavLabel = draft.navigation?.find((l) => l.href === '/tours' || l.href.startsWith('/tours'))?.label || PAGES.find((p) => p.id === 'tours')?.label || 'Safari Tours';
+  const toursSectionLabel = PAGES.find((p) => p.id === 'tours')?.sections.find((s) => s.key === 'tours-page-list')?.label || draft.toursPage?.tours?.title || 'Safari Packages';
 
   const updEnabled = (v: boolean) => set((p) => ({ ...p, homepage: { ...p.homepage, tours: { ...p.homepage.tours, enabled: v } } }));
 
@@ -1216,32 +1215,32 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
       const hpItems = [...(p.homepage?.tours?.items || [])];
       const tpItems = [...(currentToursPage.tours?.items || [])];
-      const uniqueId = `charter-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const uniqueId = `safari-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       const newTour: TourItem = {
         id: uniqueId,
         enabled: true,
         deleted: false,
-        title: 'New Fishing Charter',
+        title: 'New Safari Package',
         badge: 'Popular',
-        description: 'Experience premier big-game fishing on the Kenyan Coast...',
-        duration: 'Guided 6 hours Tour',
+        description: 'Experience premier wildlife safaris and Big Five game drives in Kenya...',
+        duration: '3 Days / 2 Nights',
         rating: 5,
         imageUrl: '/images/hero/hero.jpg',
-        location: 'Watamu Marine Park, Kilifi County',
+        location: 'Maasai Mara National Reserve',
         showLocation: true,
-        schedule: 'Morning Slots (November To March)',
+        schedule: 'Daily Departures (Year-Round)',
         showSchedule: true,
-        groupType: 'Families · Private · Groups',
+        groupType: 'Families · Private 4x4 · Groups',
         showGroupType: true,
         price: 'Contact for pricing',
-        overview: 'Experience premier big-game fishing along the Kenyan Coast with full gear and experienced crew.',
-        included: ['Professional skipper & crew', 'Tackle & bait', 'Refreshments & lunch'],
+        overview: 'Experience premier African wildlife safaris and Big Five game drives in Kenya with customized 4x4 Land Cruisers and professional guides.',
+        included: ['Custom 4x4 Safari Land Cruiser', 'Professional safari guide & tracker', 'Park conservation fees', 'Lodge accommodation & meals'],
         showIncluded: true,
-        notIncluded: ['Crew gratuities and tips (optional)', 'Hotel pickup & return transfers', 'Personal swimwear & towels'],
+        notIncluded: ['Driver-guide gratuities (optional)', 'Hot air balloon safari', 'Personal travel insurance'],
         showNotIncluded: true,
-        whyChoose: ['Decades of local fishing experience', 'Modern rigged tournament boat'],
+        whyChoose: ['Guaranteed window seats in 4x4 Land Cruisers', 'Silver & Gold certified safari guides', 'Ethical wildlife tracking & Big Five focus'],
         showWhyChoose: true,
-        knowBeforeYouGo: ['Departure: 6:00 AM', 'What to bring: Sunscreen, hat, sunglasses'],
+        knowBeforeYouGo: ['Departure: Early morning hotel/airport pickup', 'What to bring: Neutral safari clothing, binoculars, sunscreen, warm jacket'],
         showKnowBeforeYouGo: true,
         showTitle: true,
         showBadge: true,
@@ -1353,20 +1352,20 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
       />
 
       <div className="flex items-start gap-2.5 rounded-lg border border-primary/25 bg-primary/5 p-3.5 text-xs text-muted-foreground">
-        <Ship className="h-4 w-4 shrink-0 text-primary mt-0.5" />
+        <Compass className="h-4 w-4 shrink-0 text-primary mt-0.5" />
         <div className="space-y-1">
           <p className="font-semibold text-foreground">Connected to {toursPageNavLabel} Directory</p>
           <p>
-            The charters listed below are automatically synced with your <strong>{toursPageNavLabel}</strong> directory (`/tours`) and individual charter pages (`/tours/[slug]`).
+            The safari packages listed below are automatically synced with your <strong>{toursPageNavLabel}</strong> directory (`/tours`) and individual safari pages (`/tours/[slug]`).
           </p>
         </div>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold">Charter Packages ({toursList.length})</h4>
+          <h4 className="text-sm font-semibold">Safari Packages ({toursList.length})</h4>
           <Button variant="outline" size="sm" className="h-8 gap-1" onClick={addTour}>
-            <Plus className="h-3.5 w-3.5" /> Add Charter
+            <Plus className="h-3.5 w-3.5" /> Add Safari Package
           </Button>
         </div>
 
@@ -1387,7 +1386,7 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
                     <>
                       <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
                       <span className="text-xs font-semibold text-muted-foreground">
-                        Charter #{i + 1} {!t.enabled && '(Hidden)'}
+                        Safari #{i + 1} {!t.enabled && '(Hidden)'}
                       </span>
                     </>
                   ) : (
@@ -1427,7 +1426,7 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
                         size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => setDeletePrompt({ type: 'soft', tour: t, index: i })}
-                        title="Soft delete charter (move to inactive)"
+                        title="Soft delete safari (move to inactive)"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -1440,7 +1439,7 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
                         size="sm"
                         className="h-7 text-xs gap-1"
                         onClick={() => restoreTour(t, i)}
-                        title="Restore charter"
+                        title="Restore safari"
                       >
                         <RotateCcw className="h-3.5 w-3.5" /> Restore
                       </Button>
@@ -1450,7 +1449,7 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
                         size="sm"
                         className="h-7 text-xs gap-1"
                         onClick={() => setDeletePrompt({ type: 'permanent', tour: t, index: i })}
-                        title="Permanently delete charter"
+                        title="Permanently delete safari"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Delete Forever
                       </Button>
@@ -1590,7 +1589,7 @@ function ToursEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig
                 </FieldRow>
 
                 <div className="rounded-md bg-muted/40 px-3 py-2 text-[11px] text-muted-foreground border border-border/50">
-                  Single charter deep page details (inclusions, itinerary, single-page carousel) are managed under <strong>{toursPageNavLabel} &rarr; {toursSectionLabel}</strong>.
+                  Single safari deep page details (inclusions, itinerary, single-page carousel) are managed under <strong>{toursPageNavLabel} &rarr; {toursSectionLabel}</strong>.
                 </div>
               </div>
             </div>
@@ -2496,7 +2495,7 @@ function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 
   return (
     <div className="space-y-5">
-      <SectionToggle title="Fishing Charters Hero Section" enabled={h.enabled} onChange={(v) => upd('enabled', v)} />
+      <SectionToggle title="Safari Tours Hero Section" enabled={h.enabled} onChange={(v) => upd('enabled', v)} />
       <BackgroundColorPicker value={h.backgroundColor} onChange={(v) => upd('backgroundColor', v)} />
       
       <div className="flex gap-4 items-start">
@@ -2540,12 +2539,12 @@ function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
       </FieldRow>
 
       <div className="rounded-lg border border-border bg-card p-4 space-y-3 pt-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">Fishing Charters Page SEO & Meta</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">Safari Tours Page SEO & Meta</h4>
         <FieldRow label="Meta Title" id="tp-meta-title">
           <Input
             id="tp-meta-title"
             value={draft.toursPage?.metaTitle || ''}
-            placeholder="e.g. Fishing Charters & Packages"
+            placeholder="e.g. Safari Packages & Wildlife Game Drives"
             onChange={(e) =>
               set((p) => {
                 const current = p.toursPage || defaultConfig.toursPage!;
@@ -2559,7 +2558,7 @@ function ToursPageHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
             id="tp-meta-desc"
             rows={2}
             value={draft.toursPage?.metaDescription || ''}
-            placeholder="e.g. Explore our fleet of sportfishing charter packages in Watamu..."
+            placeholder="e.g. Explore our fleet of custom 4x4 safari packages in Maasai Mara, Amboseli, and Tsavo..."
             onChange={(e) =>
               set((p) => {
                 const current = p.toursPage || defaultConfig.toursPage!;
@@ -2712,7 +2711,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
         />
       )}
 
-      <SectionToggle title="Charters Listing Section" enabled={data.enabled} onChange={updEnabled} />
+      <SectionToggle title="Safaris Listing Section" enabled={data.enabled} onChange={updEnabled} />
       <BackgroundColorPicker value={data.backgroundColor} onChange={(v) => set((p) => {
         const current = p.toursPage || defaultConfig.toursPage!;
         return { ...p, toursPage: { ...current, tours: { ...current.tours, backgroundColor: v } } };
@@ -2729,16 +2728,16 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
       <div className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3.5 text-xs text-muted-foreground">
         <Info className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
         <div className="space-y-1">
-          <p className="font-semibold text-foreground">Charter Card Attributes Managed in {homeToursSectionLabel}</p>
+          <p className="font-semibold text-foreground">Safari Card Attributes Managed in {homeToursSectionLabel}</p>
           <p>
-            Card titles, pricing, ratings, badges, and cover thumbnails are edited under <strong>{homeLabel} &rarr; {homeToursSectionLabel}</strong>. Below, expand each charter to configure its full single-page details (overview, inclusions, itinerary, hero banner, and photo carousel).
+            Card titles, pricing, ratings, badges, and cover thumbnails are edited under <strong>{homeLabel} &rarr; {homeToursSectionLabel}</strong>. Below, expand each safari to configure its full single-page details (overview, inclusions, itinerary, hero banner, and photo carousel).
           </p>
         </div>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold">Charter Packages ({toursList.length})</h4>
+          <h4 className="text-sm font-semibold">Safari Packages ({toursList.length})</h4>
         </div>
 
         {toursList.map((t, i) => {
@@ -2758,7 +2757,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                     <>
                       <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
                       <span className="text-xs font-semibold text-muted-foreground">
-                        Charter #{i + 1} {!t.enabled && '(Hidden)'}
+                        Safari #{i + 1} {!t.enabled && '(Hidden)'}
                       </span>
                       <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
                         Card info read-only
@@ -2801,7 +2800,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                         size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                         onClick={() => setDeletePrompt({ type: 'soft', tour: t, index: i })}
-                        title="Soft delete charter (move to inactive)"
+                        title="Soft delete safari (move to inactive)"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -2814,7 +2813,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                         size="sm"
                         className="h-7 text-xs gap-1"
                         onClick={() => restoreTour(t, i)}
-                        title="Restore charter"
+                        title="Restore safari"
                       >
                         <RotateCcw className="h-3.5 w-3.5" /> Restore
                       </Button>
@@ -2824,7 +2823,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                         size="sm"
                         className="h-7 text-xs gap-1"
                         onClick={() => setDeletePrompt({ type: 'permanent', tour: t, index: i })}
-                        title="Permanently delete charter"
+                        title="Permanently delete safari"
                       >
                         <Trash2 className="h-3.5 w-3.5" /> Delete Forever
                       </Button>
@@ -2952,7 +2951,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   </FieldRow>
                 </div>
 
-                <FieldRow label="Charter Card & Gallery Main Image" id={`tp-img-${i}`}>
+                <FieldRow label="Safari Card & Gallery Main Image" id={`tp-img-${i}`}>
                   <ImageUploaderField
                     id={`tp-img-${i}`}
                     value={t.imageUrl}
@@ -2977,7 +2976,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
             <details open={!isDeleted} className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
               <summary className="cursor-pointer text-xs font-semibold text-foreground flex items-center justify-between select-none">
                 <span className="flex items-center gap-1.5 text-primary font-bold">
-                  <Ship className="h-3.5 w-3.5" /> Single Charter Page Details (Overview, Included, Location, Info, Carousel)
+                  <Compass className="h-3.5 w-3.5" /> Single Safari Page Details (Overview, Included, Location, Info, Carousel)
                 </span>
                 <span className="text-[10px] text-muted-foreground font-mono">▼ Collapse / Expand</span>
               </summary>
@@ -2986,16 +2985,16 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                 {/* Hero Background & Carousel Photos */}
                 <div className="rounded-lg border border-border p-4 bg-background space-y-4">
                   <div>
-                    <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">Single Charter Hero & Carousel Photos</h5>
+                    <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">Single Safari Hero & Carousel Photos</h5>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Configure the hero background color, backdrop image, and the interactive photo carousel for this single charter detail page.
+                      Configure the hero background color, backdrop image, and the interactive photo carousel for this single safari detail page.
                     </p>
                   </div>
 
                   <BackgroundColorPicker
                     label="Hero Background Color"
                     desc="Custom hero background color when no hero image is set or behind the overlay."
-                    value={t.heroBackgroundColor || '#193da9'}
+                    value={t.heroBackgroundColor || '#1b4332'}
                     onChange={(v) => updTour(i, 'heroBackgroundColor', v)}
                   />
 
@@ -3014,7 +3013,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <BackgroundColorPicker
                     label="Carousel Indicator Color"
                     desc="Pick a custom color for the active carousel dot indicators."
-                    value={t.indicatorColor || '#f6ab03'}
+                    value={t.indicatorColor || '#d97706'}
                     onChange={(v) => updTour(i, 'indicatorColor', v)}
                   />
 
@@ -3121,7 +3120,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                   <div>
                     <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">Quick Info Strip Bar (Hours, Location, Schedule, Group Suitability)</h5>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Configure the quick metadata pills displayed in the strip bar right below the single charter hero carousel.
+                      Configure the quick metadata pills displayed in the strip bar right below the single safari hero carousel.
                     </p>
                   </div>
 
@@ -3354,14 +3353,14 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 
                 <div className="pt-3 border-t border-border/60 space-y-3">
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Single Charter SEO & Meta
+                    Single Safari SEO & Meta
                   </span>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <FieldRow label="Meta Title (Optional)" id={`tp-mtitle-${i}`}>
                       <Input
                         id={`tp-mtitle-${i}`}
                         value={t.metaTitle || ''}
-                        placeholder={t.title ? `${t.title} | Sea Smoke Fishing Club` : 'e.g. Marlin Safari | Sea Smoke'}
+                        placeholder={t.title ? `${t.title} | Safari Tours Kenya` : 'e.g. Maasai Mara Big Five | Safari Tours Kenya'}
                         onChange={(e) => updTour(i, 'metaTitle', e.target.value)}
                         disabled={!t.enabled || isDeleted}
                       />
@@ -3371,7 +3370,7 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
                         id={`tp-mdesc-${i}`}
                         rows={2}
                         value={t.metaDescription || ''}
-                        placeholder="Overrides default meta description for this single charter page..."
+                        placeholder="Overrides default meta description for this single safari page..."
                         onChange={(e) => updTour(i, 'metaDescription', e.target.value)}
                         disabled={!t.enabled || isDeleted}
                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
@@ -3393,8 +3392,8 @@ function ToursPageListEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: A
 function ToursBookingFormEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
   const f = draft.toursPage?.bookingForm || defaultConfig.toursPage?.bookingForm || {
     enabled: true,
-    title: 'Book This Charter',
-    subtitle: 'Reserve your private expedition on the water.',
+    title: 'Reserve This Safari',
+    subtitle: 'Secure your private 4x4 safari expedition.',
     buttonText: 'Submit Reservation',
     accessKey: '',
     fields: defaultConfig.toursPage!.bookingForm!.fields || [],
@@ -3467,7 +3466,7 @@ function ToursBookingFormEditor({ draft, set }: { draft: AppConfig; set: (fn: (p
   return (
     <div className="space-y-6">
       <SectionToggle
-        title="Enable Reservation Form on Charter Pages"
+        title="Enable Reservation Form on Safari Pages"
         enabled={f.enabled !== false}
         onChange={(v) => updF('enabled', v)}
       />
@@ -3477,7 +3476,7 @@ function ToursBookingFormEditor({ draft, set }: { draft: AppConfig; set: (fn: (p
           <Input
             id="tbf-title"
             value={f.title || ''}
-            placeholder="Book This Charter"
+            placeholder="Reserve This Safari"
             onChange={(e) => updF('title', e.target.value)}
             disabled={f.enabled === false}
           />
@@ -3487,7 +3486,7 @@ function ToursBookingFormEditor({ draft, set }: { draft: AppConfig; set: (fn: (p
           <Input
             id="tbf-sub"
             value={f.subtitle || ''}
-            placeholder="Reserve your private expedition on the water."
+            placeholder="Secure your private 4x4 safari expedition."
             onChange={(e) => updF('subtitle', e.target.value)}
             disabled={f.enabled === false}
           />
@@ -3821,7 +3820,7 @@ function ContactHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: App
             id="ct-meta-desc"
             rows={2}
             value={draft.contactPage?.metaDescription || ''}
-            placeholder="e.g. Get in touch with our booking desk to plan your custom fishing trip..."
+            placeholder="e.g. Get in touch with our safari desk to plan your custom wildlife safari, Big Five game drive, or lodge vacation..."
             onChange={(e) =>
               set((p) => ({ ...p, contactPage: { ...p.contactPage, metaDescription: e.target.value } }))
             }
@@ -4144,52 +4143,10 @@ function ContactEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConf
                 size="sm"
                 onClick={() => {
                   const newField: DynamicFormField = {
-                    id: `cf_date_${Date.now()}`,
-                    label: 'Preferred Date',
-                    type: 'date',
-                    required: false,
-                    halfWidth: true,
-                    enabled: true,
-                  };
-                  const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
-                  updF('fields', [...currentFields, newField]);
-                }}
-                disabled={f.enabled === false}
-                className="text-[11px] h-9 flex-1 sm:flex-initial"
-              >
-                + Date
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  const newField: DynamicFormField = {
-                    id: `cf_time_${Date.now()}`,
-                    label: 'Preferred Time',
-                    type: 'time',
-                    required: false,
-                    halfWidth: true,
-                    enabled: true,
-                  };
-                  const currentFields = f.fields || defaultConfig.contactPage.form.fields || [];
-                  updF('fields', [...currentFields, newField]);
-                }}
-                disabled={f.enabled === false}
-                className="text-[11px] h-9 flex-1 sm:flex-initial"
-              >
-                + Time
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  const newField: DynamicFormField = {
                     id: `cf_select_${Date.now()}`,
                     label: 'Subject / Category',
                     type: 'select',
-                    options: ['General Inquiry', 'Charters', 'Feedback'],
+                    options: ['General Inquiry', 'Safari Tours', 'Feedback'],
                     required: false,
                     halfWidth: true,
                     enabled: true,
@@ -4276,7 +4233,7 @@ function FAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) 
                     const arr = [...f.items];
                     arr[idx] = { ...item, question: e.target.value };
                     upd('items', arr);
-                  }}
+                  }} 
                   placeholder="Question"
                   disabled={!item.enabled}
                   className="h-8 text-sm font-semibold"
@@ -4287,7 +4244,7 @@ function FAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) 
                     const arr = [...f.items];
                     arr[idx] = { ...item, answer: e.target.value };
                     upd('items', arr);
-                  }}
+                  }} 
                   placeholder="Answer"
                   disabled={!item.enabled}
                   rows={2}
@@ -4381,7 +4338,7 @@ function AboutHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCo
           <Input
             id="ab-meta-title"
             value={draft.aboutPage?.metaTitle || ''}
-            placeholder="e.g. About Our Heritage & Crew"
+            placeholder="e.g. About Our Heritage & Guides"
             onChange={(e) =>
               set((p) => {
                 const current = p.aboutPage || defaultConfig.aboutPage!;
@@ -4395,7 +4352,7 @@ function AboutHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppCo
             id="ab-meta-desc"
             rows={2}
             value={draft.aboutPage?.metaDescription || ''}
-            placeholder="e.g. Discover our story, decades of sportfishing heritage, and conservation..."
+            placeholder="e.g. Discover our story, decades of wildlife guiding, and savannah conservation..."
             onChange={(e) =>
               set((p) => {
                 const current = p.aboutPage || defaultConfig.aboutPage!;
@@ -5253,7 +5210,7 @@ function VersionHistoryEditor({
           <span>Automated Configuration Snapshots</span>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Snapshots preserve full site configurations across branding, page layouts, charter packages, and booking forms.
+          Snapshots preserve full site configurations across branding, page layouts, safari packages, and booking forms.
           Whenever you <strong>restore</strong> a version or <strong>reset to defaults</strong>, the system automatically takes a safety backup of the active configuration beforehand.
         </p>
       </div>
@@ -5526,7 +5483,7 @@ function VersionHistoryEditor({
                       </div>
                     </div>
                     <div className="p-3 rounded-lg border bg-muted/20 space-y-1">
-                      <span className="text-[10px] uppercase font-semibold text-muted-foreground">Charters / Tours</span>
+                      <span className="text-[10px] uppercase font-semibold text-muted-foreground">Safari Packages</span>
                       <p className="text-xs font-bold text-foreground">
                         {inspectConfig.toursPage?.tours?.items?.length || inspectConfig.homepage?.tours?.items?.length || 0} packages
                       </p>

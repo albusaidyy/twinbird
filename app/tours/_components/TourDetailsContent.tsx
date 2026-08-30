@@ -13,36 +13,36 @@ export function TourDetailsContent({
   const overview =
     tour.overview ||
     tour.description ||
-    'Experience an exhilarating day on the ocean with premier charter boats and tournament-grade sportfishing gear.';
+    'Experience an exhilarating wildlife safari with customized 4x4 Land Cruisers, certified professional naturalists, and premier game drives.';
 
   const defaultIncluded = [
-    'Heavy and light sportfishing tackle, Shimano & Penn rods/reels',
-    'Live bait, teaser spreads, and custom trolling lures',
-    'Certified marine park permits and fishing licenses',
-    'Experienced skipper and professional first mate',
-    'Freshly prepared lunch and ice-cold refreshments',
-    'Garmin sonar GPS, safety life vests, and first-aid equipment',
+    'Customized 4x4 Safari Land Cruiser with pop-up viewing roof',
+    'Professional certified safari guide & wildlife tracker',
+    'All National Park & Reserve conservation entry fees',
+    'Full-board accommodation at luxury tented camp or safari lodge',
+    'Unlimited bottled mineral water during all game drives',
+    'Round-trip hotel or airport transfers in comfortable transport',
   ];
 
   const defaultNotIncluded = [
-    'Crew gratuities and tips (optional)',
-    'Hotel pickup & return transfers (available on request)',
-    'Personal swimwear & beach towels',
-    'Alcoholic spirits (BYOB welcome)',
+    'Driver-guide and camp staff gratuities (optional)',
+    'Hot air balloon safari excursion (available as an add-on)',
+    'Personal travel, medical, and baggage insurance',
+    'Alcoholic spirits and premium bottled beverages',
   ];
 
   const defaultWhyChoose = [
-    'Deep-sea sportfisher equipped with fighting chairs & shaded canopy',
-    'Experienced local captain with decades of sportfishing knowledge',
-    'Strict billfish conservation protocol with tagging and release',
-    'All-inclusive private charter with premium gear and catering',
+    'Guaranteed window seats in custom 4x4 safari vehicles',
+    'Silver & gold-level certified professional safari guides',
+    'Ethical wildlife tracking with high Big Five sighting success',
+    'Handpicked luxury eco-camps inside prime wildlife territories',
   ];
 
   const defaultKnowBeforeYouGo = [
-    `Departure: Morning from Watamu Pier / Coastal Harbor`,
-    `Duration: Approx. ${tour.duration || '6 - 8 hours'}`,
-    'What to bring: Polarized sunglasses, reef-safe sunscreen, light jacket, deck shoes',
-    'Booking: Reserve in advance to secure your boat and crew',
+    `Departure: Early morning pickup from your hotel or airport`,
+    `Duration: Approx. ${tour.duration || 'Full Day'}`,
+    'What to bring: Neutral-colored clothing, wide-brim hat, binoculars, camera gear, and a warm fleece for morning game drives',
+    'Booking: Advance reservations recommended to secure park permits and lodge bookings',
   ];
 
   const included = tour.included !== undefined ? tour.included : defaultIncluded;

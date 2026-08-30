@@ -115,7 +115,7 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<
                 <Link href={targetHref} className="block relative h-52 overflow-hidden">
                   <Image
                     src={tour.imageUrl || '/images/hero/hero.jpg'}
-                    alt={tour.title || 'Fishing Charter'}
+                    alt={tour.title || 'Safari Tour'}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -544,8 +544,8 @@ export default function HomePage() {
     switch (key) {
       case 'stats':   return <StatsBar key={key} data={hp.stats} primaryColor={primaryColor} />;
       case 'tours': {
-        const charterItems = hp.tours?.items || [];
-        return <FeaturedTours key={key} data={{ ...hp.tours, items: charterItems }} primaryColor={primaryColor} accentColor={accentColor} />;
+        const tourItems = hp.tours?.items || [];
+        return <FeaturedTours key={key} data={{ ...hp.tours, items: tourItems }} primaryColor={primaryColor} accentColor={accentColor} />;
       }
       case 'whyus':   return <WhyUs key={key} data={hp.whyUs} primaryColor={primaryColor} accentColor={accentColor} fallbackImageUrl={hp.hero.imageUrl} />;
       case 'reviews': return <Reviews key={key} data={hp.reviews} primaryColor={primaryColor} accentColor={accentColor} />;

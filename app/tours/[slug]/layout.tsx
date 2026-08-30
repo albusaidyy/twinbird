@@ -9,13 +9,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const config = await getAppConfig();
-  const appName = config.branding.appName || 'Sea Smoke Fishing Club';
+  const appName = config.branding.appName || 'Safari Tours Kenya';
   const tours = config.toursPage?.tours?.items || [];
   const tour = findTourBySlug(tours, slug);
 
   if (!tour) {
     return {
-      title: `Charter Excursion | ${appName}`,
+      title: `Safari Expedition | ${appName}`,
       description: config.branding.metaDescription,
     };
   }
@@ -26,7 +26,7 @@ export async function generateMetadata({
     tour.description ||
     tour.overview ||
     config.branding.metaDescription ||
-    'Premier sportfishing charter excursion in Kenya.';
+    'Premier African wildlife safari and Big Five game drive in Kenya.';
 
   return {
     title,
