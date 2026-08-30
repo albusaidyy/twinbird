@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f291e" />
+      <stop offset="100%" stop-color="#1b4332" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="128" height="128" rx="28" fill="url(#bgGrad)" />
+  
+  <!-- Outer Gold Ring -->
+  <circle cx="64" cy="64" r="50" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" opacity="0.4" />
+  <circle cx="64" cy="64" r="44" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.8" />
+
+  <!-- Compass Star Points -->
+  <g filter="url(#shadow)">
+    <!-- North -->
+    <polygon points="64,18 70,58 64,54 58,58" fill="url(#goldGrad)" />
+    <!-- South -->
+    <polygon points="64,110 70,70 64,74 58,70" fill="url(#goldGrad)" opacity="0.8" />
+    <!-- East -->
+    <polygon points="110,64 70,70 74,64 70,58" fill="url(#goldGrad)" />
+    <!-- West -->
+    <polygon points="18,64 58,70 54,64 58,58" fill="url(#goldGrad)" opacity="0.8" />
+
+    <!-- Diagonal Points -->
+    <polygon points="94,34 68,60 64,64 64,60" fill="url(#goldGrad)" opacity="0.6" />
+    <polygon points="34,94 60,68 64,64 64,68" fill="url(#goldGrad)" opacity="0.6" />
+    <polygon points="94,94 68,68 64,64 68,64" fill="url(#goldGrad)" opacity="0.6" />
+    <polygon points="34,34 60,60 64,64 60,64" fill="url(#goldGrad)" opacity="0.6" />
+  </g>
+
+  <!-- Center Lion Badge Core -->
+  <circle cx="64" cy="64" r="16" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="2.5" filter="url(#shadow)" />
+  <circle cx="64" cy="64" r="4" fill="url(#goldGrad)" />
+
+  <!-- Cardinal Tick Marks -->
+  <line x1="64" y1="14" x2="64" y2="18" stroke="url(#goldGrad)" stroke-width="2" />
+  <line x1="64" y1="110" x2="64" y2="114" stroke="url(#goldGrad)" stroke-width="2" />
+  <line x1="14" y1="64" x2="18" y2="64" stroke="url(#goldGrad)" stroke-width="2" />
+  <line x1="110" y1="64" x2="114" y2="64" stroke="url(#goldGrad)" stroke-width="2" />
+</svg>

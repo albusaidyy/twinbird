@@ -4,25 +4,71 @@ This document records the complete setup, debugging, migrations, and admin seedi
 
 ---
 
-## 1. Database Connection & URL Encoding
+## 1. Environment Setup (`.env`)
 
-When connecting to Supabase PostgreSQL using a connection string in `.env`:
+Create a `.env` file in your root project directory with the following variables:
 
 ```env
+# 1. Supabase PostgreSQL Connection String
 DATABASE_URL=postgresql://postgres:[ENCODED_PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres
-BETTER_AUTH_SECRET=your_auth_secret_key
+
+# 2. Better Auth Encryption Secret & Base URL
+BETTER_AUTH_SECRET=your_generated_32_byte_secret_key
 BETTER_AUTH_URL=http://localhost:3000
+
+# 3. Supabase API Credentials
+SUPABASE_URL=https://[PROJECT_REF].supabase.co
+SUPABASE_SERVICE_KEY=your_supabase_service_or_secret_key
+
+# 4. Initial Admin Credentials (for seed script)
 ADMIN_EMAIL=designhives.ke@gmail.com
 ADMIN_PASSWORD=your_secure_password
 ADMIN_NAME=Admin
 ```
 
-### Key Considerations:
-* **Special Characters in Database Password**: If the password contains symbols like `+`, `/`, `%`, or `@`, they must be percent-encoded (e.g. `+` -> `%2B`, `/` -> `%2F`, `%` -> `%25`) to prevent connection parsing errors (`ENOTFOUND`).
+---
+
+## 2. Generating Required Values
+
+### Step 2.1: Generate `DATABASE_URL` (with Automatic Password Encoding)
+If your Supabase database password contains special characters (`+`, `/`, `%`, `@`, etc.), they must be percent-encoded to prevent connection errors (`ENOTFOUND` / parse errors).
+
+Run the interactive generator:
+```bash
+npx tsx scripts/generate-db-url.ts
+```
+
+### Step 2.2: Generate `BETTER_AUTH_SECRET`
+Better Auth requires a high-entropy 32-byte secret key in `BETTER_AUTH_SECRET` to encrypt session tokens and cookies. Generate one using any of these commands:
+
+#### Option A: Using the Better Auth CLI (Recommended)
+```bash
+npx @better-auth/cli secret
+```
+
+#### Option B: Using Node.js (Cross-Platform)
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+#### Option C: Using OpenSSL (macOS / Linux / Git Bash)
+```bash
+openssl rand -base64 32
+```
+
+#### Option D: Using PowerShell (Windows Native)
+```powershell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
+```
+
+Copy the generated string and paste it into your `.env`:
+```env
+BETTER_AUTH_SECRET=your_generated_secret_string_here
+```
 
 ---
 
-## 2. Core Auth Configuration
+## 3. Core Auth Configuration
 
 ### `lib/auth.ts` (Server Configuration)
 Initializes Better Auth using the `pg` connection pool:
@@ -71,15 +117,17 @@ export const authClient = createAuthClient({
 
 ---
 
-## 3. Database Schema & Migrations (`npx auth@latest`)
+## 4. Database Schema & Migrations
+
+### 4.1 Better Auth Core Tables (`npx auth@latest`)
 
 Better Auth requires 4 core tables: `user`, `session`, `account`, and `verification`.
 
-### Recommended 2-Step Workflow
+#### Recommended 2-Step Workflow
 
 Instead of relying on locally pinned CLI packages, use the official `auth@latest` runner:
 
-#### Step 1: Generate the Migration SQL
+##### Step 1: Generate the Migration SQL
 Generates the exact schema migration diff matching your installed `better-auth` version into the `better-auth_migrations/` folder:
 
 ```bash
@@ -88,14 +136,14 @@ npx auth@latest generate
 
 This creates a migration SQL file (e.g. `better-auth_migrations/2026-08-19T...sql`) specifying any missing tables, columns, or indexes (such as the `issuer` column and unique constraint on `account`).
 
-#### Step 2: Apply the Migration Directly to Supabase
+##### Step 2: Apply the Migration Directly to Supabase
 Applies the generated schema directly to your Supabase PostgreSQL database using the connection string from `lib/auth.ts`:
 
 ```bash
 npx auth@latest migrate
 ```
 
-### Schema Structure:
+#### Schema Structure:
 1. **`user`**: `id` (PK), `name`, `email` (unique), `emailVerified`, `image`, `createdAt`, `updatedAt`
 2. **`session`**: `id` (PK), `expiresAt`, `token` (unique), `createdAt`, `updatedAt`, `ipAddress`, `userAgent`, `userId` (FK -> user)
 3. **`account`**: `id` (PK), `issuer`, `accountId`, `providerId`, `userId` (FK -> user), `accessToken`, `refreshToken`, `idToken`, `accessTokenExpiresAt`, `refreshTokenExpiresAt`, `scope`, `password`, `createdAt`, `updatedAt`
@@ -105,7 +153,44 @@ npx auth@latest migrate
 
 ---
 
-## 4. Route Protection (`proxy.ts`)
+### 4.2 Site Configuration & Snapshot Tables (`scripts/create-config-versions-table.ts`)
+
+The admin configuration and snapshot versioning system requires two dedicated PostgreSQL tables:
+1. **`site_config`**: Stores the single live site configuration JSON (`id = 'main'`).
+2. **`site_config_versions`**: Stores point-in-time backup snapshots for configuration restores.
+
+#### Run the Migration Script:
+```bash
+npm run db:migrate
+# or
+npx tsx scripts/create-config-versions-table.ts
+```
+
+#### Table Schema Created:
+```sql
+-- Live Site Configuration
+create table if not exists site_config (
+  id          text        primary key,
+  config      jsonb       not null,
+  updated_at  timestamptz not null default now(),
+  updated_by  text
+);
+
+-- Automated & Manual Version Snapshots
+create table if not exists site_config_versions (
+  id          uuid        primary key default gen_random_uuid(),
+  config      jsonb       not null,
+  label       text,
+  created_at  timestamptz not null default now(),
+  created_by  text
+);
+```
+
+> **Safety**: The migration is fully idempotent (`create table if not exists` and schema validation). It is safe to run multiple times.
+
+---
+
+## 5. Route Protection (`proxy.ts`)
 
 In Next.js 16+, the `middleware.ts` convention is superseded by **`proxy.ts`** with the `export function proxy(req: NextRequest)` entry point.
 
@@ -148,7 +233,7 @@ export const config = {
 
 ---
 
-## 5. Admin Seeding Script
+## 6. Admin Seeding Script
 
 The script at `scripts/seed-admin.ts` provides one-time initial admin creation with **idempotency** (safely skips creation if the admin already exists).
 
@@ -204,7 +289,7 @@ npx tsx scripts/seed-admin.ts
 
 ---
 
-## 6. Vercel Deployment & Environment Variables
+## 7. Vercel Deployment & Environment Variables
 
 When deploying the application to **Vercel**, configure the project linkage and production environment variables.
 
@@ -253,7 +338,7 @@ npx vercel --prod
 
 ---
 
-## 7. Verification & Build Commands
+## 8. Verification & Build Commands
 
 To verify that the entire system is healthy and types are valid:
 

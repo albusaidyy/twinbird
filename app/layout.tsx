@@ -18,7 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
       config.branding.metaDescription ||
       'Premier African wildlife safaris, Big Five game drives, and luxury bush expeditions in Kenya.',
     icons: {
-      icon: favicon,
+      icon: [
+        { url: '/brand/favicons/favicon.svg', type: 'image/svg+xml' },
+        { url: favicon },
+      ],
       shortcut: favicon,
       apple: favicon === '/brand/favicons/favicon.ico' ? '/brand/favicons/apple-touch-icon.png' : favicon,
       other: [
