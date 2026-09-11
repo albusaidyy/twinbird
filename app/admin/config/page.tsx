@@ -11,7 +11,7 @@ import { useAppConfig } from '@/components/providers/AppConfigProvider';
 import { saveAppConfig } from '@/lib/config/saveAppConfig';
 import { defaultConfig } from '@/config/default-config';
 import { saveConfigVersion } from './actions';
-import type { AppConfig, TourItem } from '@/types/app-config';
+import type { AppConfig } from '@/types/app-config';
 import {
   CheckCircle,
   RotateCcw,
@@ -38,7 +38,9 @@ import { VersionHistoryEditor } from './_components/global/VersionHistoryEditor'
 // Homepage editors
 import { HomeHeroEditor } from './_components/home/HomeHeroEditor';
 import { HomeStatsEditor } from './_components/home/HomeStatsEditor';
+import { HomeExperiencesEditor } from './_components/home/HomeExperiencesEditor';
 import { HomeToursEditor } from './_components/home/HomeToursEditor';
+import { HomeExcursionsEditor } from './_components/home/HomeExcursionsEditor';
 import { HomeReviewsEditor } from './_components/home/HomeReviewsEditor';
 import { HomeGalleryEditor } from './_components/home/HomeGalleryEditor';
 import { HomeWhyUsEditor } from './_components/home/HomeWhyUsEditor';
@@ -104,7 +106,7 @@ export default function AdminConfigPage() {
     // Clean up empty options in select fields before saving
     const cleanedDraft = JSON.parse(JSON.stringify(draft)) as AppConfig;
 
-    const deduplicateList = (items?: TourItem[]) => {
+    const deduplicateList = <T extends { id?: string; slug?: string; title?: string }>(items?: T[]): T[] | undefined => {
       if (!items) return items;
       const seen = new Set<string>();
       return items.filter((item, idx) => {
@@ -117,6 +119,9 @@ export default function AdminConfigPage() {
 
     if (cleanedDraft.homepage?.tours?.items) {
       cleanedDraft.homepage.tours.items = deduplicateList(cleanedDraft.homepage.tours.items)!;
+    }
+    if (cleanedDraft.homepage?.excursions?.items) {
+      cleanedDraft.homepage.excursions.items = deduplicateList(cleanedDraft.homepage.excursions.items)!;
     }
     if (cleanedDraft.toursPage?.tours?.items) {
       cleanedDraft.toursPage.tours.items = deduplicateList(cleanedDraft.toursPage.tours.items)!;
@@ -405,8 +410,18 @@ export default function AdminConfigPage() {
 
                           const heroSec = page.sections.find((s) => s.key === 'hero');
                           const footerSec = page.sections.find((s) => s.key === 'footer');
-                          const defaultOrder = ['stats', 'tours', 'whyus', 'reviews', 'gallery', 'cta'];
+                          const defaultOrder = ['stats', 'experiences', 'tours', 'excursions', 'whyus', 'reviews', 'gallery', 'cta'];
                           const order = [...(draft.homepage.sectionOrder || defaultOrder)];
+                          if (!order.includes('experiences')) {
+                            const statsIdx = order.indexOf('stats');
+                            if (statsIdx !== -1) order.splice(statsIdx + 1, 0, 'experiences');
+                            else order.unshift('experiences');
+                          }
+                          if (!order.includes('excursions')) {
+                            const toursIdx = order.indexOf('tours');
+                            if (toursIdx !== -1) order.splice(toursIdx + 1, 0, 'excursions');
+                            else order.push('excursions');
+                          }
                           if (!order.includes('gallery')) {
                             const reviewsIdx = order.indexOf('reviews');
                             if (reviewsIdx !== -1) order.splice(reviewsIdx + 1, 0, 'gallery');
@@ -414,7 +429,12 @@ export default function AdminConfigPage() {
                           }
 
                           const middleSecs = order
-                            .map((k) => page.sections.find((s) => s.key === k))
+                            .map((k) => {
+                              if (k === 'excursions') {
+                                return page.sections.find((s) => s.key === 'home-excursions');
+                              }
+                              return page.sections.find((s) => s.key === k);
+                            })
                             .filter(Boolean) as typeof page.sections;
 
                           const allOrdered = [];
@@ -447,12 +467,15 @@ export default function AdminConfigPage() {
                                   if (!isMiddle) return;
                                   e.preventDefault();
                                   if (draggedItem && draggedItem !== key) {
-                                    const oldIdx = order.indexOf(draggedItem);
-                                    const newIdx = order.indexOf(key);
+                                    const normalizeKey = (k: string) => (k === 'home-excursions' ? 'excursions' : k);
+                                    const dragKey = normalizeKey(draggedItem);
+                                    const targetKey = normalizeKey(key);
+                                    const oldIdx = order.indexOf(dragKey);
+                                    const newIdx = order.indexOf(targetKey);
                                     if (oldIdx !== -1 && newIdx !== -1) {
                                       const newOrder = [...order];
                                       newOrder.splice(oldIdx, 1);
-                                      newOrder.splice(newIdx, 0, draggedItem);
+                                      newOrder.splice(newIdx, 0, dragKey);
                                       setDraft((p) => ({ ...p, homepage: { ...p.homepage, sectionOrder: newOrder } }));
                                     }
                                   }
@@ -544,7 +567,9 @@ export default function AdminConfigPage() {
             {/* Homepage */}
             {active === 'hero' && <HomeHeroEditor {...editorProps} />}
             {active === 'stats' && <HomeStatsEditor {...editorProps} />}
+            {active === 'experiences' && <HomeExperiencesEditor {...editorProps} />}
             {active === 'tours' && <HomeToursEditor {...editorProps} />}
+            {active === 'home-excursions' && <HomeExcursionsEditor {...editorProps} />}
             {active === 'reviews' && <HomeReviewsEditor {...editorProps} />}
             {active === 'gallery' && <HomeGalleryEditor {...editorProps} />}
             {active === 'whyus' && <HomeWhyUsEditor {...editorProps} />}

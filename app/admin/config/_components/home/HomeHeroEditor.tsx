@@ -112,6 +112,28 @@ export function HomeHeroEditor({ draft, set }: EditorProps) {
               disabled={!h.showPrimaryCta}
             />
           </FieldRow>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {[
+              { label: 'Safari Tours', href: '/tours' },
+              { label: 'Excursions', href: '/excursions' },
+              { label: 'Transfers', href: '/transfers' },
+              { label: 'Contact', href: '/contact' },
+            ].map((r) => (
+              <button
+                key={r.href}
+                type="button"
+                onClick={() => upd("primaryCtaHref", r.href)}
+                disabled={!h.showPrimaryCta}
+                className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors ${
+                  h.primaryCtaHref === r.href
+                    ? 'bg-primary text-primary-foreground border-primary font-medium'
+                    : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border'
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-4 border rounded-lg p-4 bg-muted/20">
@@ -138,6 +160,28 @@ export function HomeHeroEditor({ draft, set }: EditorProps) {
               disabled={!h.showSecondaryCta}
             />
           </FieldRow>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {[
+              { label: 'Excursions', href: '/excursions' },
+              { label: 'Safari Tours', href: '/tours' },
+              { label: 'Transfers', href: '/transfers' },
+              { label: 'Contact', href: '/contact' },
+            ].map((r) => (
+              <button
+                key={r.href}
+                type="button"
+                onClick={() => upd("secondaryCtaHref", r.href)}
+                disabled={!h.showSecondaryCta}
+                className={`text-[10px] px-1.5 py-0.5 rounded border transition-colors ${
+                  h.secondaryCtaHref === r.href
+                    ? 'bg-primary text-primary-foreground border-primary font-medium'
+                    : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border'
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       <Separator />

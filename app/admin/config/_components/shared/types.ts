@@ -19,6 +19,7 @@ import {
   Phone,
   FileText,
   Users,
+  Sparkles,
 } from 'lucide-react';
 
 export type SectionKey =
@@ -27,7 +28,9 @@ export type SectionKey =
   | 'versions'
   | 'hero'
   | 'stats'
+  | 'experiences'
   | 'tours'
+  | 'home-excursions'
   | 'reviews'
   | 'whyus'
   | 'gallery'
@@ -87,14 +90,16 @@ export const PAGES: PageItem[] = [
     Icon: Home,
     href: '/',
     sections: [
-      { key: 'hero',     label: 'Hero',            Icon: Layers,     description: 'Main splash section' },
-      { key: 'stats',    label: 'Stats Bar',       Icon: BarChart2,  description: '4 stat counters' },
-      { key: 'tours',    label: 'Featured Tours',  Icon: Map,        description: 'Tour cards' },
-      { key: 'reviews',  label: 'Reviews',         Icon: Star,       description: 'Guest testimonials' },
-      { key: 'whyus',    label: 'Why Us',          Icon: HelpCircle, description: 'Feature highlights' },
-      { key: 'gallery',  label: 'Gallery',         Icon: ImageIcon,  description: 'Catch photo gallery' },
-      { key: 'cta',      label: 'CTA Banner',      Icon: Megaphone,  description: 'Bottom call-to-action' },
-      { key: 'footer',   label: 'Footer',          Icon: LayoutDashboard, description: 'Site footer & links' },
+      { key: 'hero',            label: 'Hero',                Icon: Layers,     description: 'Main splash section' },
+      { key: 'stats',           label: 'Stats Bar',           Icon: BarChart2,  description: '4 stat counters' },
+      { key: 'experiences',     label: 'Experiences',         Icon: Sparkles,   description: 'Core offerings (Safaris, Excursions, Transfers)' },
+      { key: 'tours',           label: 'Featured Tours',      Icon: Map,        description: 'Tour cards' },
+      { key: 'home-excursions', label: 'Featured Excursions', Icon: Compass,    description: 'Day excursion cards' },
+      { key: 'reviews',         label: 'Reviews',             Icon: Star,       description: 'Guest testimonials' },
+      { key: 'whyus',           label: 'Why Us',              Icon: HelpCircle, description: 'Feature highlights' },
+      { key: 'gallery',         label: 'Gallery',             Icon: ImageIcon,  description: 'Catch photo gallery' },
+      { key: 'cta',             label: 'CTA Banner',          Icon: Megaphone,  description: 'Bottom call-to-action' },
+      { key: 'footer',          label: 'Footer',              Icon: LayoutDashboard, description: 'Site footer & links' },
     ],
   },
   {

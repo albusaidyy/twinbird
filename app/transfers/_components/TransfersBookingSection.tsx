@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Clock, Send, CheckCircle2, MessageCircle, Luggage, ArrowRight, Calendar, Users, MapPin, Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle2, MessageCircle, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

@@ -21,6 +21,8 @@ import type {
 } from '@/types/app-config';
 import { defaultConfig } from '@/config/default-config';
 import { getTourSlug } from '@/lib/tour-utils';
+import { HomeExperiencesSection } from '@/components/home/HomeExperiencesSection';
+import { HomeExcursionsSection } from '@/components/home/HomeExcursionsSection';
 
 // Extracted to components/
 
@@ -71,7 +73,7 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<
   return (
     <section 
       className={`py-24 px-6 ${isDark ? 'dark text-white' : 'text-foreground'}`}
-      style={{ backgroundColor: data.backgroundColor || '#fafafa' }}
+      style={{ backgroundColor: data.backgroundColor || '#ffffff' }}
     >
       <div className="mx-auto max-w-6xl">
         {((title && title.trim() !== '') || (eyebrow && eyebrow.trim() !== '') || (subtitle && subtitle.trim() !== '')) && (
@@ -110,7 +112,7 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<
             return (
               <article
                 key={tour.title}
-                className="group relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 shadow-sm hover:shadow-xl transition-shadow duration-300"
+                className="group relative overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 border border-border/80 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between"
               >
                 <Link href={targetHref} className="block relative h-52 overflow-hidden">
                   <Image
@@ -532,8 +534,18 @@ export default function HomePage() {
   const { primaryColor, accentColor, appName, logoUrl } = config.branding;
   const hp = config.homepage;
 
-  const defaultOrder = ['stats', 'tours', 'whyus', 'reviews', 'gallery', 'cta'];
+  const defaultOrder = ['stats', 'experiences', 'tours', 'excursions', 'whyus', 'reviews', 'gallery', 'cta'];
   const order = [...(hp.sectionOrder || defaultOrder)];
+  if (!order.includes('experiences')) {
+    const statsIdx = order.indexOf('stats');
+    if (statsIdx !== -1) order.splice(statsIdx + 1, 0, 'experiences');
+    else order.unshift('experiences');
+  }
+  if (!order.includes('excursions')) {
+    const toursIdx = order.indexOf('tours');
+    if (toursIdx !== -1) order.splice(toursIdx + 1, 0, 'excursions');
+    else order.push('excursions');
+  }
   if (!order.includes('gallery')) {
     const reviewsIdx = order.indexOf('reviews');
     if (reviewsIdx !== -1) order.splice(reviewsIdx + 1, 0, 'gallery');
@@ -542,10 +554,15 @@ export default function HomePage() {
 
   const renderSection = (key: string) => {
     switch (key) {
-      case 'stats':   return <StatsBar key={key} data={hp.stats} primaryColor={primaryColor} />;
+      case 'stats':       return <StatsBar key={key} data={hp.stats} primaryColor={primaryColor} />;
+      case 'experiences': return <HomeExperiencesSection key={key} data={hp.experiences} primaryColor={primaryColor} />;
       case 'tours': {
         const tourItems = hp.tours?.items || [];
         return <FeaturedTours key={key} data={{ ...hp.tours, items: tourItems }} primaryColor={primaryColor} accentColor={accentColor} />;
+      }
+      case 'excursions': {
+        const excursionItems = hp.excursions?.items || config.excursionsPage?.tours?.items || [];
+        return <HomeExcursionsSection key={key} data={{ ...(hp.excursions || defaultConfig.homepage.excursions!), items: excursionItems }} primaryColor={primaryColor} accentColor={accentColor} />;
       }
       case 'whyus':   return <WhyUs key={key} data={hp.whyUs} primaryColor={primaryColor} accentColor={accentColor} fallbackImageUrl={hp.hero.imageUrl} />;
       case 'reviews': return <Reviews key={key} data={hp.reviews} primaryColor={primaryColor} accentColor={accentColor} />;

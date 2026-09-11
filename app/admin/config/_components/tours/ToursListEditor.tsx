@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
   Compass,
-  Info,
   Plus,
   Trash2,
   RotateCcw,
@@ -15,7 +14,6 @@ import {
 import type { TourItem } from '@/types/app-config';
 import { defaultConfig } from '@/config/default-config';
 import type { EditorProps } from '../shared/types';
-import { PAGES } from '../shared/types';
 import { FieldRow } from '../shared/FieldRow';
 import { SectionToggle } from '../shared/SectionToggle';
 import { BackgroundColorPicker } from '../shared/BackgroundColorPicker';
@@ -29,9 +27,6 @@ export function ToursListEditor({ draft, set }: EditorProps) {
   const data = currentToursPage.tours || defaultConfig.toursPage!.tours;
   const toursList = data.items || [];
   const [deletePrompt, setDeletePrompt] = useState<{ type: 'soft' | 'permanent'; tour: TourItem; index: number } | null>(null);
-
-  const homeLabel = PAGES.find((p) => p.id === 'home')?.label || 'Home';
-  const homeToursSectionLabel = PAGES.find((p) => p.id === 'home')?.sections.find((s) => s.key === 'tours')?.label || draft.homepage?.tours?.title || 'Featured Tours';
 
   const updEnabled = (v: boolean) => set((p) => {
     const current = p.toursPage || defaultConfig.toursPage!;
@@ -62,6 +57,53 @@ export function ToursListEditor({ draft, set }: EditorProps) {
         ...p,
         homepage: { ...p.homepage, tours: { ...(p.homepage?.tours || defaultConfig.homepage.tours), items: hpItems } },
         toursPage: { ...currentToursPage, tours: { ...currentTours, items: tpItems } },
+      };
+    });
+
+  const addTour = () =>
+    set((p) => {
+      const currentToursPage = p.toursPage || defaultConfig.toursPage!;
+      const hpItems = [...(p.homepage?.tours?.items || [])];
+      const tpItems = [...(currentToursPage.tours?.items || [])];
+      const uniqueId = `safari-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const newTour: TourItem = {
+        id: uniqueId,
+        enabled: true,
+        deleted: false,
+        title: 'New Safari Package',
+        badge: 'Popular',
+        description: 'Experience premier wildlife safaris and Big Five game drives in Kenya...',
+        duration: '3 Days / 2 Nights',
+        rating: 5,
+        imageUrl: '/images/hero/hero.jpg',
+        location: 'Maasai Mara National Reserve',
+        showLocation: true,
+        schedule: 'Daily Departures (Year-Round)',
+        showSchedule: true,
+        groupType: 'Families · Private 4x4 · Groups',
+        showGroupType: true,
+        price: 'Contact for pricing',
+        overview: 'Experience premier African wildlife safaris and Big Five game drives in Kenya with customized 4x4 Land Cruisers and professional guides.',
+        included: ['Custom 4x4 Safari Land Cruiser', 'Professional safari guide & tracker', 'Park conservation fees', 'Lodge accommodation & meals'],
+        showIncluded: true,
+        notIncluded: ['Driver-guide gratuities (optional)', 'Hot air balloon safari', 'Personal travel insurance'],
+        showNotIncluded: true,
+        whyChoose: ['Guaranteed window seats in 4x4 Land Cruisers', 'Silver & Gold certified safari guides', 'Ethical wildlife tracking & Big Five focus'],
+        showWhyChoose: true,
+        knowBeforeYouGo: ['Departure: Early morning hotel/airport pickup', 'What to bring: Neutral safari clothing, binoculars, sunscreen, warm jacket'],
+        showKnowBeforeYouGo: true,
+        showTitle: true,
+        showBadge: true,
+        showDuration: true,
+        showRating: true,
+        showPrice: true,
+      };
+      const newHpItems = [...hpItems, { ...newTour }];
+      const newTpItems = [...tpItems, { ...newTour }];
+      return {
+        ...p,
+        homepage: { ...p.homepage, tours: { ...(p.homepage?.tours || defaultConfig.homepage.tours), items: newHpItems } },
+        toursPage: { ...currentToursPage, tours: { ...currentToursPage.tours, items: newTpItems } },
       };
     });
 
@@ -176,19 +218,18 @@ export function ToursListEditor({ draft, set }: EditorProps) {
         })} 
       />
 
-      <div className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3.5 text-xs text-muted-foreground">
-        <Info className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
-        <div className="space-y-1">
-          <p className="font-semibold text-foreground">Safari Card Attributes Managed in {homeToursSectionLabel}</p>
-          <p>
-            Card titles, pricing, ratings, badges, and cover thumbnails are edited under <strong>{homeLabel} &rarr; {homeToursSectionLabel}</strong>. Below, expand each safari to configure its full single-page details (overview, inclusions, itinerary, hero banner, and photo carousel).
-          </p>
-        </div>
-      </div>
-
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-semibold">Safari Packages ({toursList.length})</h4>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addTour}
+            className="gap-1.5 text-xs font-semibold"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Safari Package
+          </Button>
         </div>
 
         {toursList.map((t, i) => {
@@ -209,9 +250,6 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                       <Switch checked={t.enabled} onCheckedChange={(v) => updTour(i, 'enabled', v)} />
                       <span className="text-xs font-semibold text-muted-foreground">
                         Safari #{i + 1} {!t.enabled && '(Hidden)'}
-                      </span>
-                      <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                        Card info read-only
                       </span>
                     </>
                   ) : (
@@ -297,8 +335,9 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                         <Input
                           id={`tp-title-${i}`}
                           value={t.title}
-                          disabled={true}
-                          className={`bg-muted/40 cursor-not-allowed ${isDeleted ? 'line-through text-muted-foreground' : ''}`}
+                          onChange={(e) => updTour(i, 'title', e.target.value)}
+                          disabled={!t.enabled || isDeleted}
+                          className={isDeleted ? 'line-through text-muted-foreground' : ''}
                         />
                       </FieldRow>
                     </div>
@@ -317,8 +356,8 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                         <Input
                           id={`tp-badge-${i}`}
                           value={t.badge || ''}
-                          disabled={true}
-                          className="bg-muted/40 cursor-not-allowed"
+                          onChange={(e) => updTour(i, 'badge', e.target.value)}
+                          disabled={!t.enabled || isDeleted}
                         />
                       </FieldRow>
                     </div>
@@ -337,8 +376,8 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                         <Input
                           id={`tp-dur-${i}`}
                           value={t.duration || ''}
-                          disabled={true}
-                          className="bg-muted/40 cursor-not-allowed"
+                          onChange={(e) => updTour(i, 'duration', e.target.value)}
+                          disabled={!t.enabled || isDeleted}
                         />
                       </FieldRow>
                     </div>
@@ -361,8 +400,8 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                           max={5}
                           step={0.1}
                           value={t.rating}
-                          disabled={true}
-                          className="bg-muted/40 cursor-not-allowed"
+                          onChange={(e) => updTour(i, 'rating', parseFloat(e.target.value) || 0)}
+                          disabled={!t.enabled || isDeleted}
                         />
                       </FieldRow>
                     </div>
@@ -384,8 +423,8 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                           id={`tp-price-${i}`}
                           value={t.price || ''}
                           placeholder="Contact for pricing"
-                          disabled={true}
-                          className="bg-muted/40 cursor-not-allowed"
+                          onChange={(e) => updTour(i, 'price', e.target.value)}
+                          disabled={!t.enabled || isDeleted}
                         />
                       </FieldRow>
                     </div>
@@ -396,8 +435,8 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                       id={`tp-href-${i}`}
                       value={t.href || ''}
                       placeholder="/tours/..."
-                      disabled={true}
-                      className="bg-muted/40 cursor-not-allowed"
+                      onChange={(e) => updTour(i, 'href', e.target.value)}
+                      disabled={!t.enabled || isDeleted}
                     />
                   </FieldRow>
                 </div>
@@ -409,7 +448,7 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                     onChange={(url) => updTour(i, 'imageUrl', url)}
                     folder="tours"
                     placeholder="Cover photo..."
-                    disabled={true}
+                    disabled={!t.enabled || isDeleted}
                   />
                 </FieldRow>
 
@@ -418,8 +457,9 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                     id={`tp-desc-${i}`}
                     rows={2}
                     value={t.description}
-                    disabled={true}
-                    className="w-full rounded-md border border-input bg-muted/40 px-3 py-2 text-sm shadow-sm resize-none disabled:opacity-75 cursor-not-allowed"
+                    onChange={(e) => updTour(i, 'description', e.target.value)}
+                    disabled={!t.enabled || isDeleted}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm resize-none disabled:opacity-75"
                   />
                 </FieldRow>
 

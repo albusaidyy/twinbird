@@ -12,7 +12,7 @@ import {
   ArrowDown,
 } from 'lucide-react';
 import type { ExcursionItem } from '@/types/app-config';
-import { defaultConfig } from '@/config/default-config';
+import { defaultConfig, defaultExcursionItems } from '@/config/default-config';
 import type { EditorProps } from '../shared/types';
 import { FieldRow } from '../shared/FieldRow';
 import { SectionToggle } from '../shared/SectionToggle';
@@ -23,6 +23,15 @@ import { TourDeleteConfirmDialog } from '../shared/TourDeleteConfirmDialog';
 import { isExcursionMatch } from '@/lib/excursion-utils';
 
 export function ExcursionsListEditor({ draft, set }: EditorProps) {
+  const fallbackExcursions = defaultConfig.homepage.excursions || {
+    enabled: true,
+    backgroundColor: '#ffffff',
+    eyebrow: 'DAY EXPEDITIONS & EXCURSIONS',
+    title: 'Handcrafted Day Excursions',
+    subtitle: 'Immerse yourself in Kenya’s marine sanctuaries, coastal coral gardens, and ancient forests on guided day journeys back before evening.',
+    items: defaultExcursionItems,
+  };
+
   const currentExcursionsPage = draft.excursionsPage || defaultConfig.excursionsPage!;
   const data = currentExcursionsPage.tours || defaultConfig.excursionsPage!.tours;
   const excursionsList: ExcursionItem[] = data.items || [];
@@ -38,16 +47,31 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
     set((p) => {
       const current = p.excursionsPage || defaultConfig.excursionsPage!;
       const currentTours = current.tours || defaultConfig.excursionsPage!.tours;
-      const items = [...(currentTours.items || defaultConfig.excursionsPage!.tours.items)];
+      const hpItems = [...(p.homepage?.excursions?.items || fallbackExcursions.items)];
+      const epItems = [...(currentTours.items || defaultConfig.excursionsPage!.tours.items)];
 
-      const currentItem = items[i];
+      const currentItem = epItems[i];
       if (!currentItem) return p;
 
-      items[i] = { ...currentItem, [k]: v };
+      epItems[i] = { ...currentItem, [k]: v };
+
+      const hpIdx = hpItems.findIndex((t, idx) => isExcursionMatch(t, currentItem, idx, i));
+      if (hpIdx !== -1) {
+        hpItems[hpIdx] = { ...hpItems[hpIdx], [k]: v };
+      } else if (hpItems[i]) {
+        hpItems[i] = { ...hpItems[i], [k]: v };
+      }
 
       return {
         ...p,
-        excursionsPage: { ...current, tours: { ...currentTours, items } },
+        homepage: {
+          ...p.homepage,
+          excursions: {
+            ...(p.homepage?.excursions || fallbackExcursions),
+            items: hpItems,
+          },
+        },
+        excursionsPage: { ...current, tours: { ...currentTours, items: epItems } },
       };
     });
 
@@ -55,7 +79,8 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
     set((p) => {
       const current = p.excursionsPage || defaultConfig.excursionsPage!;
       const currentTours = current.tours || defaultConfig.excursionsPage!.tours;
-      const items = [...(currentTours.items || [])];
+      const hpItems = [...(p.homepage?.excursions?.items || fallbackExcursions.items)];
+      const epItems = [...(currentTours.items || defaultConfig.excursionsPage!.tours.items)];
 
       const newId = `exc_${Date.now()}`;
       const newExcursion: ExcursionItem = {
@@ -112,11 +137,18 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
 
       return {
         ...p,
+        homepage: {
+          ...p.homepage,
+          excursions: {
+            ...(p.homepage?.excursions || fallbackExcursions),
+            items: [...hpItems, { ...newExcursion }],
+          },
+        },
         excursionsPage: {
           ...current,
           tours: {
             ...currentTours,
-            items: [...items, newExcursion],
+            items: [...epItems, { ...newExcursion }],
           },
         },
       };
@@ -125,9 +157,10 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
 
   const softDeleteExcursion = (targetExcursion: ExcursionItem, targetIndex: number) =>
     set((p) => {
-      const current = p.excursionsPage || currentExcursionsPage;
-      const currentTours = current.tours || data;
-      const items = [...(currentTours.items || [])];
+      const current = p.excursionsPage || defaultConfig.excursionsPage!;
+      const currentTours = current.tours || defaultConfig.excursionsPage!.tours;
+      const hpItems = [...(p.homepage?.excursions?.items || fallbackExcursions.items)];
+      const epItems = [...(currentTours.items || defaultConfig.excursionsPage!.tours.items)];
 
       const markSoftDeleted = (t: ExcursionItem, idx: number) =>
         isExcursionMatch(t, targetExcursion, idx, targetIndex)
@@ -136,15 +169,23 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
 
       return {
         ...p,
-        excursionsPage: { ...current, tours: { ...currentTours, items: items.map(markSoftDeleted) } },
+        homepage: {
+          ...p.homepage,
+          excursions: {
+            ...(p.homepage?.excursions || fallbackExcursions),
+            items: hpItems.map(markSoftDeleted),
+          },
+        },
+        excursionsPage: { ...current, tours: { ...currentTours, items: epItems.map(markSoftDeleted) } },
       };
     });
 
   const restoreExcursion = (targetExcursion: ExcursionItem, targetIndex: number) =>
     set((p) => {
-      const current = p.excursionsPage || currentExcursionsPage;
-      const currentTours = current.tours || data;
-      const items = [...(currentTours.items || [])];
+      const current = p.excursionsPage || defaultConfig.excursionsPage!;
+      const currentTours = current.tours || defaultConfig.excursionsPage!.tours;
+      const hpItems = [...(p.homepage?.excursions?.items || fallbackExcursions.items)];
+      const epItems = [...(currentTours.items || defaultConfig.excursionsPage!.tours.items)];
 
       const markRestored = (t: ExcursionItem, idx: number) =>
         isExcursionMatch(t, targetExcursion, idx, targetIndex)
@@ -153,21 +194,36 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
 
       return {
         ...p,
-        excursionsPage: { ...current, tours: { ...currentTours, items: items.map(markRestored) } },
+        homepage: {
+          ...p.homepage,
+          excursions: {
+            ...(p.homepage?.excursions || fallbackExcursions),
+            items: hpItems.map(markRestored),
+          },
+        },
+        excursionsPage: { ...current, tours: { ...currentTours, items: epItems.map(markRestored) } },
       };
     });
 
   const permanentDeleteExcursion = (targetExcursion: ExcursionItem, targetIndex: number) =>
     set((p) => {
-      const current = p.excursionsPage || currentExcursionsPage;
-      const currentTours = current.tours || data;
-      const items = [...(currentTours.items || [])];
+      const current = p.excursionsPage || defaultConfig.excursionsPage!;
+      const currentTours = current.tours || defaultConfig.excursionsPage!.tours;
+      const hpItems = [...(p.homepage?.excursions?.items || fallbackExcursions.items)];
+      const epItems = [...(currentTours.items || defaultConfig.excursionsPage!.tours.items)];
 
       const notTarget = (t: ExcursionItem, idx: number) => !isExcursionMatch(t, targetExcursion, idx, targetIndex);
 
       return {
         ...p,
-        excursionsPage: { ...current, tours: { ...currentTours, items: items.filter(notTarget) } },
+        homepage: {
+          ...p.homepage,
+          excursions: {
+            ...(p.homepage?.excursions || fallbackExcursions),
+            items: hpItems.filter(notTarget),
+          },
+        },
+        excursionsPage: { ...current, tours: { ...currentTours, items: epItems.filter(notTarget) } },
       };
     });
 
@@ -456,7 +512,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                     id={`exp-img-${i}`}
                     value={t.imageUrl}
                     onChange={(url) => updExcursion(i, 'imageUrl', url)}
-                    folder="tours"
+                    folder="excursions"
                     placeholder="Cover photo..."
                     disabled={!t.enabled || isDeleted}
                   />

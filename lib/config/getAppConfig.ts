@@ -1,6 +1,7 @@
-import { defaultConfig } from "@/config/default-config";
-import type { AppConfig, TourItem } from "@/types/app-config";
+import { defaultConfig, defaultExcursionItems } from "@/config/default-config";
+import type { AppConfig, TourItem, ExcursionItem } from "@/types/app-config";
 import { supabase } from "@/lib/supabase";
+import { isExcursionMatch } from "@/lib/excursion-utils";
 
 export async function getAppConfig(): Promise<AppConfig> {
   try {
@@ -78,13 +79,6 @@ export async function getAppConfig(): Promise<AppConfig> {
       return false;
     }
 
-    const hasSavedHpItems =
-      Array.isArray(savedConfig.homepage?.tours?.items) &&
-      savedConfig.homepage!.tours!.items!.length > 0;
-    const hasSavedTpItems =
-      Array.isArray(savedConfig.toursPage?.tours?.items) &&
-      savedConfig.toursPage!.tours!.items!.length > 0;
-
     const savedHpItems =
       sanitizeTours(savedConfig.homepage?.tours?.items) || [];
     const savedTpItems =
@@ -114,14 +108,31 @@ export async function getAppConfig(): Promise<AppConfig> {
       return result;
     };
 
-    // The single canonical source of truth for the base tours list
-    const rawBaseTours: TourItem[] = hasSavedHpItems
-      ? savedHpItems
-      : hasSavedTpItems
-        ? savedTpItems
-        : fallbackItems;
+    // Master catalog base list for Safari Tours listing page
+    const listingBaseTours = deduplicateTours(
+      savedTpItems.length > 0 ? savedTpItems : fallbackItems,
+    );
 
-    const baseToursList = deduplicateTours(rawBaseTours);
+    // Independent ordering for Homepage Featured Tours
+    const rawHomeTours: TourItem[] = [];
+    if (savedHpItems.length > 0) {
+      savedHpItems.forEach((hpTour, idx) => {
+        const master = listingBaseTours.find((m, mIdx) => isTourMatch(m, hpTour, mIdx, idx));
+        rawHomeTours.push(
+          master
+            ? { ...master, enabled: hpTour.enabled !== undefined ? hpTour.enabled : master.enabled }
+            : hpTour,
+        );
+      });
+      listingBaseTours.forEach((mTour, mIdx) => {
+        if (!rawHomeTours.some((h, hIdx) => isTourMatch(h, mTour, hIdx, mIdx))) {
+          rawHomeTours.push(mTour);
+        }
+      });
+    } else {
+      rawHomeTours.push(...listingBaseTours);
+    }
+    const homeBaseTours = deduplicateTours(rawHomeTours);
 
     const findMatching = (
       list: TourItem[],
@@ -140,7 +151,7 @@ export async function getAppConfig(): Promise<AppConfig> {
       const hpItem = findMatching(savedHpItems, baseItem, index);
       const fbItem = findMatching(fallbackItems, baseItem, index);
 
-      // Deep page details priority: toursPage (tpItem) > homepage (hpItem) > fallback (fbItem) > baseItem
+      // Deep page details & card priority: toursPage (Master Catalog) > homepage > fallback > baseItem
       const deep = tpItem || hpItem || fbItem || baseItem;
       const card = isListing
         ? tpItem || hpItem || fbItem || baseItem
@@ -156,42 +167,53 @@ export async function getAppConfig(): Promise<AppConfig> {
         // Identity
         id: baseItem.id || deep.id || `safari-${index + 1}`,
         slug: baseItem.slug || deep.slug || "",
-        title: hpItem?.title || baseItem.title || deep.title || "",
-        href: hpItem?.href || baseItem.href || deep.href,
+        title: tpItem?.title || hpItem?.title || baseItem.title || deep.title || "",
+        href: tpItem?.href || hpItem?.href || baseItem.href || deep.href,
 
-        // Card attributes (managed by main tour editor in Homepage / Featured Tours)
+        // Card attributes (managed in Safari Tours Master Catalog)
         badge:
-          hpItem?.badge !== undefined
-            ? hpItem.badge
-            : (card.badge ?? deep.badge ?? ""),
+          tpItem?.badge !== undefined
+            ? tpItem.badge
+            : hpItem?.badge !== undefined
+              ? hpItem.badge
+              : (card.badge ?? deep.badge ?? ""),
         price:
-          hpItem?.price !== undefined
-            ? hpItem.price
-            : (card.price ?? deep.price),
+          tpItem?.price !== undefined
+            ? tpItem.price
+            : hpItem?.price !== undefined
+              ? hpItem.price
+              : (card.price ?? deep.price),
         priceLabel:
-          hpItem?.priceLabel !== undefined
-            ? hpItem.priceLabel
-            : (card.priceLabel ?? deep.priceLabel),
+          tpItem?.priceLabel !== undefined
+            ? tpItem.priceLabel
+            : hpItem?.priceLabel !== undefined
+              ? hpItem.priceLabel
+              : (card.priceLabel ?? deep.priceLabel),
         rating:
-          hpItem?.rating !== undefined
-            ? hpItem.rating
-            : (card.rating ?? deep.rating ?? 5),
+          tpItem?.rating !== undefined
+            ? tpItem.rating
+            : hpItem?.rating !== undefined
+              ? hpItem.rating
+              : (card.rating ?? deep.rating ?? 5),
         imageUrl:
+          tpItem?.imageUrl ||
           hpItem?.imageUrl ||
           card.imageUrl ||
           deep.imageUrl ||
           "/images/hero/hero.jpg",
         description:
-          hpItem?.description !== undefined
-            ? hpItem.description
-            : (card.description ?? deep.description ?? ""),
+          tpItem?.description !== undefined
+            ? tpItem.description
+            : hpItem?.description !== undefined
+              ? hpItem.description
+              : (card.description ?? deep.description ?? ""),
         enabled: isListing
           ? tpItem?.enabled !== undefined
             ? tpItem.enabled
             : (card.enabled ?? true)
           : hpItem?.enabled !== undefined
             ? hpItem.enabled
-            : (card.enabled ?? true),
+            : (tpItem?.enabled ?? true),
         deleted:
           baseItem.deleted !== undefined
             ? baseItem.deleted
@@ -358,11 +380,238 @@ export async function getAppConfig(): Promise<AppConfig> {
       };
     };
 
-    const listingTours = baseToursList.map((t, idx) =>
+    const listingTours = listingBaseTours.map((t, idx) =>
       buildEnrichedTour(t, idx, true),
     );
-    const homepageTours = baseToursList.map((t, idx) =>
+    const homepageTours = homeBaseTours.map((t, idx) =>
       buildEnrichedTour(t, idx, false),
+    );
+
+    const savedHpExcursions = savedConfig.homepage?.excursions?.items || [];
+    const savedEpExcursions = savedConfig.excursionsPage?.tours?.items || [];
+    const fallbackExcursionItems =
+      defaultConfig.excursionsPage?.tours?.items ||
+      defaultConfig.homepage?.excursions?.items ||
+      defaultExcursionItems;
+
+    const deduplicateExcursions = (items: ExcursionItem[]): ExcursionItem[] => {
+      const seen = new Set<string>();
+      const result: ExcursionItem[] = [];
+      for (const item of items) {
+        const key =
+          item.id ||
+          item.slug ||
+          (item.title ? item.title.trim().toLowerCase() : "");
+        if (key) {
+          if (!seen.has(key)) {
+            seen.add(key);
+            result.push(item);
+          }
+        } else {
+          result.push(item);
+        }
+      }
+      return result;
+    };
+
+    // Master catalog base list for Excursions listing page
+    const listingBaseExcursions = deduplicateExcursions(
+      savedEpExcursions.length > 0 ? savedEpExcursions : fallbackExcursionItems,
+    );
+
+    // Independent ordering for Homepage Featured Excursions
+    const rawHomeExcursions: ExcursionItem[] = [];
+    if (savedHpExcursions.length > 0) {
+      savedHpExcursions.forEach((hpExc, idx) => {
+        const master = listingBaseExcursions.find((m, mIdx) => isExcursionMatch(m, hpExc, mIdx, idx));
+        rawHomeExcursions.push(
+          master
+            ? { ...master, enabled: hpExc.enabled !== undefined ? hpExc.enabled : master.enabled }
+            : hpExc,
+        );
+      });
+      listingBaseExcursions.forEach((mExc, mIdx) => {
+        if (!rawHomeExcursions.some((h, hIdx) => isExcursionMatch(h, mExc, hIdx, mIdx))) {
+          rawHomeExcursions.push(mExc);
+        }
+      });
+    } else {
+      rawHomeExcursions.push(...listingBaseExcursions);
+    }
+    const homeBaseExcursions = deduplicateExcursions(rawHomeExcursions);
+
+    const findMatchingExcursion = (
+      list: ExcursionItem[],
+      target: ExcursionItem,
+      targetIdx: number,
+    ): ExcursionItem | undefined => {
+      return list.find((e, i) => isExcursionMatch(e, target, i, targetIdx));
+    };
+
+    const buildEnrichedExcursion = (
+      baseItem: ExcursionItem,
+      index: number,
+      isListing: boolean,
+    ): ExcursionItem => {
+      const epItem = findMatchingExcursion(savedEpExcursions, baseItem, index);
+      const hpItem = findMatchingExcursion(savedHpExcursions, baseItem, index);
+      const fbItem = findMatchingExcursion(fallbackExcursionItems, baseItem, index);
+
+      const deep = epItem || hpItem || fbItem || baseItem;
+      const card = isListing
+        ? epItem || hpItem || fbItem || baseItem
+        : hpItem || epItem || fbItem || baseItem;
+
+      return {
+        ...(fbItem || {}),
+        ...baseItem,
+        ...(hpItem || {}),
+        ...(epItem || {}),
+
+        id: baseItem.id || deep.id || `excursion-${index + 1}`,
+        slug: baseItem.slug || deep.slug || "",
+        title: epItem?.title || hpItem?.title || baseItem.title || deep.title || "",
+        href: epItem?.href || hpItem?.href || baseItem.href || deep.href,
+
+        badge:
+          epItem?.badge !== undefined
+            ? epItem.badge
+            : hpItem?.badge !== undefined
+              ? hpItem.badge
+              : (card.badge ?? deep.badge ?? ""),
+        price:
+          epItem?.price !== undefined
+            ? epItem.price
+            : hpItem?.price !== undefined
+              ? hpItem.price
+              : (card.price ?? deep.price),
+        priceLabel:
+          epItem?.priceLabel !== undefined
+            ? epItem.priceLabel
+            : hpItem?.priceLabel !== undefined
+              ? hpItem.priceLabel
+              : (card.priceLabel ?? deep.priceLabel),
+        rating:
+          epItem?.rating !== undefined
+            ? epItem.rating
+            : hpItem?.rating !== undefined
+              ? hpItem.rating
+              : (card.rating ?? deep.rating ?? 5),
+        imageUrl:
+          epItem?.imageUrl ||
+          hpItem?.imageUrl ||
+          card.imageUrl ||
+          deep.imageUrl ||
+          "/images/hero/hero.jpg",
+        description:
+          epItem?.description !== undefined
+            ? epItem.description
+            : hpItem?.description !== undefined
+              ? hpItem.description
+              : (card.description ?? deep.description ?? ""),
+        enabled: isListing
+          ? epItem?.enabled !== undefined
+            ? epItem.enabled
+            : (card.enabled ?? true)
+          : hpItem?.enabled !== undefined
+            ? hpItem.enabled
+            : (epItem?.enabled ?? true),
+        deleted: baseItem.deleted !== undefined ? baseItem.deleted : (deep.deleted ?? false),
+        deletedAt: baseItem.deletedAt || deep.deletedAt,
+
+        showTitle: card.showTitle !== undefined ? card.showTitle : true,
+        showBadge: card.showBadge !== undefined ? card.showBadge : true,
+        showRating: card.showRating !== undefined ? card.showRating : true,
+        showPrice: card.showPrice !== undefined ? card.showPrice : true,
+
+        heroImageUrl: epItem?.heroImageUrl ?? hpItem?.heroImageUrl ?? fbItem?.heroImageUrl,
+        heroBackgroundColor: epItem?.heroBackgroundColor ?? hpItem?.heroBackgroundColor ?? fbItem?.heroBackgroundColor,
+        indicatorColor: epItem?.indicatorColor ?? hpItem?.indicatorColor ?? fbItem?.indicatorColor,
+        gallery: epItem?.gallery && epItem.gallery.length > 0
+          ? epItem.gallery
+          : hpItem?.gallery && hpItem.gallery.length > 0
+            ? hpItem.gallery
+            : fbItem?.gallery,
+        overview: epItem?.overview !== undefined
+          ? epItem.overview
+          : hpItem?.overview !== undefined
+            ? hpItem.overview
+            : fbItem?.overview,
+
+        duration: epItem?.duration !== undefined
+          ? epItem.duration
+          : hpItem?.duration !== undefined
+            ? hpItem.duration
+            : (fbItem?.duration ?? baseItem.duration ?? ""),
+        showDuration: epItem?.showDuration !== undefined
+          ? epItem.showDuration
+          : hpItem?.showDuration !== undefined
+            ? hpItem.showDuration
+            : fbItem?.showDuration !== undefined
+              ? fbItem.showDuration
+              : true,
+
+        location: epItem?.location !== undefined
+          ? epItem.location
+          : hpItem?.location !== undefined
+            ? hpItem.location
+            : (fbItem?.location ?? baseItem.location ?? ""),
+        showLocation: epItem?.showLocation !== undefined
+          ? epItem.showLocation
+          : hpItem?.showLocation !== undefined
+            ? hpItem.showLocation
+            : fbItem?.showLocation !== undefined
+              ? fbItem.showLocation
+              : true,
+
+        schedule: epItem?.schedule !== undefined
+          ? epItem.schedule
+          : hpItem?.schedule !== undefined
+            ? hpItem.schedule
+            : (fbItem?.schedule ?? baseItem.schedule ?? ""),
+        showSchedule: epItem?.showSchedule !== undefined
+          ? epItem.showSchedule
+          : hpItem?.showSchedule !== undefined
+            ? hpItem.showSchedule
+            : fbItem?.showSchedule !== undefined
+              ? fbItem.showSchedule
+              : true,
+
+        groupType: epItem?.groupType !== undefined
+          ? epItem.groupType
+          : hpItem?.groupType !== undefined
+            ? hpItem.groupType
+            : (fbItem?.groupType ?? baseItem.groupType ?? ""),
+        showGroupType: epItem?.showGroupType !== undefined
+          ? epItem.showGroupType
+          : hpItem?.showGroupType !== undefined
+            ? hpItem.showGroupType
+            : fbItem?.showGroupType !== undefined
+              ? fbItem.showGroupType
+              : true,
+
+        included: epItem?.included !== undefined ? epItem.included : hpItem?.included !== undefined ? hpItem.included : fbItem?.included,
+        showIncluded: epItem?.showIncluded !== undefined ? epItem.showIncluded : hpItem?.showIncluded !== undefined ? hpItem.showIncluded : fbItem?.showIncluded !== undefined ? fbItem.showIncluded : true,
+
+        notIncluded: epItem?.notIncluded !== undefined ? epItem.notIncluded : hpItem?.notIncluded !== undefined ? hpItem.notIncluded : fbItem?.notIncluded,
+        showNotIncluded: epItem?.showNotIncluded !== undefined ? epItem.showNotIncluded : hpItem?.showNotIncluded !== undefined ? hpItem.showNotIncluded : fbItem?.showNotIncluded !== undefined ? fbItem.showNotIncluded : true,
+
+        whyChoose: epItem?.whyChoose !== undefined ? epItem.whyChoose : hpItem?.whyChoose !== undefined ? hpItem.whyChoose : fbItem?.whyChoose,
+        showWhyChoose: epItem?.showWhyChoose !== undefined ? epItem.showWhyChoose : hpItem?.showWhyChoose !== undefined ? hpItem.showWhyChoose : fbItem?.showWhyChoose !== undefined ? fbItem.showWhyChoose : true,
+
+        knowBeforeYouGo: epItem?.knowBeforeYouGo !== undefined ? epItem.knowBeforeYouGo : hpItem?.knowBeforeYouGo !== undefined ? hpItem.knowBeforeYouGo : fbItem?.knowBeforeYouGo,
+        showKnowBeforeYouGo: epItem?.showKnowBeforeYouGo !== undefined ? epItem.showKnowBeforeYouGo : hpItem?.showKnowBeforeYouGo !== undefined ? hpItem.showKnowBeforeYouGo : fbItem?.showKnowBeforeYouGo !== undefined ? fbItem.showKnowBeforeYouGo : true,
+
+        metaTitle: epItem?.metaTitle ?? hpItem?.metaTitle ?? fbItem?.metaTitle,
+        metaDescription: epItem?.metaDescription ?? hpItem?.metaDescription ?? fbItem?.metaDescription,
+      };
+    };
+
+    const listingExcursions = listingBaseExcursions.map((e, idx) =>
+      buildEnrichedExcursion(e, idx, true),
+    );
+    const homepageExcursions = homeBaseExcursions.map((e, idx) =>
+      buildEnrichedExcursion(e, idx, false),
     );
 
     // Merge with defaults so new page sections like toursPage are present
@@ -377,10 +626,74 @@ export async function getAppConfig(): Promise<AppConfig> {
       homepage: {
         ...defaultConfig.homepage,
         ...(savedConfig.homepage || {}),
+        hero: {
+          ...defaultConfig.homepage.hero,
+          ...(savedConfig.homepage?.hero || {}),
+          secondaryCtaHref:
+            savedConfig.homepage?.hero?.secondaryCtaHref === "/contact"
+              ? "/excursions"
+              : savedConfig.homepage?.hero?.secondaryCtaHref || defaultConfig.homepage.hero.secondaryCtaHref,
+          secondaryCtaLabel:
+            savedConfig.homepage?.hero?.secondaryCtaLabel === "Plan Custom Safari"
+              ? "Explore Excursions"
+              : savedConfig.homepage?.hero?.secondaryCtaLabel || defaultConfig.homepage.hero.secondaryCtaLabel,
+        },
+        sectionOrder: (() => {
+          const defaultOrder = [
+            "stats",
+            "experiences",
+            "tours",
+            "excursions",
+            "whyus",
+            "reviews",
+            "gallery",
+            "cta",
+          ];
+          const savedOrder = savedConfig.homepage?.sectionOrder;
+          if (!savedOrder || !Array.isArray(savedOrder) || savedOrder.length === 0) {
+            return defaultOrder;
+          }
+          const missing = defaultOrder.filter((k) => !savedOrder.includes(k));
+          const combined = [...savedOrder];
+          for (const m of missing) {
+            if (m === "experiences") {
+              const statsIdx = combined.indexOf("stats");
+              if (statsIdx !== -1) {
+                combined.splice(statsIdx + 1, 0, "experiences");
+              } else {
+                combined.unshift("experiences");
+              }
+            } else if (m === "excursions") {
+              const toursIdx = combined.indexOf("tours");
+              if (toursIdx !== -1) {
+                combined.splice(toursIdx + 1, 0, "excursions");
+              } else {
+                combined.push("excursions");
+              }
+            } else {
+              combined.push(m);
+            }
+          }
+          return combined;
+        })(),
+        experiences: {
+          ...defaultConfig.homepage.experiences!,
+          ...(savedConfig.homepage?.experiences || {}),
+          items:
+            savedConfig.homepage?.experiences?.items &&
+            savedConfig.homepage.experiences.items.length > 0
+              ? savedConfig.homepage.experiences.items
+              : defaultConfig.homepage.experiences!.items,
+        },
         tours: {
           ...defaultConfig.homepage.tours,
           ...(savedConfig.homepage?.tours || {}),
           items: homepageTours,
+        },
+        excursions: {
+          ...defaultConfig.homepage.excursions!,
+          ...(savedConfig.homepage?.excursions || {}),
+          items: homepageExcursions,
         },
       },
       toursPage: {
@@ -407,7 +720,7 @@ export async function getAppConfig(): Promise<AppConfig> {
           ...(savedConfig.toursPage?.bookingForm || {}),
           fields:
             savedConfig.toursPage?.bookingForm?.fields &&
-            savedConfig.toursPage?.bookingForm?.fields.length > 0
+            savedConfig.toursPage.bookingForm.fields.length > 0
               ? savedConfig.toursPage.bookingForm.fields
               : defaultConfig.toursPage!.bookingForm!.fields,
         },
@@ -422,11 +735,7 @@ export async function getAppConfig(): Promise<AppConfig> {
         tours: {
           ...defaultConfig.excursionsPage!.tours,
           ...(savedConfig.excursionsPage?.tours || {}),
-          items:
-            savedConfig.excursionsPage?.tours?.items &&
-            savedConfig.excursionsPage.tours.items.length > 0
-              ? savedConfig.excursionsPage.tours.items
-              : defaultConfig.excursionsPage!.tours.items,
+          items: listingExcursions,
         },
         bookingForm: {
           ...defaultConfig.excursionsPage!.bookingForm!,

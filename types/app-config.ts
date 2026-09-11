@@ -172,11 +172,23 @@ export interface SectionList<T> {
   items: T[];
 }
 
+export interface ExperienceItem {
+  id?: string;
+  icon: string;
+  title: string;
+  description: string;
+  ctaLabel: string;
+  ctaHref: string;
+  enabled: boolean;
+}
+
 export interface HomepageConfig {
   sectionOrder: string[];
   hero: HeroSection;
   stats: SectionList<StatItem>;
+  experiences?: SectionList<ExperienceItem>;
   tours: SectionList<TourItem>;
+  excursions?: SectionList<ExcursionItem>;
   reviews: SectionList<ReviewItem>;
   whyUs: WhyUsSection;
   gallery: SectionList<GalleryItem>;

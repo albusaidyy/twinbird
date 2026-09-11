@@ -43,6 +43,10 @@ import {
   Luggage,
   Navigation,
   Plane,
+  Bus,
+  Tent,
+  Map,
+  Mountain,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -83,6 +87,10 @@ const iconMap: Record<string, LucideIcon | React.ComponentType<{ className?: str
   Luggage,
   Navigation,
   Plane,
+  Bus,
+  Tent,
+  Map,
+  Mountain,
   Facebook: FaFacebook,
   Instagram: FaInstagram,
   Whatsapp: FaWhatsapp,

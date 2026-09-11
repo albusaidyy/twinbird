@@ -1,4 +1,40 @@
-import type { AppConfig, TourItem, ExcursionItem } from "@/types/app-config";
+import type { AppConfig, TourItem, ExcursionItem, ExperienceItem } from "@/types/app-config";
+
+/**
+ * Default core offerings / experiences for homepage.
+ */
+export const defaultExperienceItems: ExperienceItem[] = [
+  {
+    id: "exp-tailored-safaris",
+    icon: "Trees",
+    title: "Tailored Safaris",
+    description:
+      "Private and group expeditions through Kenya's most legendary parks and hidden conservancies.",
+    ctaLabel: "Explore Tours",
+    ctaHref: "/tours",
+    enabled: true,
+  },
+  {
+    id: "exp-daily-excursions",
+    icon: "Compass",
+    title: "Daily Excursions",
+    description:
+      "Short, high-impact trips including cultural village visits, hiking trails, and boat journeys.",
+    ctaLabel: "View Excursions",
+    ctaHref: "/excursions",
+    enabled: true,
+  },
+  {
+    id: "exp-transfer-services",
+    icon: "Car",
+    title: "Transfer Services",
+    description:
+      "Reliable, professional airport and inter-destination transport in modern, comfortable vehicles.",
+    ctaLabel: "Book Transfer",
+    ctaHref: "/transfers",
+    enabled: true,
+  },
+];
 
 /**
  * Default coastal and day-trip excursion packages.
@@ -561,7 +597,7 @@ export const defaultConfig: AppConfig = {
   ],
 
   homepage: {
-    sectionOrder: ["stats", "tours", "whyus", "reviews", "gallery", "cta"],
+    sectionOrder: ["stats", "experiences", "tours", "excursions", "whyus", "reviews", "gallery", "cta"],
     hero: {
       size: "fullscreen",
       enabled: true,
@@ -577,9 +613,9 @@ export const defaultConfig: AppConfig = {
       primaryCtaHref: "/tours",
       showPrimaryCta: true,
       primaryCtaLabel: "Explore Safari Packages",
-      secondaryCtaHref: "/contact",
+      secondaryCtaHref: "/excursions",
       showSecondaryCta: true,
-      secondaryCtaLabel: "Plan Custom Safari",
+      secondaryCtaLabel: "Explore Excursions",
     },
     stats: {
       items: [
@@ -610,6 +646,15 @@ export const defaultConfig: AppConfig = {
       subtitle: "",
       backgroundColor: "#ffffff",
     },
+    experiences: {
+      enabled: true,
+      backgroundColor: "#fbf9f5",
+      eyebrow: "WHAT WE OFFER",
+      title: "Our experiences",
+      subtitle:
+        "Tailored journeys designed to connect you deeply with the spirit of the wild.",
+      items: defaultExperienceItems,
+    },
     tours: {
       items: defaultTourItems,
       title: "Iconic Safari Packages",
@@ -617,7 +662,16 @@ export const defaultConfig: AppConfig = {
       eyebrow: "FEATURED SAFARIS",
       subtitle:
         "From thrilling 3-day Maasai Mara game drives to scenic Amboseli Kilimanjaro expeditions, explore our handcrafted African wildlife safaris.",
-      backgroundColor: "#fafafa",
+      backgroundColor: "#ffffff",
+    },
+    excursions: {
+      items: defaultExcursionItems,
+      title: "Handcrafted Day Excursions",
+      enabled: true,
+      eyebrow: "DAY EXPEDITIONS & EXCURSIONS",
+      subtitle:
+        "Immerse yourself in Kenya’s marine sanctuaries, coastal coral gardens, and ancient forests on guided day journeys back before evening.",
+      backgroundColor: "#f8f7f4",
     },
     whyUs: {
       items: [

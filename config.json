@@ -74,8 +74,8 @@
       "primaryCtaLabel": "Explore Safari Packages",
       "primaryCtaHref": "/tours",
       "showSecondaryCta": true,
-      "secondaryCtaLabel": "Plan Custom Safari",
-      "secondaryCtaHref": "/contact",
+      "secondaryCtaLabel": "Explore Excursions",
+      "secondaryCtaHref": "/excursions",
       "imageUrl": "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop"
     },
     "stats": {
