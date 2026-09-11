@@ -400,6 +400,67 @@ export interface TransfersPageConfig {
   faq?: SectionList<FAQItem>;
 }
 
+// ─── Excursions Page ─────────────────────────────────────────────────────────
+export interface ExcursionItem {
+  id?: string;
+  slug?: string;
+  enabled: boolean;
+  deleted?: boolean;
+  deletedAt?: string;
+  title: string;
+  showTitle?: boolean;
+  badge: string;
+  showBadge?: boolean;
+  description: string;
+  duration: string;
+  showDuration?: boolean;
+  rating: number;
+  showRating?: boolean;
+  price?: string;
+  showPrice?: boolean;
+  priceLabel?: string;
+  imageUrl: string;
+  heroImageUrl?: string;
+  heroBackgroundColor?: string;
+  indicatorColor?: string;
+  gallery?: string[];
+  location?: string;
+  showLocation?: boolean;
+  schedule?: string;
+  showSchedule?: boolean;
+  groupType?: string;
+  showGroupType?: boolean;
+  overview?: string;
+  included?: string[];
+  showIncluded?: boolean;
+  notIncluded?: string[];
+  showNotIncluded?: boolean;
+  whyChoose?: string[];
+  showWhyChoose?: boolean;
+  knowBeforeYouGo?: string[];
+  showKnowBeforeYouGo?: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
+  href?: string;
+}
+
+export interface ExcursionBookingFormConfig {
+  enabled?: boolean;
+  title?: string;
+  subtitle?: string;
+  buttonText?: string;
+  accessKey?: string;
+  fields?: DynamicFormField[];
+}
+
+export interface ExcursionsPageConfig {
+  metaTitle?: string;
+  metaDescription?: string;
+  hero: HeroSection;
+  tours: SectionList<ExcursionItem>;
+  bookingForm?: ExcursionBookingFormConfig;
+}
+
 // ─── Root config ───────────────────────────────────────────────────────────────
 export interface AppConfig {
   branding: Branding;
@@ -407,8 +468,10 @@ export interface AppConfig {
   features: FeatureFlags;
   homepage: HomepageConfig;
   toursPage?: ToursPageConfig;
-  contactPage: ContactPageConfig;
-  aboutPage?: AboutPageConfig;
+  excursionsPage?: ExcursionsPageConfig;
   transfersPage?: TransfersPageConfig;
+  aboutPage?: AboutPageConfig;
+  contactPage: ContactPageConfig;
 }
+
 

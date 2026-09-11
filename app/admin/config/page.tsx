@@ -50,6 +50,11 @@ import { ToursHeroEditor } from './_components/tours/ToursHeroEditor';
 import { ToursListEditor } from './_components/tours/ToursListEditor';
 import { ToursBookingEditor } from './_components/tours/ToursBookingEditor';
 
+// Excursions page editors
+import { ExcursionsHeroEditor } from './_components/excursions/ExcursionsHeroEditor';
+import { ExcursionsListEditor } from './_components/excursions/ExcursionsListEditor';
+import { ExcursionsBookingEditor } from './_components/excursions/ExcursionsBookingEditor';
+
 // Transfers page editors
 import { TransfersHeroEditor } from './_components/transfers/TransfersHeroEditor';
 import { TransfersRoutesEditor } from './_components/transfers/TransfersRoutesEditor';
@@ -116,9 +121,20 @@ export default function AdminConfigPage() {
     if (cleanedDraft.toursPage?.tours?.items) {
       cleanedDraft.toursPage.tours.items = deduplicateList(cleanedDraft.toursPage.tours.items)!;
     }
+    if (cleanedDraft.excursionsPage?.tours?.items) {
+      cleanedDraft.excursionsPage.tours.items = deduplicateList(cleanedDraft.excursionsPage.tours.items)!;
+    }
 
     if (cleanedDraft.toursPage?.bookingForm?.fields) {
       cleanedDraft.toursPage.bookingForm.fields.forEach((f) => {
+        if (f.type === 'select' && f.options) {
+          f.options = f.options.map((o) => o.trim()).filter(Boolean);
+        }
+      });
+    }
+
+    if (cleanedDraft.excursionsPage?.bookingForm?.fields) {
+      cleanedDraft.excursionsPage.bookingForm.fields.forEach((f) => {
         if (f.type === 'select' && f.options) {
           f.options = f.options.map((o) => o.trim()).filter(Boolean);
         }
@@ -539,6 +555,11 @@ export default function AdminConfigPage() {
             {active === 'tours-page-hero' && <ToursHeroEditor {...editorProps} />}
             {active === 'tours-page-list' && <ToursListEditor {...editorProps} />}
             {active === 'tours-page-booking' && <ToursBookingEditor {...editorProps} />}
+
+            {/* Excursions Page */}
+            {active === 'excursions-hero' && <ExcursionsHeroEditor {...editorProps} />}
+            {active === 'excursions-list' && <ExcursionsListEditor {...editorProps} />}
+            {active === 'excursions-booking' && <ExcursionsBookingEditor {...editorProps} />}
 
             {/* Transfers Page */}
             {active === 'transfers-hero' && <TransfersHeroEditor {...editorProps} />}

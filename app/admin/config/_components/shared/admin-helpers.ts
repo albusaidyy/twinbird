@@ -20,6 +20,14 @@ export function slugifyNavRoute(label: string): string {
     trimmed === 'safari tours'
   )
     return '/tours';
+  if (
+    trimmed === 'excursions' ||
+    trimmed === 'excursion' ||
+    trimmed === 'day trips' ||
+    trimmed === 'day tours' ||
+    trimmed === 'activities'
+  )
+    return '/excursions';
   if (trimmed === 'transfers' || trimmed === 'airport transfers' || trimmed === 'taxi' || trimmed === 'cabs')
     return '/transfers';
   if (trimmed === 'about' || trimmed === 'about us' || trimmed === 'our story') return '/about';
@@ -35,6 +43,7 @@ export function slugifyNavRoute(label: string): string {
 export const NAV_PRESETS = [
   { label: 'Home', href: '/' },
   { label: 'Safaris', href: '/tours' },
+  { label: 'Excursions', href: '/excursions' },
   { label: 'Transfers', href: '/transfers' },
   { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },

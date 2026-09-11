@@ -20,7 +20,6 @@ interface TransfersFeaturesSectionProps {
 
 export function TransfersFeaturesSection({
   features = [],
-  primaryColor = '#1b4332',
   accentColor = '#d97706',
   backgroundColor = '#f5f5f0',
 }: TransfersFeaturesSectionProps) {

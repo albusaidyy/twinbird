@@ -36,6 +36,9 @@ export type SectionKey =
   | 'tours-page-hero'
   | 'tours-page-list'
   | 'tours-page-booking'
+  | 'excursions-hero'
+  | 'excursions-list'
+  | 'excursions-booking'
   | 'transfers-hero'
   | 'transfers-routes'
   | 'transfers-booking'
@@ -103,6 +106,17 @@ export const PAGES: PageItem[] = [
       { key: 'tours-page-hero', label: 'Hero', Icon: Layers, description: 'Safari Tours splash hero' },
       { key: 'tours-page-list', label: 'Safaris Listing', Icon: Map, description: 'Safari packages & cards' },
       { key: 'tours-page-booking', label: 'Booking Form', Icon: Calendar, description: 'Single safari reservation form settings' },
+    ],
+  },
+  {
+    id: 'excursions',
+    label: 'Excursions',
+    Icon: Compass,
+    href: '/excursions',
+    sections: [
+      { key: 'excursions-hero', label: 'Hero', Icon: Layers, description: 'Excursions & Day Trips splash hero' },
+      { key: 'excursions-list', label: 'Excursions Listing', Icon: Map, description: 'Excursion packages & coastal activities' },
+      { key: 'excursions-booking', label: 'Booking Form', Icon: Calendar, description: 'Single excursion reservation form settings' },
     ],
   },
   {

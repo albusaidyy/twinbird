@@ -16,7 +16,6 @@ interface TransfersFAQSectionProps {
 
 export function TransfersFAQSection({
   data,
-  primaryColor = '#1b4332',
   accentColor = '#d97706',
 }: TransfersFAQSectionProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(0);

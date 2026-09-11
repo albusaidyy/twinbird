@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { Users, Luggage, ShieldCheck, Sparkles, Check } from 'lucide-react';
+import { Users, Luggage, ShieldCheck } from 'lucide-react';
 import { TransferVehicle } from '@/types/app-config';
 
 interface TransfersFleetSectionProps {
@@ -16,7 +15,6 @@ export function TransfersFleetSection({
   title = 'Our Modern Fleet',
   subtitle = 'Well-maintained, clean, air-conditioned vehicles driven by professional local chauffeurs',
   vehicles = [],
-  primaryColor = '#1b4332',
   accentColor = '#d97706',
 }: TransfersFleetSectionProps) {
   const visibleVehicles = (vehicles || []).filter((v) => v.enabled !== false);
