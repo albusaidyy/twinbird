@@ -38,6 +38,11 @@ import {
   Fish,
   HeartHandshake,
   Info,
+  Car,
+  Sparkles,
+  Luggage,
+  Navigation,
+  Plane,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -73,6 +78,11 @@ const iconMap: Record<string, LucideIcon | React.ComponentType<{ className?: str
   Fish,
   HeartHandshake,
   Info,
+  Car,
+  Sparkles,
+  Luggage,
+  Navigation,
+  Plane,
   Facebook: FaFacebook,
   Instagram: FaInstagram,
   Whatsapp: FaWhatsapp,

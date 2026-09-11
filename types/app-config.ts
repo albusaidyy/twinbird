@@ -336,6 +336,70 @@ export interface AboutPageConfig {
   cta: AboutCTASection;
 }
 
+// ─── Transfers Page ───────────────────────────────────────────────────────────
+export interface TransferRoute {
+  id: string;
+  from: string;
+  to: string;
+  duration: string;
+  price?: string;
+  priceLabel?: string;
+  popular?: boolean;
+  enabled: boolean;
+}
+
+export interface TransferFeature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface TransferVehicle {
+  id: string;
+  name: string;
+  category: string;
+  passengers: string;
+  luggage: string;
+  description: string;
+  imageUrl?: string;
+  featured?: boolean;
+  enabled?: boolean;
+}
+
+export interface TransferBookingFormConfig {
+  enabled?: boolean;
+  title: string;
+  subtitle?: string;
+  buttonText?: string;
+  accessKey?: string;
+  whatsappNumber?: string;
+  whatsappText?: string;
+  noticeText?: string;
+  fields?: DynamicFormField[];
+}
+
+export interface TransfersPageConfig {
+  metaTitle?: string;
+  metaDescription?: string;
+  hero: HeroSection;
+  features: TransferFeature[];
+  routesSection: {
+    enabled: boolean;
+    title: string;
+    subtitle?: string;
+    note?: string;
+    routes: TransferRoute[];
+  };
+  vehiclesSection?: {
+    enabled: boolean;
+    title: string;
+    subtitle?: string;
+    vehicles: TransferVehicle[];
+  };
+  bookingForm: TransferBookingFormConfig;
+  faq?: SectionList<FAQItem>;
+}
+
 // ─── Root config ───────────────────────────────────────────────────────────────
 export interface AppConfig {
   branding: Branding;
@@ -345,5 +409,6 @@ export interface AppConfig {
   toursPage?: ToursPageConfig;
   contactPage: ContactPageConfig;
   aboutPage?: AboutPageConfig;
+  transfersPage?: TransfersPageConfig;
 }
 

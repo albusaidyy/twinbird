@@ -23,7 +23,7 @@ import {
   type MediaItem,
   type ConfigVersionSummary,
 } from './actions';
-import type { AppConfig, NavItem, StatItem, TourItem, TourBookingFormConfig, DynamicFormField, FormFieldType, ReviewItem, WhyUsItem, GalleryItem, FooterLink, SocialLink, AboutValueItem, AboutTeamMember, StoryParagraphItem } from '@/types/app-config';
+import type { AppConfig, NavItem, StatItem, TourItem, TourBookingFormConfig, TransferBookingFormConfig, TransferVehicle, DynamicFormField, FormFieldType, ReviewItem, WhyUsItem, GalleryItem, FooterLink, SocialLink, AboutValueItem, AboutTeamMember, StoryParagraphItem } from '@/types/app-config';
 import {
   CheckCircle,
   RotateCcw,
@@ -43,6 +43,8 @@ import {
   LayoutDashboard,
   Info,
   Phone,
+  Car,
+  Luggage,
   ChevronRight,
   ChevronDown,
   Upload,
@@ -88,6 +90,11 @@ type SectionKey =
   | 'tours-page-hero'
   | 'tours-page-list'
   | 'tours-page-booking'
+  | 'transfers-hero'
+  | 'transfers-routes'
+  | 'transfers-booking'
+  | 'transfers-fleet'
+  | 'transfers-faq'
   | 'about-hero'
   | 'about-story'
   | 'about-values'
@@ -130,6 +137,19 @@ const PAGES = [
       { key: 'tours-page-hero' as SectionKey, label: 'Hero', Icon: Layers, description: 'Safari Tours splash hero' },
       { key: 'tours-page-list' as SectionKey, label: 'Safaris Listing', Icon: Map, description: 'Safari packages & cards' },
       { key: 'tours-page-booking' as SectionKey, label: 'Booking Form', Icon: Calendar, description: 'Single safari reservation form settings' },
+    ],
+  },
+  {
+    id: 'transfers',
+    label: 'Transfers',
+    Icon: Car,
+    href: '/transfers',
+    sections: [
+      { key: 'transfers-hero' as SectionKey, label: 'Hero', Icon: Layers, description: 'Airport & Coast transfer splash hero' },
+      { key: 'transfers-routes' as SectionKey, label: 'Available Routes', Icon: Map, description: 'Transfer routes and estimated travel times' },
+      { key: 'transfers-booking' as SectionKey, label: 'Booking Form', Icon: Calendar, description: 'Transfer booking form & dynamic fields' },
+      { key: 'transfers-fleet' as SectionKey, label: 'Fleet Overview', Icon: Car, description: 'Vehicles, passenger & luggage capacity' },
+      { key: 'transfers-faq' as SectionKey, label: 'FAQ', Icon: HelpCircle, description: 'Transfer & airport pickup questions' },
     ],
   },
   {
@@ -2467,6 +2487,11 @@ export default function AdminConfigPage() {
             {active === 'tours-page-hero' && <ToursPageHeroEditor {...editorProps} />}
             {active === 'tours-page-list' && <ToursPageListEditor {...editorProps} />}
             {active === 'tours-page-booking' && <ToursBookingFormEditor {...editorProps} />}
+            {active === 'transfers-hero' && <TransfersHeroEditor {...editorProps} />}
+            {active === 'transfers-routes' && <TransfersRoutesEditor {...editorProps} />}
+            {active === 'transfers-booking' && <TransfersBookingEditor {...editorProps} />}
+            {active === 'transfers-fleet' && <TransfersFleetEditor {...editorProps} />}
+            {active === 'transfers-faq' && <TransfersFAQEditor {...editorProps} />}
             {active === 'about-hero'      && <AboutHeroEditor {...editorProps} />}
             {active === 'about-story'     && <AboutStoryEditor {...editorProps} />}
             {active === 'about-values'    && <AboutValuesEditor {...editorProps} />}
@@ -4194,6 +4219,28 @@ function FAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) 
   const upd = <K extends keyof AppConfig['contactPage']['faq']>(k: K, v: AppConfig['contactPage']['faq'][K]) =>
     set((p) => ({ ...p, contactPage: { ...p.contactPage, faq: { ...p.contactPage.faq, [k]: v } } }));
 
+  const addItem = () => {
+    const newItem = {
+      question: 'New Question',
+      answer: 'Add your answer here.',
+      enabled: true,
+    };
+    upd('items', [...f.items, newItem]);
+  };
+
+  const removeItem = (idx: number) => {
+    upd('items', f.items.filter((_, i) => i !== idx));
+  };
+
+  const moveItem = (idx: number, direction: -1 | 1) => {
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= f.items.length) return;
+    const reordered = [...f.items];
+    const [temp] = reordered.splice(idx, 1);
+    reordered.splice(targetIdx, 0, temp);
+    upd('items', reordered);
+  };
+
   return (
     <div className="space-y-5">
       <SectionToggle title="FAQ Section" enabled={f.enabled} onChange={(v) => upd('enabled', v)} />
@@ -4213,21 +4260,69 @@ function FAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) 
 
       <div className="pt-4 space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold">FAQ Items</h4>
+          <h4 className="text-sm font-semibold">FAQ Items ({f.items.length})</h4>
+          <Button
+            type="button"
+            size="sm"
+            onClick={addItem}
+            disabled={!f.enabled}
+            className="text-xs h-8 gap-1"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Question
+          </Button>
         </div>
         {f.items.map((item, idx) => (
-          <div key={idx} className="border rounded-md p-3 relative bg-card shadow-sm space-y-3">
-            <div className="flex gap-2">
-              <Switch 
-                checked={item.enabled} 
-                onCheckedChange={(v) => {
-                  const arr = [...f.items];
-                  arr[idx] = { ...item, enabled: v };
-                  upd('items', arr);
-                }} 
-              />
-              <div className="flex-1 space-y-2">
+          <div key={idx} className="border rounded-xl p-4 relative bg-card shadow-xs space-y-3" style={{ opacity: item.enabled ? 1 : 0.55 }}>
+            <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+              <div className="flex items-center gap-2">
+                <Switch 
+                  checked={item.enabled} 
+                  onCheckedChange={(v) => {
+                    const arr = [...f.items];
+                    arr[idx] = { ...item, enabled: v };
+                    upd('items', arr);
+                  }} 
+                  disabled={!f.enabled}
+                />
+                <span className="text-xs font-semibold">Question #{idx + 1}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={idx === 0 || !f.enabled}
+                  onClick={() => moveItem(idx, -1)}
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={idx === f.items.length - 1 || !f.enabled}
+                  onClick={() => moveItem(idx, 1)}
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                  disabled={!f.enabled}
+                  onClick={() => removeItem(idx)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <FieldRow label="Question" id={`cf-q-${idx}`}>
                 <Input 
+                  id={`cf-q-${idx}`}
                   value={item.question} 
                   onChange={(e) => {
                     const arr = [...f.items];
@@ -4235,10 +4330,13 @@ function FAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) 
                     upd('items', arr);
                   }} 
                   placeholder="Question"
-                  disabled={!item.enabled}
-                  className="h-8 text-sm font-semibold"
+                  disabled={!item.enabled || !f.enabled}
+                  className="h-9 text-xs font-semibold"
                 />
+              </FieldRow>
+              <FieldRow label="Answer" id={`cf-a-${idx}`}>
                 <textarea
+                  id={`cf-a-${idx}`}
                   value={item.answer}
                   onChange={(e) => {
                     const arr = [...f.items];
@@ -4246,11 +4344,11 @@ function FAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) 
                     upd('items', arr);
                   }} 
                   placeholder="Answer"
-                  disabled={!item.enabled}
+                  disabled={!item.enabled || !f.enabled}
                   rows={2}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
                 />
-              </div>
+              </FieldRow>
             </div>
           </div>
         ))}
@@ -5678,6 +5776,951 @@ function VersionHistoryEditor({
     </div>
   );
 }
+
+// ─── Transfers Page Editors ──────────────────────────────────────────────────
+function TransfersHeroEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const tp = draft.transfersPage || defaultConfig.transfersPage!;
+  const h = tp.hero || defaultConfig.transfersPage!.hero;
+
+  const upd = <K extends keyof AppConfig['homepage']['hero']>(k: K, v: AppConfig['homepage']['hero'][K]) =>
+    set((p) => {
+      const current = p.transfersPage || defaultConfig.transfersPage!;
+      return {
+        ...p,
+        transfersPage: {
+          ...current,
+          hero: { ...current.hero, [k]: v },
+        },
+      };
+    });
+
+  return (
+    <div className="space-y-5">
+      <SectionToggle title="Transfers Hero Section" enabled={h.enabled !== false} onChange={(v) => upd('enabled', v)} />
+      <BackgroundColorPicker value={h.backgroundColor} onChange={(v) => upd('backgroundColor', v)} />
+      
+      <div className="flex gap-4 items-start">
+        <Switch checked={h.showEyebrow} onCheckedChange={(v) => upd('showEyebrow', v)} className="mt-8" />
+        <div className="flex-1">
+          <FieldRow label="Eyebrow text" id="trh-eyebrow">
+            <Input id="trh-eyebrow" value={h.eyebrow} onChange={(e) => upd('eyebrow', e.target.value)} disabled={!h.showEyebrow} />
+          </FieldRow>
+        </div>
+      </div>
+      <Separator />
+      
+      <FieldRow label="Headline" id="trh-headline">
+        <Input id="trh-headline" value={h.headline} onChange={(e) => upd('headline', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Italic / highlight text" id="trh-italic">
+        <Input id="trh-italic" value={h.italicText} onChange={(e) => upd('italicText', e.target.value)} />
+      </FieldRow>
+      
+      <div className="flex gap-4 items-start">
+        <Switch checked={h.showSubtitle} onCheckedChange={(v) => upd('showSubtitle', v)} className="mt-8" />
+        <div className="flex-1">
+          <FieldRow label="Subtitle" id="trh-subtitle">
+            <textarea
+              id="trh-subtitle"
+              rows={3}
+              value={h.subtitle}
+              onChange={(e) => upd('subtitle', e.target.value)}
+              disabled={!h.showSubtitle}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+            />
+          </FieldRow>
+        </div>
+      </div>
+      
+      <Separator />
+      <FieldRow label="Background image" id="trh-image">
+        <ImageUploaderField
+          id="trh-image"
+          value={h.imageUrl}
+          onChange={(url) => upd('imageUrl', url)}
+          folder="hero"
+          placeholder="Upload or choose hero background..."
+        />
+      </FieldRow>
+
+      <div className="rounded-lg border border-border bg-card p-4 space-y-3 pt-3">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">Transfers Page SEO & Meta</h4>
+        <FieldRow label="Meta Title" id="trp-meta-title">
+          <Input
+            id="trp-meta-title"
+            value={draft.transfersPage?.metaTitle || ''}
+            placeholder="e.g. Airport & Coast Transfer Services | Safari Tours Kenya"
+            onChange={(e) =>
+              set((p) => {
+                const current = p.transfersPage || defaultConfig.transfersPage!;
+                return { ...p, transfersPage: { ...current, metaTitle: e.target.value } };
+              })
+            }
+          />
+        </FieldRow>
+        <FieldRow label="Meta Description" id="trp-meta-desc">
+          <textarea
+            id="trp-meta-desc"
+            rows={2}
+            value={draft.transfersPage?.metaDescription || ''}
+            placeholder="e.g. Reliable, comfortable transfers across Kenya Coast..."
+            onChange={(e) =>
+              set((p) => {
+                const current = p.transfersPage || defaultConfig.transfersPage!;
+                return { ...p, transfersPage: { ...current, metaDescription: e.target.value } };
+              })
+            }
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+          />
+        </FieldRow>
+      </div>
+    </div>
+  );
+}
+
+function TransfersRoutesEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const tp = draft.transfersPage || defaultConfig.transfersPage!;
+  const rs = tp.routesSection;
+  const routes = rs.routes || [];
+
+  const upd = (k: string, v: unknown) =>
+    set((p) => {
+      const current = p.transfersPage || defaultConfig.transfersPage!;
+      return {
+        ...p,
+        transfersPage: {
+          ...current,
+          routesSection: { ...current.routesSection, [k]: v },
+        },
+      };
+    });
+
+  const updRoute = (index: number, k: string, v: unknown) => {
+    const updated = [...routes];
+    updated[index] = { ...updated[index], [k]: v };
+    upd('routes', updated);
+  };
+
+  const addRoute = () => {
+    const newRoute = {
+      id: `route-${Date.now()}`,
+      from: 'Mombasa Airport (MBA)',
+      to: 'Watamu',
+      duration: '~2 hrs',
+      price: '$65',
+      priceLabel: 'per vehicle',
+      popular: false,
+      enabled: true,
+    };
+    upd('routes', [...routes, newRoute]);
+  };
+
+  const removeRoute = (index: number) => {
+    upd('routes', routes.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="Enable Routes Section" enabled={rs.enabled !== false} onChange={(v) => upd('enabled', v)} />
+      <FieldRow label="Section Title" id="trr-title">
+        <Input id="trr-title" value={rs.title || ''} onChange={(e) => upd('title', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Section Subtitle" id="trr-sub">
+        <Input id="trr-sub" value={rs.subtitle || ''} onChange={(e) => upd('subtitle', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Footer Note" id="trr-note">
+        <Input id="trr-note" value={rs.note || ''} onChange={(e) => upd('note', e.target.value)} />
+      </FieldRow>
+
+      <Separator />
+
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold">Available Route Items ({routes.length})</h4>
+        <Button type="button" size="sm" onClick={addRoute} className="text-xs h-8 gap-1">
+          <Plus className="h-3.5 w-3.5" /> Add Route
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        {routes.map((r, idx) => (
+          <div key={r.id || idx} className="rounded-xl border p-4 bg-card space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-semibold text-xs">Route #{idx + 1}</span>
+              <div className="flex items-center gap-2">
+                <Switch checked={r.enabled !== false} onCheckedChange={(v) => updRoute(idx, 'enabled', v)} />
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeRoute(idx)} className="h-7 w-7 p-0 text-red-500">
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FieldRow label="Origin (From)" id={`rf-${idx}`}>
+                <Input id={`rf-${idx}`} value={r.from} onChange={(e) => updRoute(idx, 'from', e.target.value)} />
+              </FieldRow>
+              <FieldRow label="Destination (To)" id={`rt-${idx}`}>
+                <Input id={`rt-${idx}`} value={r.to} onChange={(e) => updRoute(idx, 'to', e.target.value)} />
+              </FieldRow>
+              <FieldRow label="Estimated Duration" id={`rd-${idx}`}>
+                <Input id={`rd-${idx}`} value={r.duration} onChange={(e) => updRoute(idx, 'duration', e.target.value)} />
+              </FieldRow>
+              <div className="flex items-center gap-2 pt-6">
+                <Switch checked={Boolean(r.popular)} onCheckedChange={(v) => updRoute(idx, 'popular', v)} id={`rp-${idx}`} />
+                <Label htmlFor={`rp-${idx}`} className="text-xs cursor-pointer">Badge as Popular</Label>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TransfersBookingEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const tp = draft.transfersPage || defaultConfig.transfersPage!;
+  const f = tp.bookingForm || defaultConfig.transfersPage!.bookingForm;
+  const fields = f.fields || defaultConfig.transfersPage!.bookingForm!.fields || [];
+
+  const updF = <K extends keyof TransferBookingFormConfig>(k: K, v: TransferBookingFormConfig[K]) =>
+    set((p) => {
+      const current = p.transfersPage || defaultConfig.transfersPage!;
+      return {
+        ...p,
+        transfersPage: {
+          ...current,
+          bookingForm: {
+            ...(current.bookingForm || defaultConfig.transfersPage?.bookingForm || {}),
+            [k]: v,
+          },
+        },
+      };
+    });
+
+  const updField = (index: number, key: keyof DynamicFormField, val: unknown) => {
+    const updated = [...fields];
+    updated[index] = { ...updated[index], [key]: val };
+    updF('fields', updated);
+  };
+
+  const addField = () => {
+    const newField: DynamicFormField = {
+      id: `field_${Date.now()}`,
+      label: 'New Field',
+      type: 'text',
+      placeholder: 'Enter details...',
+      required: false,
+      halfWidth: false,
+      enabled: true,
+    };
+    updF('fields', [...fields, newField]);
+  };
+
+  const addFieldWithType = (type: FormFieldType, label = 'New Field') => {
+    const newField: DynamicFormField = {
+      id: `field_${Date.now()}`,
+      label,
+      type,
+      placeholder: type === 'select' || type === 'checkbox' ? '' : 'Enter details...',
+      options: type === 'select' ? ['Option 1', 'Option 2'] : undefined,
+      required: false,
+      halfWidth: type === 'date' || type === 'time' || type === 'text' || type === 'tel',
+      enabled: true,
+    };
+    updF('fields', [...fields, newField]);
+  };
+
+  const removeField = (index: number) => {
+    updF('fields', fields.filter((_, i) => i !== index));
+  };
+
+  const moveField = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= fields.length) return;
+    const reordered = [...fields];
+    const temp = reordered[index];
+    reordered[index] = reordered[targetIndex];
+    reordered[targetIndex] = temp;
+    updF('fields', reordered);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle
+        title="Enable Transfer Booking Form"
+        enabled={f.enabled !== false}
+        onChange={(v) => updF('enabled', v)}
+      />
+
+      <div className="space-y-4">
+        <FieldRow label="Form Title" id="trb-title">
+          <Input
+            id="trb-title"
+            value={f.title || ''}
+            placeholder="Book this transfer"
+            onChange={(e) => updF('title', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="Form Subtitle" id="trb-sub">
+          <Input
+            id="trb-sub"
+            value={f.subtitle || ''}
+            placeholder="Instant quote & quick confirmation"
+            onChange={(e) => updF('subtitle', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="Submit Button Label" id="trb-btn">
+          <Input
+            id="trb-btn"
+            value={f.buttonText || ''}
+            placeholder="Request Transfer"
+            onChange={(e) => updF('buttonText', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="WhatsApp Support Number" id="trb-wa">
+          <Input
+            id="trb-wa"
+            value={f.whatsappNumber || ''}
+            placeholder="+254700000000"
+            onChange={(e) => updF('whatsappNumber', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="Web3Forms Access Key (Optional override)" id="trb-key">
+          <Input
+            id="trb-key"
+            value={f.accessKey || ''}
+            placeholder="Leave blank to use Contact Page access key"
+            onChange={(e) => updF('accessKey', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <FieldRow label="Notice Footer Text" id="trb-notice">
+          <Input
+            id="trb-notice"
+            value={f.noticeText || ''}
+            placeholder="No commitment required. We reply within 24 hours."
+            onChange={(e) => updF('noticeText', e.target.value)}
+            disabled={f.enabled === false}
+          />
+        </FieldRow>
+
+        <Separator />
+
+        {/* Dynamic Form Fields Builder */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-bold text-foreground">Dynamic Transfer Booking Fields</h4>
+              <p className="text-xs text-muted-foreground">
+                Customize, reorder, add dropdowns, luggage toggles, date pickers, or text fields.
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addField}
+              disabled={f.enabled === false}
+              className="gap-1.5"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Field
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {fields.map((field, idx) => (
+              <div
+                key={field.id || idx}
+                className="relative rounded-xl border border-border p-4 bg-card shadow-xs space-y-3"
+                style={{ opacity: field.enabled !== false ? 1 : 0.55 }}
+              >
+                {/* Field Top Bar: Controls */}
+                <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={field.enabled !== false}
+                      onCheckedChange={(v) => updField(idx, 'enabled', v)}
+                      disabled={f.enabled === false}
+                    />
+                    <span className="text-xs font-semibold text-foreground">
+                      {field.label || `Field ${idx + 1}`}
+                    </span>
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground uppercase">
+                      {field.type}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      disabled={idx === 0 || f.enabled === false}
+                      onClick={() => moveField(idx, 'up')}
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      disabled={idx === fields.length - 1 || f.enabled === false}
+                      onClick={() => moveField(idx, 'down')}
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                      disabled={f.enabled === false}
+                      onClick={() => removeField(idx)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Field Configuration Inputs */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <FieldRow label="Field Label" id={`trf-lbl-${idx}`}>
+                    <Input
+                      id={`trf-lbl-${idx}`}
+                      value={field.label}
+                      onChange={(e) => updField(idx, 'label', e.target.value)}
+                      disabled={f.enabled === false}
+                    />
+                  </FieldRow>
+
+                  <FieldRow label="Field Type" id={`trf-typ-${idx}`}>
+                    <select
+                      id={`trf-typ-${idx}`}
+                      value={field.type}
+                      onChange={(e) => updField(idx, 'type', e.target.value as FormFieldType)}
+                      disabled={f.enabled === false}
+                      className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="text">Text (Single Line)</option>
+                      <option value="email">Email Address</option>
+                      <option value="tel">Phone Number</option>
+                      <option value="number">Number</option>
+                      <option value="date">Date Picker</option>
+                      <option value="time">Time Picker</option>
+                      <option value="datetime-local">Date & Time Picker</option>
+                      <option value="select">Dropdown (Select Menu)</option>
+                      <option value="checkbox">Checkbox Toggle</option>
+                      <option value="textarea">Textarea (Multi-Line)</option>
+                    </select>
+                  </FieldRow>
+                </div>
+
+                {/* Placeholder (Not applicable for checkbox) */}
+                {field.type !== 'checkbox' && (
+                  <FieldRow label="Placeholder Text" id={`trf-plc-${idx}`}>
+                    <Input
+                      id={`trf-plc-${idx}`}
+                      value={field.placeholder || ''}
+                      placeholder="e.g. Enter details..."
+                      onChange={(e) => updField(idx, 'placeholder', e.target.value)}
+                      disabled={f.enabled === false}
+                    />
+                  </FieldRow>
+                )}
+
+                {/* Dropdown Options (For Select Type) */}
+                {field.type === 'select' && (
+                  <FieldRow label="Dropdown Options (1 per line)" id={`trf-opt-${idx}`}>
+                    <textarea
+                      id={`trf-opt-${idx}`}
+                      rows={3}
+                      value={(field.options || []).join('\n')}
+                      placeholder="Option 1&#10;Option 2&#10;Option 3"
+                      onChange={(e) =>
+                        updField(
+                          idx,
+                          'options',
+                          e.target.value.split('\n')
+                        )
+                      }
+                      disabled={f.enabled === false}
+                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none font-mono"
+                    />
+                  </FieldRow>
+                )}
+
+                {/* Toggles: Required & Half Width */}
+                <div className="flex flex-wrap items-center gap-6 pt-1">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`trf-req-${idx}`}
+                      checked={Boolean(field.required)}
+                      onCheckedChange={(v) => updField(idx, 'required', v)}
+                      disabled={f.enabled === false}
+                    />
+                    <Label htmlFor={`trf-req-${idx}`} className="text-xs cursor-pointer">
+                      Required field
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id={`trf-half-${idx}`}
+                      checked={Boolean(field.halfWidth)}
+                      onCheckedChange={(v) => updField(idx, 'halfWidth', v)}
+                      disabled={f.enabled === false}
+                    />
+                    <Label htmlFor={`trf-half-${idx}`} className="text-xs cursor-pointer">
+                      Half Width (2-Column Grid)
+                    </Label>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Add Field at the Bottom */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => addField()}
+              disabled={f.enabled === false}
+              className="w-full sm:flex-1 h-10 border-dashed gap-2 text-xs font-semibold"
+            >
+              <Plus className="h-4 w-4" /> Add Custom Field
+            </Button>
+            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('date', 'Pick-up Date')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Date
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('time', 'Pick-up Time')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Time
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('select', 'Vehicle Preference')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Dropdown
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('checkbox', 'Luggage Assistance')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Checkbox
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => addFieldWithType('textarea', 'Flight & Pickup Notes')}
+                disabled={f.enabled === false}
+                className="text-[11px] h-9 flex-1 sm:flex-initial"
+              >
+                + Notes
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TransfersFleetEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const tp = draft.transfersPage || defaultConfig.transfersPage!;
+  const vs = tp.vehiclesSection || { enabled: true, title: 'Our Modern Fleet', subtitle: '', vehicles: [] };
+  const vehicles = vs.vehicles || [];
+
+  const upd = (k: string, v: unknown) =>
+    set((p) => {
+      const current = p.transfersPage || defaultConfig.transfersPage!;
+      return {
+        ...p,
+        transfersPage: {
+          ...current,
+          vehiclesSection: { ...(current.vehiclesSection || vs), [k]: v },
+        },
+      };
+    });
+
+  const updVehicle = (index: number, k: string, v: unknown) => {
+    const updated = [...vehicles];
+    updated[index] = { ...updated[index], [k]: v };
+    upd('vehicles', updated);
+  };
+
+  const addVehicle = () => {
+    const newVehicle: TransferVehicle = {
+      id: `vehicle-${Date.now()}`,
+      name: 'New Vehicle',
+      category: 'Private Transfer',
+      passengers: '1 - 4 Passengers',
+      luggage: '3 Large Bags',
+      description: 'Comfortable air-conditioned vehicle with professional chauffeur.',
+      featured: false,
+      enabled: true,
+    };
+    upd('vehicles', [...vehicles, newVehicle]);
+  };
+
+  const removeVehicle = (index: number) => {
+    upd('vehicles', vehicles.filter((_, i) => i !== index));
+  };
+
+  const moveVehicle = (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= vehicles.length) return;
+    const reordered = [...vehicles];
+    const [temp] = reordered.splice(index, 1);
+    reordered.splice(targetIndex, 0, temp);
+    upd('vehicles', reordered);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="Enable Fleet Overview" enabled={vs.enabled !== false} onChange={(v) => upd('enabled', v)} />
+      <FieldRow label="Section Title" id="trf-title">
+        <Input id="trf-title" value={vs.title || ''} onChange={(e) => upd('title', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Subtitle" id="trf-sub">
+        <Input id="trf-sub" value={vs.subtitle || ''} onChange={(e) => upd('subtitle', e.target.value)} />
+      </FieldRow>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-semibold text-foreground">Fleet Vehicles ({vehicles.length})</h4>
+            <p className="text-xs text-muted-foreground">Add, configure, reorder, or toggle individual fleet vehicles.</p>
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            onClick={addVehicle}
+            disabled={vs.enabled === false}
+            className="text-xs h-8 gap-1"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Vehicle
+          </Button>
+        </div>
+
+        {vehicles.map((v, idx) => (
+          <div
+            key={v.id || idx}
+            className="rounded-xl border p-4 bg-card space-y-4 shadow-xs"
+            style={{ opacity: v.enabled !== false ? 1 : 0.55 }}
+          >
+            <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+              <div className="flex items-center gap-2.5">
+                <Switch
+                  checked={v.enabled !== false}
+                  onCheckedChange={(val) => updVehicle(idx, 'enabled', val)}
+                  disabled={vs.enabled === false}
+                />
+                <span className="font-semibold text-xs text-foreground">
+                  {v.name || `Vehicle #${idx + 1}`}
+                </span>
+                {v.featured && (
+                  <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                    Most Popular
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={idx === 0 || vs.enabled === false}
+                  onClick={() => moveVehicle(idx, -1)}
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={idx === vehicles.length - 1 || vs.enabled === false}
+                  onClick={() => moveVehicle(idx, 1)}
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                  disabled={vs.enabled === false}
+                  onClick={() => removeVehicle(idx)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FieldRow label="Vehicle Name" id={`vn-${idx}`}>
+                <Input
+                  id={`vn-${idx}`}
+                  value={v.name}
+                  onChange={(e) => updVehicle(idx, 'name', e.target.value)}
+                  disabled={vs.enabled === false}
+                />
+              </FieldRow>
+              <FieldRow label="Category / Tier" id={`vc-${idx}`}>
+                <Input
+                  id={`vc-${idx}`}
+                  value={v.category}
+                  placeholder="e.g. Private Transfer, Family & Small Group"
+                  onChange={(e) => updVehicle(idx, 'category', e.target.value)}
+                  disabled={vs.enabled === false}
+                />
+              </FieldRow>
+              <FieldRow label="Passengers Capacity" id={`vp-${idx}`}>
+                <Input
+                  id={`vp-${idx}`}
+                  value={v.passengers}
+                  placeholder="e.g. 1 - 3 Passengers"
+                  onChange={(e) => updVehicle(idx, 'passengers', e.target.value)}
+                  disabled={vs.enabled === false}
+                />
+              </FieldRow>
+              <FieldRow label="Luggage Capacity" id={`vl-${idx}`}>
+                <Input
+                  id={`vl-${idx}`}
+                  value={v.luggage}
+                  placeholder="e.g. 2 Large + 2 Hand Luggage"
+                  onChange={(e) => updVehicle(idx, 'luggage', e.target.value)}
+                  disabled={vs.enabled === false}
+                />
+              </FieldRow>
+            </div>
+
+            <FieldRow label="Vehicle Description" id={`vd-${idx}`}>
+              <textarea
+                id={`vd-${idx}`}
+                rows={2}
+                value={v.description}
+                onChange={(e) => updVehicle(idx, 'description', e.target.value)}
+                disabled={vs.enabled === false}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              />
+            </FieldRow>
+
+            <div className="flex items-center gap-2 pt-1">
+              <Switch
+                id={`vf-${idx}`}
+                checked={Boolean(v.featured)}
+                onCheckedChange={(val) => updVehicle(idx, 'featured', val)}
+                disabled={vs.enabled === false}
+              />
+              <Label htmlFor={`vf-${idx}`} className="text-xs cursor-pointer font-medium">
+                Feature as "Most Popular"
+              </Label>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TransfersFAQEditor({ draft, set }: { draft: AppConfig; set: (fn: (p: AppConfig) => AppConfig) => void }) {
+  const tp = draft.transfersPage || defaultConfig.transfersPage!;
+  const faq = tp.faq || defaultConfig.transfersPage!.faq!;
+  const items = faq.items || [];
+
+  const upd = (k: string, v: unknown) =>
+    set((p) => {
+      const current = p.transfersPage || defaultConfig.transfersPage!;
+      return {
+        ...p,
+        transfersPage: {
+          ...current,
+          faq: { ...(current.faq || faq), [k]: v },
+        },
+      };
+    });
+
+  const updItem = (index: number, k: string, v: unknown) => {
+    const updated = [...items];
+    updated[index] = { ...updated[index], [k]: v };
+    upd('items', updated);
+  };
+
+  const addItem = () => {
+    const newItem = {
+      question: 'New Question',
+      answer: 'Add your detailed answer here.',
+      enabled: true,
+    };
+    upd('items', [...items, newItem]);
+  };
+
+  const removeItem = (index: number) => {
+    upd('items', items.filter((_, i) => i !== index));
+  };
+
+  const moveItem = (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    const reordered = [...items];
+    const [temp] = reordered.splice(index, 1);
+    reordered.splice(targetIndex, 0, temp);
+    upd('items', reordered);
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionToggle title="Enable Transfers FAQ" enabled={faq.enabled !== false} onChange={(v) => upd('enabled', v)} />
+      <FieldRow label="Eyebrow text" id="trfaq-eyebrow">
+        <Input id="trfaq-eyebrow" value={faq.eyebrow || ''} placeholder="TRANSFERS FAQ" onChange={(e) => upd('eyebrow', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Section Title" id="trfaq-title">
+        <Input id="trfaq-title" value={faq.title || ''} onChange={(e) => upd('title', e.target.value)} />
+      </FieldRow>
+      <FieldRow label="Section Subtitle" id="trfaq-sub">
+        <textarea
+          id="trfaq-sub"
+          rows={2}
+          value={faq.subtitle || ''}
+          onChange={(e) => upd('subtitle', e.target.value)}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
+      </FieldRow>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-sm font-semibold text-foreground">FAQ Questions ({items.length})</h4>
+            <p className="text-xs text-muted-foreground">Add, edit, reorder, or toggle questions.</p>
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            onClick={addItem}
+            disabled={faq.enabled === false}
+            className="text-xs h-8 gap-1"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Question
+          </Button>
+        </div>
+
+        {items.map((item, idx) => (
+          <div
+            key={idx}
+            className="rounded-xl border p-4 bg-card space-y-3 shadow-xs"
+            style={{ opacity: item.enabled !== false ? 1 : 0.55 }}
+          >
+            <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+              <div className="flex items-center gap-2.5">
+                <Switch
+                  checked={item.enabled !== false}
+                  onCheckedChange={(val) => updItem(idx, 'enabled', val)}
+                  disabled={faq.enabled === false}
+                />
+                <span className="font-semibold text-xs text-foreground">
+                  Question #{idx + 1}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={idx === 0 || faq.enabled === false}
+                  onClick={() => moveItem(idx, -1)}
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  disabled={idx === items.length - 1 || faq.enabled === false}
+                  onClick={() => moveItem(idx, 1)}
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-destructive hover:bg-destructive/10"
+                  disabled={faq.enabled === false}
+                  onClick={() => removeItem(idx)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <FieldRow label="Question" id={`fq-${idx}`}>
+              <Input
+                id={`fq-${idx}`}
+                value={item.question}
+                onChange={(e) => updItem(idx, 'question', e.target.value)}
+                disabled={faq.enabled === false}
+              />
+            </FieldRow>
+            <FieldRow label="Answer" id={`fa-${idx}`}>
+              <textarea
+                id={`fa-${idx}`}
+                rows={3}
+                value={item.answer}
+                onChange={(e) => updItem(idx, 'answer', e.target.value)}
+                disabled={faq.enabled === false}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+              />
+            </FieldRow>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 
 
 

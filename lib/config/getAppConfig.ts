@@ -23,7 +23,7 @@ export async function getAppConfig(): Promise<AppConfig> {
       ...defaultConfig.navigation.filter((n) => !savedNavKeys.has(n.key)),
     ];
 
-    const desiredOrder = ['home', 'tours', 'about', 'contact'];
+    const desiredOrder = ['home', 'tours', 'transfers', 'about', 'contact'];
     rawNav.sort((a, b) => {
       const aIdx = desiredOrder.indexOf(a.key);
       const bIdx = desiredOrder.indexOf(b.key);
@@ -237,6 +237,83 @@ export async function getAppConfig(): Promise<AppConfig> {
         faq: {
           ...defaultConfig.contactPage.faq,
           ...(savedConfig.contactPage?.faq || {}),
+        },
+      },
+      aboutPage: {
+        ...defaultConfig.aboutPage!,
+        ...(savedConfig.aboutPage || {}),
+        hero: {
+          ...defaultConfig.aboutPage!.hero,
+          ...(savedConfig.aboutPage?.hero || {}),
+        },
+        story: {
+          ...defaultConfig.aboutPage!.story,
+          ...(savedConfig.aboutPage?.story || {}),
+        },
+        values: {
+          ...defaultConfig.aboutPage!.values,
+          ...(savedConfig.aboutPage?.values || {}),
+        },
+        team: {
+          ...defaultConfig.aboutPage!.team,
+          ...(savedConfig.aboutPage?.team || {}),
+        },
+        impact: {
+          ...defaultConfig.aboutPage!.impact,
+          ...(savedConfig.aboutPage?.impact || {}),
+        },
+        cta: {
+          ...defaultConfig.aboutPage!.cta,
+          ...(savedConfig.aboutPage?.cta || {}),
+        },
+      },
+      transfersPage: {
+        ...defaultConfig.transfersPage!,
+        ...(savedConfig.transfersPage || {}),
+        hero: {
+          ...defaultConfig.transfersPage!.hero,
+          ...(savedConfig.transfersPage?.hero || {}),
+        },
+        features:
+          savedConfig.transfersPage?.features &&
+          savedConfig.transfersPage.features.length > 0
+            ? savedConfig.transfersPage.features
+            : defaultConfig.transfersPage!.features,
+        routesSection: {
+          ...defaultConfig.transfersPage!.routesSection,
+          ...(savedConfig.transfersPage?.routesSection || {}),
+          routes:
+            savedConfig.transfersPage?.routesSection?.routes &&
+            savedConfig.transfersPage.routesSection.routes.length > 0
+              ? savedConfig.transfersPage.routesSection.routes
+              : defaultConfig.transfersPage!.routesSection.routes,
+        },
+        vehiclesSection: {
+          ...defaultConfig.transfersPage!.vehiclesSection!,
+          ...(savedConfig.transfersPage?.vehiclesSection || {}),
+          vehicles:
+            savedConfig.transfersPage?.vehiclesSection?.vehicles &&
+            savedConfig.transfersPage.vehiclesSection.vehicles.length > 0
+              ? savedConfig.transfersPage.vehiclesSection.vehicles
+              : defaultConfig.transfersPage!.vehiclesSection!.vehicles,
+        },
+        bookingForm: {
+          ...defaultConfig.transfersPage!.bookingForm,
+          ...(savedConfig.transfersPage?.bookingForm || {}),
+          fields:
+            savedConfig.transfersPage?.bookingForm?.fields &&
+            savedConfig.transfersPage.bookingForm.fields.length > 0
+              ? savedConfig.transfersPage.bookingForm.fields
+              : defaultConfig.transfersPage!.bookingForm.fields,
+        },
+        faq: {
+          ...defaultConfig.transfersPage!.faq!,
+          ...(savedConfig.transfersPage?.faq || {}),
+          items:
+            savedConfig.transfersPage?.faq?.items &&
+            savedConfig.transfersPage.faq.items.length > 0
+              ? savedConfig.transfersPage.faq.items
+              : defaultConfig.transfersPage!.faq!.items,
         },
       },
     };
