@@ -36,18 +36,28 @@ export function Navbar({
       <div className="flex items-center justify-between px-6 lg:px-12 py-3">
         <Link href="/" className="flex items-center gap-2.5">
           {logoUrl && logoUrl.trim() !== '' ? (
-            <Image src={logoUrl} alt={appName} width={160} height={48} className="h-11 w-auto object-contain drop-shadow" style={{ width: 'auto' }} />
+            <Image
+              src={logoUrl}
+              alt={appName}
+              width={160}
+              height={48}
+              priority
+              className="h-11 w-auto object-contain drop-shadow"
+              style={{ width: 'auto' }}
+            />
           ) : (
-            <div
-              className="flex h-9 w-9 items-center justify-center rounded-full text-white font-bold text-sm shadow-md transition-colors"
-              style={{ backgroundColor: primaryColor }}
-            >
-              {appName.charAt(0)}
-            </div>
+            <>
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full text-white font-bold text-sm shadow-md transition-colors"
+                style={{ backgroundColor: primaryColor }}
+              >
+                {appName.charAt(0)}
+              </div>
+              <span className="font-semibold text-sm tracking-wide transition-colors text-foreground">
+                {appName}
+              </span>
+            </>
           )}
-          <span className="font-semibold text-sm tracking-wide transition-colors text-foreground">
-            {appName}
-          </span>
         </Link>
 
         {/* Desktop Navigation */}

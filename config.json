@@ -1,10 +1,11 @@
 {
   "branding": {
-    "appName": "Safari Tours Kenya",
+    "appName": "Twinbird Travel Agency",
     "primaryColor": "#1b4332",
     "accentColor": "#d97706",
     "font": "inter",
     "logoUrl": "/brand/logos/logo.png",
+    "logoDarkUrl": "/brand/logos/logo-white.png",
     "faviconUrl": "/brand/favicons/favicon.ico",
     "darkMode": false
   },

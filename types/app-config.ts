@@ -6,6 +6,7 @@ export interface Branding {
   accentColor: string;
   font: string;
   logoUrl: string | null;
+  logoDarkUrl?: string | null;
   faviconUrl: string | null;
   darkMode: boolean;
 }

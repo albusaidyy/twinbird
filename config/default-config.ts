@@ -575,6 +575,7 @@ export const defaultConfig: AppConfig = {
     font: "inter",
     appName: "Safari Tours Kenya",
     logoUrl: "/brand/logos/logo.png",
+    logoDarkUrl: "/brand/logos/logo-white.png",
     darkMode: false,
     faviconUrl: "/brand/favicons/favicon.ico",
     accentColor: "#d97706",

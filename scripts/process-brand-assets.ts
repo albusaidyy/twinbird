@@ -6,20 +6,25 @@ import sharp from 'sharp';
  * Universal Brand Asset Generator
  * 
  * Takes a master logo (JPEG, JPG, PNG, WEBP, or SVG) and derives all required website & PWA icons:
- * - /public/brand/logos/logo.png (Transparent master PNG for Navbar & Footer)
- * - /public/brand/logos/logo.svg (SVG vector wrapper)
- * - /public/brand/favicons/apple-touch-icon.png (180x180)
- * - /public/brand/favicons/favicon.png (64x64)
- * - /public/brand/icon.png (512x512)
- * - /public/favicon.ico & /public/brand/favicons/favicon.ico (Multi-res 16, 32, 48)
- * - /public/icons/pwa/icon-192.png & icon-192-maskable.png
- * - /public/icons/pwa/icon-512.png & icon-512-maskable.png
+ * - Master Logos:
+ *   - /public/brand/logos/logo.png (Transparent master PNG with dark text for light headers / Navbar)
+ *   - /public/brand/logos/logo.svg (SVG vector wrapper for light logo)
+ *   - /public/brand/logos/logo-white.png & logo-dark.png (Transparent master PNG with white text for dark footers / dark mode)
+ *   - /public/brand/logos/logo-white.svg & logo-dark.svg (SVG vector wrappers for dark logo)
+ * 
+ * - Favicons & PWA Icons (ISOLATED SYMBOL ONLY - Wing Mark):
+ *   - /public/brand/favicons/apple-touch-icon.png (180x180)
+ *   - /public/brand/favicons/favicon.png (64x64)
+ *   - /public/brand/icon.png (512x512)
+ *   - /public/favicon.ico & /public/brand/favicons/favicon.ico (Multi-res 16, 32, 48)
+ *   - /public/icons/pwa/icon-192.png & icon-192-maskable.png
+ *   - /public/icons/pwa/icon-512.png & icon-512-maskable.png
  * 
  * Features:
- * - Intelligent background removal (turns solid white/near-white JPEG backgrounds into clean transparent PNGs)
- * - Anti-aliased alpha edge smoothing
+ * - Studio-grade super-sampled anti-aliasing with Lanczos3 interpolation (zero noise/pixelation)
+ * - Pure isolated brand symbol extraction for ultra-sharp, recognizable browser tabs & app icons
+ * - Light (black text) and Dark (white text) full logo generation
  * - Auto-trimming of dead margins
- * - Master logo replacement (updates logo.png & logo.svg)
  * 
  * Usage:
  *   npx tsx scripts/process-brand-assets.ts [optional-path-to-image] [--keep-bg]
@@ -47,16 +52,18 @@ async function generateAllAssetsFromLogo() {
   if (customPathArg) {
     inputLogoPath = path.resolve(rootDir, customPathArg);
   } else {
-    // Find most recently modified logo file among candidate extensions
-    const candidateExtensions = ['jpeg', 'jpg', 'webp', 'png', 'svg'];
+    // Look for master raw source files first (jpeg, jpg, png, webp) before svg wrapper
+    const candidateExtensions = ['jpeg', 'jpg', 'png', 'webp', 'svg'];
     let latestTime = 0;
 
     for (const ext of candidateExtensions) {
       const candidate = path.join(logosDir, `logo.${ext}`);
       if (fs.existsSync(candidate)) {
         const stats = fs.statSync(candidate);
-        if (stats.mtimeMs > latestTime) {
-          latestTime = stats.mtimeMs;
+        // Prioritize non-svg source files if modified within a reasonable window
+        const score = stats.mtimeMs + (ext !== 'svg' && ext !== 'png' ? 1000000000 : 0);
+        if (score > latestTime) {
+          latestTime = score;
           inputLogoPath = candidate;
         }
       }
@@ -73,69 +80,164 @@ async function generateAllAssetsFromLogo() {
   console.log(`Using source logo: ${inputLogoPath}`);
 
   const rawBuffer = fs.readFileSync(inputLogoPath);
-  let processedBuffer: Buffer = rawBuffer;
+  let processedLightBuffer: Buffer;
+  let processedDarkBuffer: Buffer;
+  let isolatedSymbolBuffer: Buffer;
 
-  // 2. Intelligent Background Removal & Auto-trim
+  // 2. Intelligent Background Removal & Smooth Anti-Aliasing
   if (!keepBg) {
-    console.log('⚡ Processing image: removing solid white background & trimming margins...');
-    const { data, info } = await sharp(rawBuffer)
+    console.log('⚡ Processing image: super-sampling and generating smooth light & dark logo variants...');
+
+    // Upscale to 1500x1500 with Lanczos3 for subpixel edge fidelity and noise elimination
+    const upscaled = await sharp(rawBuffer)
+      .resize(1500, 1500, { fit: 'inside', kernel: 'lanczos3' })
+      .toBuffer();
+
+    const { data, info } = await sharp(upscaled)
       .ensureAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true });
 
-    const { width, height, channels } = info;
-    const threshold = 238; // Threshold for near-white detection
+    const { width, height } = info;
+    const scale = width / 500; // Reference scale relative to 500x500 master canvas
 
-    for (let i = 0; i < data.length; i += channels) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
+    const lightData = Buffer.alloc(width * height * 4);
+    const darkData = Buffer.alloc(width * height * 4);
+    const symbolData = Buffer.alloc(width * height * 4);
 
-      if (r >= threshold && g >= threshold && b >= threshold) {
-        const minVal = Math.min(r, g, b);
-        if (minVal >= 248) {
-          data[i + 3] = 0; // Pure transparent
+    for (let y = 0; y < height; y++) {
+      const origY = y / scale;
+      for (let x = 0; x < width; x++) {
+        const origX = x / scale;
+        const i = (y * width + x) * 4;
+
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+        // Color detection for vibrant brand wing elements
+        const isGreen = (g > 75 && g > r * 1.15 && g > b * 1.15) || (g > 95 && g > r && g > b + 20);
+        const isRed = (r > 75 && r > g * 1.25 && r > b * 1.25) || (r > 95 && r > g + 20 && r > b + 20);
+
+        // Check if pixel belongs to the bottom curved wing feathers
+        const isBottomFeather = (
+          (origY >= 295 && origY <= 306 && origX >= 85 && origX <= 118) ||
+          (origY >= 306 && origY <= 316 && origX >= 110 && origX <= 132) ||
+          (origY >= 316 && origY <= 326 && origX >= 130 && origX <= 145) ||
+          (origY >= 326 && origY <= 336 && origX >= 142 && origX <= 156)
+        );
+
+        // Check if pixel belongs to the symbol (isolated wing mark)
+        const isPartOfSymbol = ((isGreen || isRed) && origX < 140 && origY < 310) || isBottomFeather;
+
+        if (isGreen || isRed) {
+          let alpha = 255;
+          if (lum > 175) {
+            const t = Math.max(0, Math.min(1, (246 - lum) / (246 - 175)));
+            alpha = Math.round(t * t * (3 - 2 * t) * 255);
+          }
+          lightData[i] = r; lightData[i+1] = g; lightData[i+2] = b; lightData[i+3] = alpha;
+          darkData[i] = r;  darkData[i+1] = g;  darkData[i+2] = b;  darkData[i+3] = alpha;
+
+          if (isPartOfSymbol) {
+            symbolData[i] = r; symbolData[i+1] = g; symbolData[i+2] = b; symbolData[i+3] = alpha;
+          }
         } else {
-          // Anti-aliased feathering for clean borders
-          data[i + 3] = Math.round((255 - minVal) * 25.5);
+          // Text & dark details (TWINBIRD, TRAVEL AGENCY, slogan, lower dark feathers)
+          let alpha = 0;
+          if (lum < 238) {
+            const normalized = Math.max(0, Math.min(1, (238 - lum) / (238 - 45)));
+            const smooth = normalized * normalized * (3 - 2 * normalized);
+            alpha = Math.round(smooth * 255);
+          }
+
+          // Light variant (Black text for light backgrounds)
+          lightData[i] = 0;
+          lightData[i + 1] = 0;
+          lightData[i + 2] = 0;
+          lightData[i + 3] = alpha;
+
+          // Dark variant (White text for dark backgrounds)
+          darkData[i] = 255;
+          darkData[i + 1] = 255;
+          darkData[i + 2] = 255;
+          darkData[i + 3] = alpha;
+
+          if (isPartOfSymbol) {
+            symbolData[i] = 20;
+            symbolData[i + 1] = 20;
+            symbolData[i + 2] = 20;
+            symbolData[i + 3] = alpha;
+          }
         }
       }
     }
 
-    // Convert back to PNG and trim outer transparent margins
-    processedBuffer = await sharp(data, { raw: { width, height, channels } })
-      .png()
+    processedLightBuffer = await sharp(lightData, { raw: { width, height, channels: 4 } })
       .trim()
+      .png({ quality: 100, compressionLevel: 9 })
       .toBuffer();
-    
-    console.log('✓ Converted background to transparent with anti-aliased edge smoothing');
+
+    processedDarkBuffer = await sharp(darkData, { raw: { width, height, channels: 4 } })
+      .trim()
+      .png({ quality: 100, compressionLevel: 9 })
+      .toBuffer();
+
+    isolatedSymbolBuffer = await sharp(symbolData, { raw: { width, height, channels: 4 } })
+      .trim()
+      .png({ quality: 100, compressionLevel: 9 })
+      .toBuffer();
+
+    console.log('✓ Generated smooth anti-aliased light logo, dark logo, and isolated symbol buffers');
   } else {
-    // Just trim transparent/white margins
-    processedBuffer = await sharp(rawBuffer).trim().png().toBuffer();
+    processedLightBuffer = await sharp(rawBuffer).trim().png().toBuffer();
+    processedDarkBuffer = processedLightBuffer;
+    isolatedSymbolBuffer = processedLightBuffer;
   }
 
-  // 3. Generate Main Master Website Logos (/public/brand/logos/logo.png & logo.svg)
-  fs.writeFileSync(path.join(logosDir, 'logo.png'), processedBuffer);
-  console.log('✓ Updated master logo: public/brand/logos/logo.png (for Navbar & Footer)');
+  // 3. Save Master Logos (Light & Dark Variants)
+  fs.writeFileSync(path.join(logosDir, 'logo.png'), processedLightBuffer);
+  console.log('✓ Updated light master logo: public/brand/logos/logo.png');
 
-  const logoMetadata = await sharp(processedBuffer).metadata();
-  const svgWidth = logoMetadata.width || 500;
-  const svgHeight = logoMetadata.height || 500;
-  const pngBase64 = processedBuffer.toString('base64');
+  fs.writeFileSync(path.join(logosDir, 'logo-white.png'), processedDarkBuffer);
+  fs.writeFileSync(path.join(logosDir, 'logo-dark.png'), processedDarkBuffer);
+  console.log('✓ Updated dark master logo: public/brand/logos/logo-white.png & logo-dark.png');
 
-  const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" width="100%" height="100%">
-  <image href="data:image/png;base64,${pngBase64}" width="${svgWidth}" height="${svgHeight}" />
+  // Generate SVG Wrappers
+  const lightMeta = await sharp(processedLightBuffer).metadata();
+  const lWidth = lightMeta.width || 500;
+  const lHeight = lightMeta.height || 500;
+  const lBase64 = processedLightBuffer.toString('base64');
+  const lightSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${lWidth} ${lHeight}" width="100%" height="100%">
+  <image href="data:image/png;base64,${lBase64}" width="${lWidth}" height="${lHeight}" />
 </svg>
 `;
-  fs.writeFileSync(path.join(logosDir, 'logo.svg'), svgContent);
-  console.log('✓ Updated master SVG: public/brand/logos/logo.svg');
+  fs.writeFileSync(path.join(logosDir, 'logo.svg'), lightSvg);
 
-  // 4. Helper to create padded square icon
-  const createPaddedIcon = async (size: number, paddingPercent: number = 0.06) => {
+  const darkMeta = await sharp(processedDarkBuffer).metadata();
+  const dWidth = darkMeta.width || 500;
+  const dHeight = darkMeta.height || 500;
+  const dBase64 = processedDarkBuffer.toString('base64');
+  const darkSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${dWidth} ${dHeight}" width="100%" height="100%">
+  <image href="data:image/png;base64,${dBase64}" width="${dWidth}" height="${dHeight}" />
+</svg>
+`;
+  fs.writeFileSync(path.join(logosDir, 'logo-white.svg'), darkSvg);
+  fs.writeFileSync(path.join(logosDir, 'logo-dark.svg'), darkSvg);
+  console.log('✓ Updated master SVGs: logo.svg, logo-white.svg, logo-dark.svg');
+
+  // Save isolated symbol master
+  fs.writeFileSync(path.join(logosDir, 'symbol.png'), isolatedSymbolBuffer);
+  console.log('✓ Saved isolated symbol: public/brand/logos/symbol.png');
+
+  // 4. Helper to create padded square icon from isolated symbol
+  const createPaddedSymbolIcon = async (size: number, paddingPercent: number = 0.08) => {
     const pad = Math.round(size * paddingPercent);
     const innerSize = size - pad * 2;
 
-    return await sharp(processedBuffer)
+    return await sharp(isolatedSymbolBuffer)
       .resize(innerSize, innerSize, {
         fit: 'contain',
         background: { r: 0, g: 0, b: 0, alpha: 0 },
@@ -152,23 +254,23 @@ async function generateAllAssetsFromLogo() {
   };
 
   // 5. Generate Apple Touch Icon (180x180) & Favicon PNG (64x64) & Brand Icon (512x512)
-  const appleTouchBuf = await createPaddedIcon(180, 0.06);
+  const appleTouchBuf = await createPaddedSymbolIcon(180, 0.08);
   fs.writeFileSync(path.join(faviconsDir, 'apple-touch-icon.png'), appleTouchBuf);
-  console.log('✓ Generated apple-touch-icon.png (180x180, transparent)');
+  console.log('✓ Generated apple-touch-icon.png (180x180, symbol only)');
 
-  const favicon64Buf = await createPaddedIcon(64, 0.06);
+  const favicon64Buf = await createPaddedSymbolIcon(64, 0.06);
   fs.writeFileSync(path.join(faviconsDir, 'favicon.png'), favicon64Buf);
-  console.log('✓ Generated favicon.png (64x64, transparent)');
+  console.log('✓ Generated favicon.png (64x64, symbol only)');
 
-  const icon512Buf = await createPaddedIcon(512, 0.06);
+  const icon512Buf = await createPaddedSymbolIcon(512, 0.08);
   fs.writeFileSync(path.join(brandDir, 'icon.png'), icon512Buf);
-  console.log('✓ Generated brand/icon.png (512x512, transparent)');
+  console.log('✓ Generated brand/icon.png (512x512, symbol only)');
 
   // 6. Generate Multi-resolution Favicon ICO (16x16, 32x32, 48x48)
   const icoSizes = [16, 32, 48];
   const icoPngBuffers: Buffer[] = [];
   for (const size of icoSizes) {
-    const buf = await createPaddedIcon(size, 0.04);
+    const buf = await createPaddedSymbolIcon(size, 0.04);
     icoPngBuffers.push(buf);
   }
 
@@ -199,23 +301,23 @@ async function generateAllAssetsFromLogo() {
   const icoBuffer = Buffer.concat([icoHeader, ...directoryEntries, ...icoPngBuffers]);
   fs.writeFileSync(path.join(rootDir, 'public', 'favicon.ico'), icoBuffer);
   fs.writeFileSync(path.join(faviconsDir, 'favicon.ico'), icoBuffer);
-  console.log('✓ Generated favicon.ico (multi-res 16, 32, 48, transparent)');
+  console.log('✓ Generated favicon.ico (multi-res 16, 32, 48, symbol only)');
 
   // 7. Generate PWA Icons (Standard Transparent & Maskable Safe-Zone)
   const pwaSizes = [192, 512];
   for (const size of pwaSizes) {
     // Standard icon
-    const pwaBuf = await createPaddedIcon(size, 0.08);
+    const pwaBuf = await createPaddedSymbolIcon(size, 0.08);
     fs.writeFileSync(path.join(pwaDir, `icon-${size}.png`), pwaBuf);
-    console.log(`✓ Generated icon-${size}.png (${size}x${size})`);
+    console.log(`✓ Generated icon-${size}.png (${size}x${size}, symbol only)`);
 
     // Maskable icon with 15% safe-zone margin
-    const maskableBuf = await createPaddedIcon(size, 0.15);
+    const maskableBuf = await createPaddedSymbolIcon(size, 0.15);
     fs.writeFileSync(path.join(pwaDir, `icon-${size}-maskable.png`), maskableBuf);
-    console.log(`✓ Generated icon-${size}-maskable.png (${size}x${size})`);
+    console.log(`✓ Generated icon-${size}-maskable.png (${size}x${size}, symbol only)`);
   }
 
-  console.log('\n✨ All brand assets, master logo PNG, master SVG, and favicons successfully updated!');
+  console.log('\n✨ All brand assets, light/dark master logos, SVGs, and symbol-only favicons successfully generated!');
 }
 
 generateAllAssetsFromLogo().catch((err) => {
