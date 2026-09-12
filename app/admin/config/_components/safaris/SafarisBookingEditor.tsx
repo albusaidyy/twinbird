@@ -11,7 +11,7 @@ import type { EditorProps } from '../shared/types';
 import { FieldRow } from '../shared/FieldRow';
 import { SectionToggle } from '../shared/SectionToggle';
 
-export function ToursBookingEditor({ draft, set }: EditorProps) {
+export function SafarisBookingEditor({ draft, set }: EditorProps) {
   const f = draft.toursPage?.bookingForm || defaultConfig.toursPage?.bookingForm || {
     enabled: true,
     title: 'Reserve This Safari',

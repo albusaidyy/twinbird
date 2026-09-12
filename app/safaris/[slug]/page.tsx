@@ -41,7 +41,7 @@ export default function SingleTourPage({
           <h1 className="text-3xl font-bold text-foreground">Safari Tour Not Found</h1>
           <p className="text-muted-foreground">The requested safari expedition could not be located.</p>
           <Link
-            href="/tours"
+            href="/safaris"
             className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-semibold text-white shadow-md"
             style={{ backgroundColor: primaryColor }}
           >

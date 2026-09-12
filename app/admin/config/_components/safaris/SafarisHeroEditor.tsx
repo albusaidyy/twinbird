@@ -10,7 +10,7 @@ import { SectionToggle } from '../shared/SectionToggle';
 import { BackgroundColorPicker } from '../shared/BackgroundColorPicker';
 import { ImageUploaderField } from '../shared/ImageUploaderField';
 
-export function ToursHeroEditor({ draft, set }: EditorProps) {
+export function SafarisHeroEditor({ draft, set }: EditorProps) {
   const h = draft.toursPage?.hero || defaultConfig.toursPage?.hero || defaultConfig.contactPage.hero;
   const upd = <K extends keyof AppConfig['homepage']['hero']>(k: K, v: AppConfig['homepage']['hero'][K]) =>
     set((p) => {
@@ -20,7 +20,7 @@ export function ToursHeroEditor({ draft, set }: EditorProps) {
 
   return (
     <div className="space-y-5">
-      <SectionToggle title="Safari Tours Hero Section" enabled={h.enabled} onChange={(v) => upd('enabled', v)} />
+      <SectionToggle title="Safaris Hero Section" enabled={h.enabled} onChange={(v) => upd('enabled', v)} />
       <BackgroundColorPicker value={h.backgroundColor} onChange={(v) => upd('backgroundColor', v)} />
       
       <div className="flex gap-4 items-start">
@@ -68,7 +68,7 @@ export function ToursHeroEditor({ draft, set }: EditorProps) {
       </FieldRow>
 
       <div className="rounded-lg border border-border bg-card p-4 space-y-3 pt-3">
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">Safari Tours Page SEO & Meta</h4>
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">Safaris Page SEO & Meta</h4>
         <FieldRow label="Meta Title" id="tp-meta-title">
           <Input
             id="tp-meta-title"

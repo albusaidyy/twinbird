@@ -80,7 +80,7 @@ export function HomeExperiencesSection({
         >
           {items.map((item, idx) => {
             const IconComp = getIcon(item.icon || 'Compass');
-            const href = item.ctaHref || '/tours';
+            const href = item.ctaHref || '/safaris';
 
             return (
               <div

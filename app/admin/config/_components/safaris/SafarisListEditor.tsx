@@ -22,7 +22,7 @@ import { ImageUploaderField } from '../shared/ImageUploaderField';
 import { TourDeleteConfirmDialog } from '../shared/TourDeleteConfirmDialog';
 import { isTourMatch } from '../shared/admin-helpers';
 
-export function ToursListEditor({ draft, set }: EditorProps) {
+export function SafarisListEditor({ draft, set }: EditorProps) {
   const currentToursPage = draft.toursPage || defaultConfig.toursPage!;
   const data = currentToursPage.tours || defaultConfig.toursPage!.tours;
   const toursList = data.items || [];
@@ -434,7 +434,7 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                     <Input
                       id={`tp-href-${i}`}
                       value={t.href || ''}
-                      placeholder="/tours/..."
+                      placeholder="/safaris/..."
                       onChange={(e) => updTour(i, 'href', e.target.value)}
                       disabled={!t.enabled || isDeleted}
                     />
@@ -562,7 +562,7 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             return (
                               <div key={gIdx} className="rounded-lg border border-border p-3 bg-card shadow-xs space-y-2 min-w-0">
                                 <div className="flex items-center justify-between gap-2 pb-1 border-b border-border/40">
-                                  <span className="text-xs font-semibold text-muted-foreground">
+                                   <span className="text-xs font-semibold text-muted-foreground">
                                     Carousel Photo #{gIdx + 1}
                                   </span>
                                   <div className="flex items-center gap-0.5">
@@ -798,9 +798,9 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                               checked={t.showWhyChoose !== false}
                               onCheckedChange={(v) => updTour(i, 'showWhyChoose', v)}
                               disabled={!t.enabled || isDeleted}
-                              title="Toggle Why Choose This Tour On/Off"
+                              title="Toggle Why Choose This Safari On/Off"
                             />
-                            <Label className="text-xs font-semibold">Why Choose This Tour (1 per line)</Label>
+                            <Label className="text-xs font-semibold">Why Choose This Safari (1 per line)</Label>
                           </div>
                           <textarea
                             id={`tp-why-${i}`}
@@ -863,7 +863,7 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                           <Input
                             id={`tp-mtitle-${i}`}
                             value={t.metaTitle || ''}
-                            placeholder={t.title ? `${t.title} | Safari Tours Kenya` : 'e.g. Maasai Mara Big Five | Safari Tours Kenya'}
+                            placeholder={t.title ? `${t.title} | Twinbird Travel Agency` : 'e.g. Maasai Mara Big Five | Twinbird Travel Agency'}
                             onChange={(e) => updTour(i, 'metaTitle', e.target.value)}
                             disabled={!t.enabled || isDeleted}
                           />

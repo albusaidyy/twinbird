@@ -104,11 +104,11 @@ export const PAGES: PageItem[] = [
   },
   {
     id: 'tours',
-    label: 'Safari Tours',
+    label: 'Safaris',
     Icon: Compass,
-    href: '/tours',
+    href: '/safaris',
     sections: [
-      { key: 'tours-page-hero', label: 'Hero', Icon: Layers, description: 'Safari Tours splash hero' },
+      { key: 'tours-page-hero', label: 'Hero', Icon: Layers, description: 'Safaris splash hero' },
       { key: 'tours-page-list', label: 'Safaris Listing', Icon: Map, description: 'Safari packages & cards' },
       { key: 'tours-page-booking', label: 'Booking Form', Icon: Calendar, description: 'Single safari reservation form settings' },
     ],

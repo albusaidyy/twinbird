@@ -27,7 +27,7 @@ export default function TransfersPage() {
         nav={config.navigation}
       />
 
-      {/* 1. Standard Hero Section (matching Safari Tours / App Hero standard) */}
+      {/* 1. Standard Hero Section (matching App Hero standard) */}
       <Hero
         hero={transfersPage.hero}
         primaryColor={primaryColor}

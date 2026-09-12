@@ -139,7 +139,7 @@ export function ToursHeroCarousel({
           >
             {displayItems.map((tour, i) => {
               const slug = getTourSlug(tour);
-              const targetHref = `/tours/${slug}`;
+              const targetHref = `/safaris/${slug}`;
 
               return (
                 <Link

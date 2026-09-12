@@ -81,7 +81,7 @@ export function TransfersHeroEditor({ draft, set }: EditorProps) {
           <Input
             id="trp-meta-title"
             value={draft.transfersPage?.metaTitle || ''}
-            placeholder="e.g. Airport & Coast Transfer Services | Safari Tours Kenya"
+            placeholder="e.g. Airport & Coast Transfer Services | Twinbird Travel Agency"
             onChange={(e) =>
               set((p) => {
                 const current = p.transfersPage || defaultConfig.transfersPage!;

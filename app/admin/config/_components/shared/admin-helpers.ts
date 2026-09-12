@@ -19,7 +19,7 @@ export function slugifyNavRoute(label: string): string {
     trimmed === 'safaris' ||
     trimmed === 'safari tours'
   )
-    return '/tours';
+    return '/safaris';
   if (
     trimmed === 'excursions' ||
     trimmed === 'excursion' ||
@@ -42,7 +42,7 @@ export function slugifyNavRoute(label: string): string {
 
 export const NAV_PRESETS = [
   { label: 'Home', href: '/' },
-  { label: 'Safaris', href: '/tours' },
+  { label: 'Safaris', href: '/safaris' },
   { label: 'Excursions', href: '/excursions' },
   { label: 'Transfers', href: '/transfers' },
   { label: 'About', href: '/about' },

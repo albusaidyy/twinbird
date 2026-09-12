@@ -145,7 +145,7 @@ export function TransfersBookingSection({
   const getWhatsAppLink = () => {
     const rawNumber = fConfig.whatsappNumber || '+254700000000';
     const cleanNumber = rawNumber.replace(/[^0-9]/g, '');
-    const prefix = fConfig.whatsappText || 'Hello Safari Tours Kenya! I would like to inquire about booking a transfer:';
+    const prefix = fConfig.whatsappText || 'Hello Twinbird Travel Agency! I would like to inquire about booking a transfer:';
 
     const lines = [prefix];
     if (selectedRouteName) {

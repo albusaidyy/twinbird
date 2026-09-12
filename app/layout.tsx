@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const favicon = config.branding.faviconUrl || '/brand/favicons/favicon.ico';
 
   return {
-    title: config.branding.appName || 'Safari Tours Kenya',
+    title: config.branding.appName || 'Twinbird Travel Agency',
     description:
       config.branding.metaDescription ||
       'Premier African wildlife safaris, Big Five game drives, and luxury bush expeditions in Kenya.',

@@ -60,7 +60,7 @@ export function TourListSection({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {visibleTours.map((tour, idx) => {
             const slug = getTourSlug(tour);
-            const targetHref = `/tours/${slug}`;
+            const targetHref = `/safaris/${slug}`;
             const canShowBadge = tour.showBadge !== false && Boolean(tour.badge);
             const canShowDuration = tour.showDuration !== false && Boolean(tour.duration);
             const canShowRating = tour.showRating !== false && tour.rating > 0;

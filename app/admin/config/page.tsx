@@ -39,7 +39,7 @@ import { VersionHistoryEditor } from './_components/global/VersionHistoryEditor'
 import { HomeHeroEditor } from './_components/home/HomeHeroEditor';
 import { HomeStatsEditor } from './_components/home/HomeStatsEditor';
 import { HomeExperiencesEditor } from './_components/home/HomeExperiencesEditor';
-import { HomeToursEditor } from './_components/home/HomeToursEditor';
+import { HomeSafarisEditor } from './_components/home/HomeSafarisEditor';
 import { HomeExcursionsEditor } from './_components/home/HomeExcursionsEditor';
 import { HomeReviewsEditor } from './_components/home/HomeReviewsEditor';
 import { HomeGalleryEditor } from './_components/home/HomeGalleryEditor';
@@ -47,10 +47,10 @@ import { HomeWhyUsEditor } from './_components/home/HomeWhyUsEditor';
 import { HomeCTAEditor } from './_components/home/HomeCTAEditor';
 import { HomeFooterEditor } from './_components/home/HomeFooterEditor';
 
-// Tours page editors
-import { ToursHeroEditor } from './_components/tours/ToursHeroEditor';
-import { ToursListEditor } from './_components/tours/ToursListEditor';
-import { ToursBookingEditor } from './_components/tours/ToursBookingEditor';
+// Safaris page editors
+import { SafarisHeroEditor } from './_components/safaris/SafarisHeroEditor';
+import { SafarisListEditor } from './_components/safaris/SafarisListEditor';
+import { SafarisBookingEditor } from './_components/safaris/SafarisBookingEditor';
 
 // Excursions page editors
 import { ExcursionsHeroEditor } from './_components/excursions/ExcursionsHeroEditor';
@@ -568,7 +568,7 @@ export default function AdminConfigPage() {
             {active === 'hero' && <HomeHeroEditor {...editorProps} />}
             {active === 'stats' && <HomeStatsEditor {...editorProps} />}
             {active === 'experiences' && <HomeExperiencesEditor {...editorProps} />}
-            {active === 'tours' && <HomeToursEditor {...editorProps} />}
+            {active === 'tours' && <HomeSafarisEditor {...editorProps} />}
             {active === 'home-excursions' && <HomeExcursionsEditor {...editorProps} />}
             {active === 'reviews' && <HomeReviewsEditor {...editorProps} />}
             {active === 'gallery' && <HomeGalleryEditor {...editorProps} />}
@@ -576,10 +576,10 @@ export default function AdminConfigPage() {
             {active === 'cta' && <HomeCTAEditor {...editorProps} />}
             {active === 'footer' && <HomeFooterEditor {...editorProps} />}
 
-            {/* Safari Tours Page */}
-            {active === 'tours-page-hero' && <ToursHeroEditor {...editorProps} />}
-            {active === 'tours-page-list' && <ToursListEditor {...editorProps} />}
-            {active === 'tours-page-booking' && <ToursBookingEditor {...editorProps} />}
+            {/* Safaris Page */}
+            {active === 'tours-page-hero' && <SafarisHeroEditor {...editorProps} />}
+            {active === 'tours-page-list' && <SafarisListEditor {...editorProps} />}
+            {active === 'tours-page-booking' && <SafarisBookingEditor {...editorProps} />}
 
             {/* Excursions Page */}
             {active === 'excursions-hero' && <ExcursionsHeroEditor {...editorProps} />}

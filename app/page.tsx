@@ -102,7 +102,7 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {visibleTours.map((tour) => {
             const slug = getTourSlug(tour);
-            const targetHref = `/tours/${slug}`;
+            const targetHref = `/safaris/${slug}`;
             const canShowBadge = tour.showBadge !== false && Boolean(tour.badge);
             const canShowDuration = tour.showDuration !== false && Boolean(tour.duration);
             const canShowRating = tour.showRating !== false && tour.rating > 0;

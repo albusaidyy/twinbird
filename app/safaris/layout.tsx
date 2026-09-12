@@ -3,8 +3,9 @@ import { getAppConfig } from '@/lib/config/getAppConfig';
 
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getAppConfig();
-  const appName = config.branding.appName || 'Safari Tours Kenya';
-  const pageTitle = config.toursPage?.metaTitle || 'Safari Packages & Wildlife Game Drives';
+  const appName = config.branding.appName || 'Twinbird Travel Agency';
+  const toursPage = config.toursPage;
+  const pageTitle = toursPage?.hero?.headline || toursPage?.metaTitle || 'Safaris & Expeditions';
   const description =
     config.toursPage?.metaDescription ||
     config.branding.metaDescription ||

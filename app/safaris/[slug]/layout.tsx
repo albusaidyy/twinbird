@@ -9,7 +9,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const config = await getAppConfig();
-  const appName = config.branding.appName || 'Safari Tours Kenya';
+  const appName = config.branding.appName || 'Twinbird Travel Agency';
   const tours = config.toursPage?.tours?.items || [];
   const tour = findTourBySlug(tours, slug);
 

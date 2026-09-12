@@ -34,7 +34,7 @@ const ICON_SUGGESTIONS = [
 ];
 
 const QUICK_ROUTES = [
-  { label: 'Safari Tours', href: '/tours' },
+  { label: 'Safaris', href: '/safaris' },
   { label: 'Excursions', href: '/excursions' },
   { label: 'Transfers', href: '/transfers' },
   { label: 'Contact', href: '/contact' },
@@ -130,7 +130,7 @@ export function HomeExperiencesEditor({ draft, set }: EditorProps) {
         title: 'New Offering',
         description: 'Describe the core journey or service offered to travelers.',
         ctaLabel: 'Learn More',
-        ctaHref: '/tours',
+        ctaHref: '/safaris',
         enabled: true,
       };
       return {
@@ -334,7 +334,7 @@ export function HomeExperiencesEditor({ draft, set }: EditorProps) {
                       id={`exp-cta-href-${i}`}
                       value={item.ctaHref}
                       onChange={(e) => updItem(i, 'ctaHref', e.target.value)}
-                      placeholder="/tours"
+                      placeholder="/safaris"
                       disabled={item.enabled === false}
                     />
                   </FieldRow>

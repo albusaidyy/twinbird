@@ -328,7 +328,7 @@ export function ContactDetailsEditor({ draft, set }: EditorProps) {
                     id: `cf_select_${Date.now()}`,
                     label: 'Subject / Category',
                     type: 'select',
-                    options: ['General Inquiry', 'Safari Tours', 'Feedback'],
+                    options: ['General Inquiry', 'Safaris', 'Feedback'],
                     required: false,
                     halfWidth: true,
                     enabled: true,

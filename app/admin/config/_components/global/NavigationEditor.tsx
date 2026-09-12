@@ -91,7 +91,7 @@ export function NavigationEditor({ draft, set }: EditorProps) {
       <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground flex items-start gap-2">
         <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
         <p>
-          <strong>Dynamic Auto-Sync:</strong> Typing in <em>Label</em> automatically generates the route slug (e.g. &ldquo;Safari Tours&rdquo; &rarr; <code className="bg-muted px-1 rounded font-mono text-[11px]">/tours</code> or custom slug). Click the <strong>🔗 Link Icon</strong> to toggle between auto-generation and custom manual URLs.
+          <strong>Dynamic Auto-Sync:</strong> Typing in <em>Label</em> automatically generates the route slug (e.g. &ldquo;Safaris&rdquo; &rarr; <code className="bg-muted px-1 rounded font-mono text-[11px]">/safaris</code> or custom slug). Click the <strong>🔗 Link Icon</strong> to toggle between auto-generation and custom manual URLs.
         </p>
       </div>
 
@@ -115,7 +115,7 @@ export function NavigationEditor({ draft, set }: EditorProps) {
                       value={item.label}
                       onChange={(e) => handleLabelChange(idx, e.target.value)}
                       disabled={!item.enabled}
-                      placeholder="e.g. Safari Tours"
+                      placeholder="e.g. Safaris"
                       className="text-xs font-medium"
                     />
                   </FieldRow>
@@ -126,7 +126,7 @@ export function NavigationEditor({ draft, set }: EditorProps) {
                         value={item.href}
                         onChange={(e) => handleHrefChange(idx, e.target.value)}
                         disabled={!item.enabled}
-                        placeholder="/tours or https://..."
+                        placeholder="/safaris or https://..."
                         className="text-xs font-mono pr-20"
                       />
                       <div className="absolute right-1 flex items-center gap-1">

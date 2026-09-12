@@ -50,8 +50,8 @@ export const defaultExperienceItems: ExperienceItem[] = [
     title: "Tailored Safaris",
     description:
       "Private and group expeditions through Kenya's most legendary parks and hidden conservancies.",
-    ctaLabel: "Explore Tours",
-    ctaHref: "/tours",
+    ctaLabel: "Explore Safaris",
+    ctaHref: "/safaris",
     enabled: true,
   },
   {
@@ -350,7 +350,7 @@ export const defaultExcursionItems: ExcursionItem[] = [
 ];
 
 /**
- * Default wildlife safari and tour packages for Safari Tours Kenya.
+ * Default wildlife safari and tour packages for Twinbird Travel Agency.
  */
 export const defaultTourItems: TourItem[] = [
   {
@@ -358,7 +358,7 @@ export const defaultTourItems: TourItem[] = [
     enabled: true,
     deleted: false,
     slug: "maasai-mara-big-five-3day-wildlife-safari",
-    href: "/tours/maasai-mara-big-five-3day-wildlife-safari",
+    href: "/safaris/maasai-mara-big-five-3day-wildlife-safari",
     badge: "Most Popular",
     showBadge: true,
     title: "3-Day Maasai Mara Big Five Wildlife Safari",
@@ -431,7 +431,7 @@ export const defaultTourItems: TourItem[] = [
     enabled: true,
     deleted: false,
     slug: "amboseli-kilimanjaro-elephant-safari",
-    href: "/tours/amboseli-kilimanjaro-elephant-safari",
+    href: "/safaris/amboseli-kilimanjaro-elephant-safari",
     badge: "Spectacular Views",
     showBadge: true,
     title: "2-Day Amboseli Kilimanjaro & Elephant Safari",
@@ -501,7 +501,7 @@ export const defaultTourItems: TourItem[] = [
     enabled: true,
     deleted: false,
     slug: "lake-nakuru-tsavo-rhino-wildlife-safari",
-    href: "/tours/lake-nakuru-tsavo-rhino-wildlife-safari",
+    href: "/safaris/lake-nakuru-tsavo-rhino-wildlife-safari",
     badge: "Rhino Sanctuary",
     showBadge: true,
     title: "Lake Nakuru & Tsavo Wilderness Expedition",
@@ -573,7 +573,7 @@ export const defaultTourItems: TourItem[] = [
 export const defaultConfig: AppConfig = {
   branding: {
     font: "inter",
-    appName: "Safari Tours Kenya",
+    appName: "Twinbird Travel Agency",
     logoUrl: "/brand/logos/logo.png",
     logoDarkUrl: "/brand/logos/logo-white.png",
     darkMode: false,
@@ -601,10 +601,10 @@ export const defaultConfig: AppConfig = {
       enabled: true,
     },
     {
-      key: "tours",
-      href: "/tours",
+      key: "safaris",
+      href: "/safaris",
       icon: "Compass",
-      label: "Safari Tours",
+      label: "Safaris",
       enabled: true,
     },
     {
@@ -660,9 +660,9 @@ export const defaultConfig: AppConfig = {
       italicText: "of the African Savannah",
       showEyebrow: true,
       showSubtitle: true,
-      primaryCtaHref: "/tours",
+      primaryCtaHref: "/safaris",
       showPrimaryCta: true,
-      primaryCtaLabel: "Explore Safari Packages",
+      primaryCtaLabel: "Explore Safaris",
       secondaryCtaHref: "/excursions",
       showSecondaryCta: true,
       secondaryCtaLabel: "Explore Excursions",
@@ -823,7 +823,7 @@ export const defaultConfig: AppConfig = {
       backgroundColor: "#020617",
     },
     ctaBanner: {
-      ctaHref: "/tours",
+      ctaHref: "/safaris",
       enabled: true,
       ctaLabel: "Book Your Safari Now",
       headline: "Ready for the Adventure of a Lifetime?",
@@ -833,7 +833,7 @@ export const defaultConfig: AppConfig = {
     },
     footer: {
       contact: {
-        email: "info@safaritourskenya.com",
+        email: "info@twinbirdtravel.com",
         phone: "+254 700 123 456",
         location: "Wildlife Plaza, Langata Road, Nairobi, Kenya",
         workingDays: "Mon - Sun: 7:00 AM - 9:00 PM EAT",
@@ -873,8 +873,8 @@ export const defaultConfig: AppConfig = {
             enabled: true,
           },
           {
-            href: "/tours",
-            label: "Safari Packages",
+            href: "/safaris",
+            label: "Safaris",
             enabled: true,
           },
           {
@@ -915,22 +915,22 @@ export const defaultConfig: AppConfig = {
       topPackages: {
         items: [
           {
-            href: "/tours/maasai-mara-big-five-3day-wildlife-safari",
+            href: "/safaris/maasai-mara-big-five-3day-wildlife-safari",
             label: "Maasai Mara Big Five Safari",
             enabled: true,
           },
           {
-            href: "/tours/amboseli-kilimanjaro-elephant-safari",
+            href: "/safaris/amboseli-kilimanjaro-elephant-safari",
             label: "Amboseli Kilimanjaro Safari",
             enabled: true,
           },
           {
-            href: "/tours/lake-nakuru-tsavo-rhino-wildlife-safari",
+            href: "/safaris/lake-nakuru-tsavo-rhino-wildlife-safari",
             label: "Lake Nakuru Rhino Sanctuary",
             enabled: true,
           },
           {
-            href: "/tours",
+            href: "/safaris",
             label: "Great Migration Safaris",
             enabled: true,
           },
@@ -977,7 +977,7 @@ export const defaultConfig: AppConfig = {
         "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop",
       paragraphs: [
         {
-          text: "Founded by dedicated Kenyan naturalists and bush trackers, Safari Tours Kenya was born from a singular passion: to deliver unforgettable wildlife encounters while championing ecosystem conservation and community empowerment. For our travelers, a game drive is more than sightseeing — it is an intimate connection with nature in its purest form.",
+          text: "Founded by dedicated Kenyan naturalists and bush trackers, Twinbird Travel Agency was born from a singular passion: to deliver unforgettable wildlife encounters while championing ecosystem conservation and community empowerment. For our travelers, a game drive is more than sightseeing — it is an intimate connection with nature in its purest form.",
           enabled: true,
         },
         {
@@ -1107,8 +1107,8 @@ export const defaultConfig: AppConfig = {
       subtitle:
         "Whether witnessing the Great Migration in the Maasai Mara or marveling at elephant herds in Amboseli, your safari adventure starts here.",
       primaryCta: {
-        href: "/tours",
-        label: "Explore Safari Packages",
+        href: "/safaris",
+        label: "Explore Safaris",
         enabled: true,
       },
       secondaryCta: {
@@ -1369,7 +1369,7 @@ export const defaultConfig: AppConfig = {
       secondaryCtaLabel: "",
     },
     contact: {
-      email: "info@safaritourskenya.com",
+      email: "info@twinbirdtravel.com",
       phone: "+254 700 123 456",
       enabled: true,
       location: "Nairobi & Maasai Mara, Kenya",
@@ -1479,7 +1479,7 @@ export const defaultConfig: AppConfig = {
       "Contact our safari planning specialists to reserve your custom wildlife game drives, luxury tented camps, and national park tours.",
   },
   transfersPage: {
-    metaTitle: "Airport & Coast Transfer Services | Safari Tours Kenya",
+    metaTitle: "Airport & Coast Transfer Services | Twinbird Travel Agency",
     metaDescription:
       "Reliable, comfortable transfers across the Kenya Coast — from airport pick-ups to full-day hire between Mombasa, Malindi, Watamu, Kilifi, and Diani Beach.",
     hero: {
@@ -1653,7 +1653,7 @@ export const defaultConfig: AppConfig = {
       buttonText: "Request Transfer",
       whatsappNumber: "+254700000000",
       whatsappText:
-        "Hello Safari Tours Kenya! I would like to inquire about booking a transfer.",
+        "Hello Twinbird Travel Agency! I would like to inquire about booking a transfer.",
       noticeText: "No commitment required. We reply within 24 hours.",
       fields: [
         {

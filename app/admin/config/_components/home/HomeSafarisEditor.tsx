@@ -24,7 +24,7 @@ import { BackgroundColorPicker } from "../shared/BackgroundColorPicker";
 import { SectionHeaderFields } from "../shared/SectionHeaderFields";
 import { isTourMatch } from "../shared/admin-helpers";
 
-export function HomeToursEditor({ draft, set }: EditorProps) {
+export function HomeSafarisEditor({ draft, set }: EditorProps) {
   const data = draft.homepage.tours;
   const currentToursPage = draft.toursPage || defaultConfig.toursPage!;
   const masterTours =
@@ -33,10 +33,10 @@ export function HomeToursEditor({ draft, set }: EditorProps) {
 
   const toursPageNavLabel =
     draft.navigation?.find(
-      (l) => l.href === "/tours" || l.href.startsWith("/tours"),
+      (l) => l.href === "/safaris" || l.href.startsWith("/safaris"),
     )?.label ||
     PAGES.find((p) => p.id === "tours")?.label ||
-    "Safari Tours";
+    "Safaris";
 
   const updEnabled = (v: boolean) =>
     set((p) => ({
@@ -111,7 +111,6 @@ export function HomeToursEditor({ draft, set }: EditorProps) {
     });
 
   // Build the list of packages to show in the showcase manager
-  // Start with home items, then ensure any master catalog item not yet in home list is included
   const displayList: Array<{
     tour: TourItem;
     isFeatured: boolean;
@@ -198,7 +197,7 @@ export function HomeToursEditor({ draft, set }: EditorProps) {
         <Compass className="h-5 w-5 shrink-0 text-primary mt-0.5" />
         <div className="space-y-1.5 flex-1">
           <p className="font-semibold text-foreground text-sm">
-            Curated Showcase (Pulls from Safari Tours Master Catalog)
+            Curated Showcase (Pulls from Safaris Master Catalog)
           </p>
           <p>
             The packages below are pulled directly from your{" "}
