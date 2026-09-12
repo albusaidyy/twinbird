@@ -6,6 +6,8 @@ import sharp from 'sharp';
  * Universal Brand Asset Generator
  * 
  * Takes a master logo (JPEG, JPG, PNG, WEBP, or SVG) and derives all required website & PWA icons:
+ * - /public/brand/logos/logo.png (Transparent master PNG for Navbar & Footer)
+ * - /public/brand/logos/logo.svg (SVG vector wrapper)
  * - /public/brand/favicons/apple-touch-icon.png (180x180)
  * - /public/brand/favicons/favicon.png (64x64)
  * - /public/brand/icon.png (512x512)
@@ -17,10 +19,10 @@ import sharp from 'sharp';
  * - Intelligent background removal (turns solid white/near-white JPEG backgrounds into clean transparent PNGs)
  * - Anti-aliased alpha edge smoothing
  * - Auto-trimming of dead margins
- * - Optimal aspect ratio scaling with transparent padding
+ * - Master logo replacement (updates logo.png & logo.svg)
  * 
  * Usage:
- *   npx tsx scripts/process-brand-assets.ts [optional-path-to-image] [--keep-bg] [--threshold=238]
+ *   npx tsx scripts/process-brand-assets.ts [optional-path-to-image] [--keep-bg]
  */
 async function generateAllAssetsFromLogo() {
   const rootDir = process.cwd();
@@ -29,40 +31,46 @@ async function generateAllAssetsFromLogo() {
   const keepBg = args.includes('--keep-bg');
   const customPathArg = args.find((a) => !a.startsWith('--'));
 
+  const logosDir = path.join(rootDir, 'public', 'brand', 'logos');
+  const faviconsDir = path.join(rootDir, 'public', 'brand', 'favicons');
+  const pwaDir = path.join(rootDir, 'public', 'icons', 'pwa');
+  const brandDir = path.join(rootDir, 'public', 'brand');
+
+  fs.mkdirSync(logosDir, { recursive: true });
+  fs.mkdirSync(faviconsDir, { recursive: true });
+  fs.mkdirSync(pwaDir, { recursive: true });
+  fs.mkdirSync(brandDir, { recursive: true });
+
   // 1. Determine input logo path
   let inputLogoPath: string | null = null;
 
   if (customPathArg) {
     inputLogoPath = path.resolve(rootDir, customPathArg);
   } else {
-    // Auto-detect common master logo formats
-    const candidateExtensions = ['png', 'jpeg', 'jpg', 'webp', 'svg'];
+    // Find most recently modified logo file among candidate extensions
+    const candidateExtensions = ['jpeg', 'jpg', 'webp', 'png', 'svg'];
+    let latestTime = 0;
+
     for (const ext of candidateExtensions) {
-      const candidate = path.join(rootDir, 'public', 'brand', 'logos', `logo.${ext}`);
+      const candidate = path.join(logosDir, `logo.${ext}`);
       if (fs.existsSync(candidate)) {
-        inputLogoPath = candidate;
-        break;
+        const stats = fs.statSync(candidate);
+        if (stats.mtimeMs > latestTime) {
+          latestTime = stats.mtimeMs;
+          inputLogoPath = candidate;
+        }
       }
     }
   }
 
   if (!inputLogoPath || !fs.existsSync(inputLogoPath)) {
     console.error(`Error: Source logo not found${inputLogoPath ? ` at ${inputLogoPath}` : ''}`);
-    console.error(`Please place your master logo at public/brand/logos/logo.png (or .jpeg / .jpg / .webp) or pass the path as an argument:`);
+    console.error(`Please place your master logo at public/brand/logos/logo.jpeg (or .png / .jpg / .webp) or pass the path as an argument:`);
     console.error(`  npx tsx scripts/process-brand-assets.ts path/to/image.jpeg`);
     process.exit(1);
   }
 
   console.log(`Using source logo: ${inputLogoPath}`);
-
-  // Ensure output directories exist
-  const faviconsDir = path.join(rootDir, 'public', 'brand', 'favicons');
-  const pwaDir = path.join(rootDir, 'public', 'icons', 'pwa');
-  const brandDir = path.join(rootDir, 'public', 'brand');
-
-  fs.mkdirSync(faviconsDir, { recursive: true });
-  fs.mkdirSync(pwaDir, { recursive: true });
-  fs.mkdirSync(brandDir, { recursive: true });
 
   const rawBuffer = fs.readFileSync(inputLogoPath);
   let processedBuffer: Buffer = rawBuffer;
@@ -106,8 +114,24 @@ async function generateAllAssetsFromLogo() {
     processedBuffer = await sharp(rawBuffer).trim().png().toBuffer();
   }
 
-  // 3. Helper to create padded square icon
-  const createPaddedIcon = async (size: number, paddingPercent: number = 0.08) => {
+  // 3. Generate Main Master Website Logos (/public/brand/logos/logo.png & logo.svg)
+  fs.writeFileSync(path.join(logosDir, 'logo.png'), processedBuffer);
+  console.log('✓ Updated master logo: public/brand/logos/logo.png (for Navbar & Footer)');
+
+  const logoMetadata = await sharp(processedBuffer).metadata();
+  const svgWidth = logoMetadata.width || 500;
+  const svgHeight = logoMetadata.height || 500;
+  const pngBase64 = processedBuffer.toString('base64');
+
+  const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" width="100%" height="100%">
+  <image href="data:image/png;base64,${pngBase64}" width="${svgWidth}" height="${svgHeight}" />
+</svg>
+`;
+  fs.writeFileSync(path.join(logosDir, 'logo.svg'), svgContent);
+  console.log('✓ Updated master SVG: public/brand/logos/logo.svg');
+
+  // 4. Helper to create padded square icon
+  const createPaddedIcon = async (size: number, paddingPercent: number = 0.06) => {
     const pad = Math.round(size * paddingPercent);
     const innerSize = size - pad * 2;
 
@@ -127,7 +151,7 @@ async function generateAllAssetsFromLogo() {
       .toBuffer();
   };
 
-  // 4. Generate Apple Touch Icon (180x180) & Favicon PNG (64x64)
+  // 5. Generate Apple Touch Icon (180x180) & Favicon PNG (64x64) & Brand Icon (512x512)
   const appleTouchBuf = await createPaddedIcon(180, 0.06);
   fs.writeFileSync(path.join(faviconsDir, 'apple-touch-icon.png'), appleTouchBuf);
   console.log('✓ Generated apple-touch-icon.png (180x180, transparent)');
@@ -140,7 +164,7 @@ async function generateAllAssetsFromLogo() {
   fs.writeFileSync(path.join(brandDir, 'icon.png'), icon512Buf);
   console.log('✓ Generated brand/icon.png (512x512, transparent)');
 
-  // 5. Generate Multi-resolution Favicon ICO (16x16, 32x32, 48x48)
+  // 6. Generate Multi-resolution Favicon ICO (16x16, 32x32, 48x48)
   const icoSizes = [16, 32, 48];
   const icoPngBuffers: Buffer[] = [];
   for (const size of icoSizes) {
@@ -177,7 +201,7 @@ async function generateAllAssetsFromLogo() {
   fs.writeFileSync(path.join(faviconsDir, 'favicon.ico'), icoBuffer);
   console.log('✓ Generated favicon.ico (multi-res 16, 32, 48, transparent)');
 
-  // 6. Generate PWA Icons (Standard Transparent & Maskable Safe-Zone)
+  // 7. Generate PWA Icons (Standard Transparent & Maskable Safe-Zone)
   const pwaSizes = [192, 512];
   for (const size of pwaSizes) {
     // Standard icon
@@ -191,7 +215,7 @@ async function generateAllAssetsFromLogo() {
     console.log(`✓ Generated icon-${size}-maskable.png (${size}x${size})`);
   }
 
-  console.log('\n✨ All brand assets successfully regenerated with transparent background and auto-trimming!');
+  console.log('\n✨ All brand assets, master logo PNG, master SVG, and favicons successfully updated!');
 }
 
 generateAllAssetsFromLogo().catch((err) => {
