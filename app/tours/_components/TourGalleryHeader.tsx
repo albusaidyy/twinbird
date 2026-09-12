@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import type { TourItem } from '@/types/app-config';
-import { Clock, Star } from 'lucide-react';
+import { Clock, Star, Maximize2 } from 'lucide-react';
+import { ImageLightbox } from '@/components/ui/image-lightbox';
 
 export function TourGalleryHeader({
   tour,
@@ -20,6 +21,9 @@ export function TourGalleryHeader({
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const hasMovedRef = useRef(false);
 
   // Mouse drag state
   const [isDragging, setIsDragging] = useState(false);
@@ -148,6 +152,7 @@ export function TourGalleryHeader({
             }}
             onMouseDown={(e) => {
               setIsDragging(true);
+              hasMovedRef.current = false;
               setStartX(e.pageX - (scrollRef.current?.offsetLeft || 0));
               setScrollLeftPos(scrollRef.current?.scrollLeft || 0);
             }}
@@ -158,10 +163,14 @@ export function TourGalleryHeader({
               e.preventDefault();
               const x = e.pageX - scrollRef.current.offsetLeft;
               const walk = (x - startX) * 1.5;
+              if (Math.abs(walk) > 6) {
+                hasMovedRef.current = true;
+              }
               scrollRef.current.scrollLeft = scrollLeftPos - walk;
             }}
             onTouchStart={(e) => {
               setIsDragging(true);
+              hasMovedRef.current = false;
               setStartX(e.touches[0].pageX - (scrollRef.current?.offsetLeft || 0));
               setScrollLeftPos(scrollRef.current?.scrollLeft || 0);
             }}
@@ -170,6 +179,9 @@ export function TourGalleryHeader({
               if (!isDragging || !scrollRef.current) return;
               const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
               const walk = (x - startX) * 1.5;
+              if (Math.abs(walk) > 6) {
+                hasMovedRef.current = true;
+              }
               scrollRef.current.scrollLeft = scrollLeftPos - walk;
             }}
             className={`w-full flex gap-5 overflow-x-auto pb-2 ${
@@ -183,11 +195,19 @@ export function TourGalleryHeader({
             }}
           >
             {displayItems.map((imgUrl, i) => {
-              const photoNum = (i % validImages.length) + 1;
+              const photoIndex = i % validImages.length;
+              const photoNum = photoIndex + 1;
               return (
                 <div
                   key={i}
-                  className="relative shrink-0 w-[78vw] sm:w-[calc(50%-0.65rem)] lg:w-[calc(100%/3-0.85rem)] aspect-[4/3] md:aspect-[3/4] max-h-[340px] snap-center rounded-2xl overflow-hidden group select-none"
+                  onClick={() => {
+                    if (!hasMovedRef.current) {
+                      setLightboxIndex(photoIndex);
+                      setLightboxOpen(true);
+                    }
+                  }}
+                  className="relative shrink-0 w-[78vw] sm:w-[calc(50%-0.65rem)] lg:w-[calc(100%/3-0.85rem)] aspect-[4/3] md:aspect-[3/4] max-h-[340px] snap-center rounded-2xl overflow-hidden group select-none cursor-pointer"
+                  title="Click to view full photo"
                 >
                   <Image
                     src={imgUrl}
@@ -197,7 +217,12 @@ export function TourGalleryHeader({
                     className="object-cover pointer-events-none transition-transform duration-500 group-hover:scale-105"
                     draggable={false}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none transition-opacity duration-300 group-hover:opacity-75" />
+
+                  {/* Subtle expand icon badge on hover */}
+                  <div className="absolute bottom-3 right-3 p-2 rounded-full bg-black/40 text-white backdrop-blur-md border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-md pointer-events-none">
+                    <Maximize2 className="h-4 w-4" />
+                  </div>
                 </div>
               );
             })}
@@ -218,7 +243,7 @@ export function TourGalleryHeader({
                   scrollRef.current.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
                 }
               }}
-              className="h-2 w-2 rounded-full transition-all duration-300 hover:scale-125 focus:outline-none"
+              className="h-2 w-2 rounded-full transition-all duration-300 hover:scale-125 focus:outline-none cursor-pointer"
               style={{
                 backgroundColor: indicatorDotColor || '#ffffff',
                 opacity: activeIndex === idx ? 1 : 0.3,
@@ -229,6 +254,16 @@ export function TourGalleryHeader({
           ))}
         </div>
       </div>
+
+      {/* Fullscreen Lightbox Modal with Zoom / Pan controls */}
+      <ImageLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        images={validImages}
+        initialIndex={lightboxIndex}
+        title={tour.title}
+        primaryColor={primaryColor}
+      />
 
       <style dangerouslySetInnerHTML={{
         __html: `

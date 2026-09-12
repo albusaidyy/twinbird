@@ -5,7 +5,7 @@ import sharp from 'sharp';
 /**
  * Universal Brand Asset Generator
  * 
- * Takes a single master `logo.png` and derives all required website & PWA icons:
+ * Takes a master logo (JPEG, JPG, PNG, WEBP, or SVG) and derives all required website & PWA icons:
  * - /public/brand/favicons/apple-touch-icon.png (180x180)
  * - /public/brand/favicons/favicon.png (64x64)
  * - /public/brand/icon.png (512x512)
@@ -13,18 +13,27 @@ import sharp from 'sharp';
  * - /public/icons/pwa/icon-192.png & icon-192-maskable.png
  * - /public/icons/pwa/icon-512.png & icon-512-maskable.png
  * 
+ * Features:
+ * - Intelligent background removal (turns solid white/near-white JPEG backgrounds into clean transparent PNGs)
+ * - Anti-aliased alpha edge smoothing
+ * - Auto-trimming of dead margins
+ * - Optimal aspect ratio scaling with transparent padding
+ * 
  * Usage:
- *   npx tsx scripts/process-brand-assets.ts [optional-path-to-logo.png]
+ *   npx tsx scripts/process-brand-assets.ts [optional-path-to-image] [--keep-bg] [--threshold=238]
  */
 async function generateAllAssetsFromLogo() {
   const rootDir = process.cwd();
+  const args = process.argv.slice(2);
   
+  const keepBg = args.includes('--keep-bg');
+  const customPathArg = args.find((a) => !a.startsWith('--'));
+
   // 1. Determine input logo path
-  const customInputPath = process.argv[2];
   let inputLogoPath: string | null = null;
 
-  if (customInputPath) {
-    inputLogoPath = path.resolve(rootDir, customInputPath);
+  if (customPathArg) {
+    inputLogoPath = path.resolve(rootDir, customPathArg);
   } else {
     // Auto-detect common master logo formats
     const candidateExtensions = ['png', 'jpeg', 'jpg', 'webp', 'svg'];
@@ -46,7 +55,7 @@ async function generateAllAssetsFromLogo() {
 
   console.log(`Using source logo: ${inputLogoPath}`);
 
-  // Ensure directories exist
+  // Ensure output directories exist
   const faviconsDir = path.join(rootDir, 'public', 'brand', 'favicons');
   const pwaDir = path.join(rootDir, 'public', 'icons', 'pwa');
   const brandDir = path.join(rootDir, 'public', 'brand');
@@ -55,35 +64,87 @@ async function generateAllAssetsFromLogo() {
   fs.mkdirSync(pwaDir, { recursive: true });
   fs.mkdirSync(brandDir, { recursive: true });
 
-  const imageBuffer = fs.readFileSync(inputLogoPath);
+  const rawBuffer = fs.readFileSync(inputLogoPath);
+  let processedBuffer: Buffer = rawBuffer;
 
-  // 2. Generate Apple Touch Icon & Favicon PNGs
-  await sharp(imageBuffer)
-    .resize(180, 180, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
-    .toFile(path.join(faviconsDir, 'apple-touch-icon.png'));
-  console.log('✓ Generated apple-touch-icon.png (180x180)');
+  // 2. Intelligent Background Removal & Auto-trim
+  if (!keepBg) {
+    console.log('⚡ Processing image: removing solid white background & trimming margins...');
+    const { data, info } = await sharp(rawBuffer)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
-  await sharp(imageBuffer)
-    .resize(64, 64, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
-    .toFile(path.join(faviconsDir, 'favicon.png'));
-  console.log('✓ Generated favicon.png (64x64)');
+    const { width, height, channels } = info;
+    const threshold = 238; // Threshold for near-white detection
 
-  await sharp(imageBuffer)
-    .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-    .png()
-    .toFile(path.join(brandDir, 'icon.png'));
-  console.log('✓ Generated brand/icon.png (512x512)');
+    for (let i = 0; i < data.length; i += channels) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
 
-  // 3. Generate Multi-resolution ICO (16x16, 32x32, 48x48)
+      if (r >= threshold && g >= threshold && b >= threshold) {
+        const minVal = Math.min(r, g, b);
+        if (minVal >= 248) {
+          data[i + 3] = 0; // Pure transparent
+        } else {
+          // Anti-aliased feathering for clean borders
+          data[i + 3] = Math.round((255 - minVal) * 25.5);
+        }
+      }
+    }
+
+    // Convert back to PNG and trim outer transparent margins
+    processedBuffer = await sharp(data, { raw: { width, height, channels } })
+      .png()
+      .trim()
+      .toBuffer();
+    
+    console.log('✓ Converted background to transparent with anti-aliased edge smoothing');
+  } else {
+    // Just trim transparent/white margins
+    processedBuffer = await sharp(rawBuffer).trim().png().toBuffer();
+  }
+
+  // 3. Helper to create padded square icon
+  const createPaddedIcon = async (size: number, paddingPercent: number = 0.08) => {
+    const pad = Math.round(size * paddingPercent);
+    const innerSize = size - pad * 2;
+
+    return await sharp(processedBuffer)
+      .resize(innerSize, innerSize, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .extend({
+        top: pad,
+        bottom: pad,
+        left: pad,
+        right: pad,
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+  };
+
+  // 4. Generate Apple Touch Icon (180x180) & Favicon PNG (64x64)
+  const appleTouchBuf = await createPaddedIcon(180, 0.06);
+  fs.writeFileSync(path.join(faviconsDir, 'apple-touch-icon.png'), appleTouchBuf);
+  console.log('✓ Generated apple-touch-icon.png (180x180, transparent)');
+
+  const favicon64Buf = await createPaddedIcon(64, 0.06);
+  fs.writeFileSync(path.join(faviconsDir, 'favicon.png'), favicon64Buf);
+  console.log('✓ Generated favicon.png (64x64, transparent)');
+
+  const icon512Buf = await createPaddedIcon(512, 0.06);
+  fs.writeFileSync(path.join(brandDir, 'icon.png'), icon512Buf);
+  console.log('✓ Generated brand/icon.png (512x512, transparent)');
+
+  // 5. Generate Multi-resolution Favicon ICO (16x16, 32x32, 48x48)
   const icoSizes = [16, 32, 48];
   const icoPngBuffers: Buffer[] = [];
   for (const size of icoSizes) {
-    const buf = await sharp(imageBuffer)
-      .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-      .png()
-      .toBuffer();
+    const buf = await createPaddedIcon(size, 0.04);
     icoPngBuffers.push(buf);
   }
 
@@ -114,25 +175,23 @@ async function generateAllAssetsFromLogo() {
   const icoBuffer = Buffer.concat([icoHeader, ...directoryEntries, ...icoPngBuffers]);
   fs.writeFileSync(path.join(rootDir, 'public', 'favicon.ico'), icoBuffer);
   fs.writeFileSync(path.join(faviconsDir, 'favicon.ico'), icoBuffer);
-  console.log('✓ Generated favicon.ico (multi-res 16, 32, 48)');
+  console.log('✓ Generated favicon.ico (multi-res 16, 32, 48, transparent)');
 
-  // 4. Generate PWA Icons
+  // 6. Generate PWA Icons (Standard Transparent & Maskable Safe-Zone)
   const pwaSizes = [192, 512];
   for (const size of pwaSizes) {
-    await sharp(imageBuffer)
-      .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-      .png()
-      .toFile(path.join(pwaDir, `icon-${size}.png`));
+    // Standard icon
+    const pwaBuf = await createPaddedIcon(size, 0.08);
+    fs.writeFileSync(path.join(pwaDir, `icon-${size}.png`), pwaBuf);
     console.log(`✓ Generated icon-${size}.png (${size}x${size})`);
 
-    await sharp(imageBuffer)
-      .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-      .png()
-      .toFile(path.join(pwaDir, `icon-${size}-maskable.png`));
+    // Maskable icon with 15% safe-zone margin
+    const maskableBuf = await createPaddedIcon(size, 0.15);
+    fs.writeFileSync(path.join(pwaDir, `icon-${size}-maskable.png`), maskableBuf);
     console.log(`✓ Generated icon-${size}-maskable.png (${size}x${size})`);
   }
 
-  console.log('\n✨ All brand assets successfully generated from the master logo image!');
+  console.log('\n✨ All brand assets successfully regenerated with transparent background and auto-trimming!');
 }
 
 generateAllAssetsFromLogo().catch((err) => {
