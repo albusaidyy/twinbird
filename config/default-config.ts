@@ -1,4 +1,44 @@
-import type { AppConfig, TourItem, ExcursionItem, ExperienceItem } from "@/types/app-config";
+import type {
+  AppConfig,
+  TourItem,
+  ExcursionItem,
+  ExperienceItem,
+  ExcursionScheduleItem,
+} from "@/types/app-config";
+
+/**
+ * Default schedule timeline steps for excursions.
+ */
+export const defaultExcursionSchedule: ExcursionScheduleItem[] = [
+  {
+    time: "08:00 - 09:30",
+    title: "Morning Hotel Departure & Scenic Route",
+    description:
+      "Pickup from your hotel or resort lobby in comfortable air-conditioned transport with scenic coastal views along the route.",
+  },
+  {
+    time: "10:30 - 14:00",
+    title: "Guided Excursion, Marine Activities & Lunch",
+    description:
+      "Arrive at the destination for guided activities, local sightseeing or snorkeling, followed by a delicious regional lunch with fresh local delicacies.",
+  },
+  {
+    time: "14:30 - 17:30",
+    title: "Cultural Highlights & Sunset Views",
+    description:
+      "Explore nearby natural landscapes and viewpoints as the afternoon light softens, capturing memorable photos before the return journey.",
+  },
+];
+
+/**
+ * Default mosaic gallery images for excursion single page.
+ */
+export const defaultExcursionGallery: string[] = [
+  "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=2070&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop",
+];
 
 /**
  * Default core offerings / experiences for homepage.
@@ -597,7 +637,16 @@ export const defaultConfig: AppConfig = {
   ],
 
   homepage: {
-    sectionOrder: ["stats", "experiences", "tours", "excursions", "whyus", "reviews", "gallery", "cta"],
+    sectionOrder: [
+      "stats",
+      "experiences",
+      "tours",
+      "excursions",
+      "whyus",
+      "reviews",
+      "gallery",
+      "cta",
+    ],
     hero: {
       size: "fullscreen",
       enabled: true,
@@ -1387,7 +1436,7 @@ export const defaultConfig: AppConfig = {
       ],
       enabled: true,
       subtitle: "Our safari team typically responds within 2-4 hours.",
-      accessKey: "0d68a0e7-cd00-48c8-86f3-4fab7af13020",
+      accessKey: "",
       buttonText: "Submit Safari Request",
       backgroundColor: "#ffffff",
     },

@@ -13,11 +13,13 @@ export function ExcursionBookingForm({
   config,
   primaryColor,
   defaultAccessKey,
+  className,
 }: {
   excursion: ExcursionItem;
   config?: ExcursionBookingFormConfig;
   primaryColor: string;
   defaultAccessKey?: string;
+  className?: string;
 }) {
   const formConfig: ExcursionBookingFormConfig = config || defaultConfig.excursionsPage?.bookingForm || defaultConfig.toursPage?.bookingForm || {
     title: 'Reserve This Excursion',
@@ -108,7 +110,12 @@ export function ExcursionBookingForm({
   };
 
   return (
-    <div className="rounded-3xl bg-white dark:bg-zinc-900 p-6 md:p-8 shadow-xl border border-black/5 dark:border-white/10 sticky top-28">
+    <div
+      className={
+        className ||
+        'rounded-3xl bg-white dark:bg-zinc-900 p-6 sm:p-8 md:p-10 shadow-lg border border-stone-200/70 dark:border-zinc-800'
+      }
+    >
       <div className="mb-6 border-b border-border/60 pb-4">
         <h3 className="font-serif text-2xl font-bold text-foreground">
           {formConfig.title || 'Reserve This Excursion'}

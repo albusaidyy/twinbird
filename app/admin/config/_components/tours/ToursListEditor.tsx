@@ -455,7 +455,7 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                 <FieldRow label="Card Short Description" id={`tp-desc-${i}`}>
                   <textarea
                     id={`tp-desc-${i}`}
-                    rows={2}
+                    rows={3}
                     value={t.description}
                     onChange={(e) => updTour(i, 'description', e.target.value)}
                     disabled={!t.enabled || isDeleted}
@@ -464,19 +464,27 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                 </FieldRow>
 
                 {/* Single Tour Page Details Accordion */}
-                <details open={!isDeleted} className="rounded-lg border border-border/80 bg-muted/20 p-3 space-y-4">
-                  <summary className="cursor-pointer text-xs font-semibold text-foreground flex items-center justify-between select-none">
-                    <span className="flex items-center gap-1.5 text-primary font-bold">
-                      <Compass className="h-3.5 w-3.5" /> Single Safari Page Details (Overview, Included, Location, Info, Carousel)
+                <details
+                  open={!isDeleted}
+                  className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20 dark:border-emerald-500/35 p-3.5 sm:p-5 space-y-4 shadow-xs"
+                >
+                  <summary className="cursor-pointer text-xs font-semibold flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-2 select-none p-2.5 sm:p-3 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/15 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-100 border border-emerald-500/30 transition-colors shadow-xs">
+                    <div className="flex items-center gap-2.5 font-bold min-w-0">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-600 text-white shadow-xs shrink-0">
+                        <Compass className="h-3.5 w-3.5" />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold leading-tight">Single Safari Page Content &amp; Details</span>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-600/15 dark:bg-emerald-400/20 text-emerald-800 dark:text-emerald-200 px-2.5 py-0.5 rounded-full border border-emerald-500/25 shrink-0 self-start sm:self-auto">
+                      Single Page Config
                     </span>
-                    <span className="text-[10px] text-muted-foreground font-mono">▼ Collapse / Expand</span>
                   </summary>
                   
-                  <div className="space-y-4 pt-3 border-t border-border/60">
+                  <div className="space-y-4 pt-1">
                     {/* Hero Background & Carousel Photos */}
-                    <div className="rounded-lg border border-border p-4 bg-background space-y-4">
+                    <div className="rounded-lg border border-emerald-500/20 p-4 bg-background shadow-xs space-y-4">
                       <div>
-                        <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">Single Safari Hero & Carousel Photos</h5>
+                        <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">1. Single Safari Hero &amp; Carousel Photos</h5>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           Configure the hero background color, backdrop image, and the interactive photo carousel for this single safari detail page.
                         </p>
@@ -552,9 +560,48 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             };
 
                             return (
-                              <div key={gIdx} className="flex items-center gap-2 rounded-lg border border-border p-2.5 bg-card shadow-xs">
-                                <span className="text-xs font-mono font-medium text-muted-foreground w-6 text-center">{gIdx + 1}</span>
-                                <div className="flex-1">
+                              <div key={gIdx} className="rounded-lg border border-border p-3 bg-card shadow-xs space-y-2 min-w-0">
+                                <div className="flex items-center justify-between gap-2 pb-1 border-b border-border/40">
+                                  <span className="text-xs font-semibold text-muted-foreground">
+                                    Carousel Photo #{gIdx + 1}
+                                  </span>
+                                  <div className="flex items-center gap-0.5">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      disabled={gIdx === 0 || !t.enabled || isDeleted}
+                                      onClick={() => moveGalleryImg('up')}
+                                      title="Move up"
+                                    >
+                                      <ArrowUp className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      disabled={gIdx === currentGallery.length - 1 || !t.enabled || isDeleted}
+                                      onClick={() => moveGalleryImg('down')}
+                                      title="Move down"
+                                    >
+                                      <ArrowDown className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                                      disabled={!t.enabled || currentGallery.length <= 1 || isDeleted}
+                                      onClick={removeGalleryImg}
+                                      title="Delete photo"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="w-full min-w-0">
                                   <ImageUploaderField
                                     id={`tp-gal-${i}-${gIdx}`}
                                     value={imgUrl}
@@ -564,41 +611,6 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                                     disabled={!t.enabled || isDeleted}
                                   />
                                 </div>
-                                <div className="flex items-center gap-0.5">
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    disabled={gIdx === 0 || !t.enabled || isDeleted}
-                                    onClick={() => moveGalleryImg('up')}
-                                    title="Move up"
-                                  >
-                                    <ArrowUp className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    disabled={gIdx === currentGallery.length - 1 || !t.enabled || isDeleted}
-                                    onClick={() => moveGalleryImg('down')}
-                                    title="Move down"
-                                  >
-                                    <ArrowDown className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                                    disabled={!t.enabled || currentGallery.length <= 1 || isDeleted}
-                                    onClick={removeGalleryImg}
-                                    title="Delete photo"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                </div>
                               </div>
                             );
                           })}
@@ -607,9 +619,9 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                     </div>
 
                     {/* Quick Info Strip Bar (Hours, Location, Schedule, Group Suitability) */}
-                    <div className="rounded-lg border border-border p-4 bg-background space-y-4">
+                    <div className="rounded-lg border border-emerald-500/20 p-4 bg-background shadow-xs space-y-4">
                       <div>
-                        <h5 className="text-xs font-bold text-foreground uppercase tracking-wider">Quick Info Strip Bar (Hours, Location, Schedule, Group Suitability)</h5>
+                        <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">2. Quick Info Strip Bar</h5>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
                           Configure the quick metadata pills displayed in the strip bar right below the single safari hero carousel.
                         </p>
@@ -621,11 +633,11 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             checked={t.showDuration !== false}
                             onCheckedChange={(v) => updTour(i, 'showDuration', v)}
                             disabled={!t.enabled || isDeleted}
-                            className="mt-8"
-                            title="Toggle Duration / Hours On/Off in Strip Bar"
+                            className="mt-8 shrink-0"
+                            title="Toggle Duration Strip Text On/Off"
                           />
-                          <div className="flex-1">
-                            <FieldRow label="Hours / Duration" id={`tp-dur-strip-${i}`}>
+                          <div className="flex-1 min-w-0">
+                            <FieldRow label="Duration Strip Text" id={`tp-dur-strip-${i}`}>
                               <Input
                                 id={`tp-dur-strip-${i}`}
                                 value={t.duration || ''}
@@ -642,10 +654,10 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             checked={t.showLocation !== false}
                             onCheckedChange={(v) => updTour(i, 'showLocation', v)}
                             disabled={!t.enabled || isDeleted}
-                            className="mt-8"
+                            className="mt-8 shrink-0"
                             title="Toggle Location Strip Text On/Off"
                           />
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <FieldRow label="Location Strip Text" id={`tp-loc-${i}`}>
                               <Input
                                 id={`tp-loc-${i}`}
@@ -663,10 +675,10 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             checked={t.showSchedule !== false}
                             onCheckedChange={(v) => updTour(i, 'showSchedule', v)}
                             disabled={!t.enabled || isDeleted}
-                            className="mt-8"
+                            className="mt-8 shrink-0"
                             title="Toggle Schedule Strip Text On/Off"
                           />
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <FieldRow label="Schedule / Season Text" id={`tp-sched-${i}`}>
                               <Input
                                 id={`tp-sched-${i}`}
@@ -684,10 +696,10 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             checked={t.showGroupType !== false}
                             onCheckedChange={(v) => updTour(i, 'showGroupType', v)}
                             disabled={!t.enabled || isDeleted}
-                            className="mt-8"
+                            className="mt-8 shrink-0"
                             title="Toggle Group Suitability Text On/Off"
                           />
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <FieldRow label="Group Suitability Text" id={`tp-grp-${i}`}>
                               <Input
                                 id={`tp-grp-${i}`}
@@ -702,31 +714,35 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                       </div>
                     </div>
 
-                    <FieldRow label="Full Tour Overview (Main Article)" id={`tp-over-${i}`}>
-                      <textarea
-                        id={`tp-over-${i}`}
-                        rows={3}
-                        value={t.overview || ''}
-                        placeholder="Full detailed narrative description for the single tour page..."
-                        onChange={(e) => updTour(i, 'overview', e.target.value)}
-                        disabled={!t.enabled || isDeleted}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
-                      />
-                    </FieldRow>
+                    <div className="rounded-lg border border-emerald-500/20 p-4 bg-background shadow-xs space-y-4">
+                      <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">3. About &amp; Inclusions Details</h5>
+                      
+                      <FieldRow label="Full Tour Overview (Main Article)" id={`tp-over-${i}`}>
+                        <textarea
+                          id={`tp-over-${i}`}
+                          rows={6}
+                          value={t.overview || ''}
+                          placeholder="Full detailed narrative description for the single tour page..."
+                          onChange={(e) => updTour(i, 'overview', e.target.value)}
+                          disabled={!t.enabled || isDeleted}
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+                        />
+                      </FieldRow>
 
-                    <div className="flex gap-2.5 items-start">
-                      <Switch
-                        checked={t.showIncluded !== false}
-                        onCheckedChange={(v) => updTour(i, 'showIncluded', v)}
-                        disabled={!t.enabled || isDeleted}
-                        className="mt-8"
-                        title="Toggle What's Included On/Off"
-                      />
-                      <div className="flex-1">
-                        <FieldRow label="What's Included (1 item per line)" id={`tp-inc-${i}`}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={t.showIncluded !== false}
+                              onCheckedChange={(v) => updTour(i, 'showIncluded', v)}
+                              disabled={!t.enabled || isDeleted}
+                              title="Toggle What's Included On/Off"
+                            />
+                            <Label className="text-xs font-semibold">What&apos;s Included (1 item per line)</Label>
+                          </div>
                           <textarea
                             id={`tp-inc-${i}`}
-                            rows={3}
+                            rows={7}
                             value={(t.included || []).join('\n')}
                             placeholder="Heavy tackle Penn & Shimano rods&#10;Live bait & lures&#10;Marine park entry permits&#10;Seafood lunch & drinks"
                             onChange={(e) =>
@@ -742,23 +758,21 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             disabled={!t.enabled || isDeleted || t.showIncluded === false}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
-                        </FieldRow>
-                      </div>
-                    </div>
+                        </div>
 
-                    <div className="flex gap-2.5 items-start">
-                      <Switch
-                        checked={t.showNotIncluded !== false}
-                        onCheckedChange={(v) => updTour(i, 'showNotIncluded', v)}
-                        disabled={!t.enabled || isDeleted}
-                        className="mt-8"
-                        title="Toggle What's Not Included On/Off"
-                      />
-                      <div className="flex-1">
-                        <FieldRow label="What's Not Included (1 item per line)" id={`tp-notinc-${i}`}>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={t.showNotIncluded !== false}
+                              onCheckedChange={(v) => updTour(i, 'showNotIncluded', v)}
+                              disabled={!t.enabled || isDeleted}
+                              title="Toggle What's Not Included On/Off"
+                            />
+                            <Label className="text-xs font-semibold">What&apos;s Not Included (1 item per line)</Label>
+                          </div>
                           <textarea
                             id={`tp-notinc-${i}`}
-                            rows={3}
+                            rows={7}
                             value={(t.notIncluded || []).join('\n')}
                             placeholder="Crew gratuities and tips (optional)&#10;Hotel pickup & return transfers&#10;Personal swimwear & towels&#10;Alcoholic beverages"
                             onChange={(e) =>
@@ -774,23 +788,23 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             disabled={!t.enabled || isDeleted || t.showNotIncluded === false}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
-                        </FieldRow>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex gap-2.5 items-start">
-                      <Switch
-                        checked={t.showWhyChoose !== false}
-                        onCheckedChange={(v) => updTour(i, 'showWhyChoose', v)}
-                        disabled={!t.enabled || isDeleted}
-                        className="mt-8"
-                        title="Toggle Why Choose This Tour On/Off"
-                      />
-                      <div className="flex-1">
-                        <FieldRow label="Why Choose This Tour (1 item per line)" id={`tp-why-${i}`}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={t.showWhyChoose !== false}
+                              onCheckedChange={(v) => updTour(i, 'showWhyChoose', v)}
+                              disabled={!t.enabled || isDeleted}
+                              title="Toggle Why Choose This Tour On/Off"
+                            />
+                            <Label className="text-xs font-semibold">Why Choose This Tour (1 per line)</Label>
+                          </div>
                           <textarea
                             id={`tp-why-${i}`}
-                            rows={3}
+                            rows={6}
                             value={(t.whyChoose || []).join('\n')}
                             placeholder="Twin-engine sportfisher with fighting chair&#10;IGFA certified captain with 20+ years experience&#10;Strict billfish conservation policy"
                             onChange={(e) =>
@@ -806,23 +820,21 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             disabled={!t.enabled || isDeleted || t.showWhyChoose === false}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
-                        </FieldRow>
-                      </div>
-                    </div>
+                        </div>
 
-                    <div className="flex gap-2.5 items-start">
-                      <Switch
-                        checked={t.showKnowBeforeYouGo !== false}
-                        onCheckedChange={(v) => updTour(i, 'showKnowBeforeYouGo', v)}
-                        disabled={!t.enabled || isDeleted}
-                        className="mt-8"
-                        title="Toggle Know Before You Go On/Off"
-                      />
-                      <div className="flex-1">
-                        <FieldRow label="Know Before You Go (1 item per line)" id={`tp-know-${i}`}>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={t.showKnowBeforeYouGo !== false}
+                              onCheckedChange={(v) => updTour(i, 'showKnowBeforeYouGo', v)}
+                              disabled={!t.enabled || isDeleted}
+                              title="Toggle Know Before You Go On/Off"
+                            />
+                            <Label className="text-xs font-semibold">Know Before You Go (1 per line)</Label>
+                          </div>
                           <textarea
                             id={`tp-know-${i}`}
-                            rows={3}
+                            rows={6}
                             value={(t.knowBeforeYouGo || []).join('\n')}
                             placeholder="Departure: 6:00 AM from Watamu Marine Park Gate&#10;Duration: Approx. 8 hours&#10;What to bring: Polarized sunglasses, reef-safe sunscreen"
                             onChange={(e) =>
@@ -838,14 +850,14 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                             disabled={!t.enabled || isDeleted || t.showKnowBeforeYouGo === false}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
-                        </FieldRow>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-border/60 space-y-3">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Single Safari SEO & Meta
-                      </span>
+                    <div className="rounded-lg border border-emerald-500/20 p-4 bg-background shadow-xs space-y-3">
+                      <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                        4. Single Safari SEO &amp; Meta
+                      </h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <FieldRow label="Meta Title (Optional)" id={`tp-mtitle-${i}`}>
                           <Input
@@ -859,7 +871,7 @@ export function ToursListEditor({ draft, set }: EditorProps) {
                         <FieldRow label="Meta Description (Optional)" id={`tp-mdesc-${i}`}>
                           <textarea
                             id={`tp-mdesc-${i}`}
-                            rows={2}
+                            rows={3}
                             value={t.metaDescription || ''}
                             placeholder="Overrides default meta description for this single safari page..."
                             onChange={(e) => updTour(i, 'metaDescription', e.target.value)}

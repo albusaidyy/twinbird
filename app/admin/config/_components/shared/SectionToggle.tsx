@@ -13,12 +13,12 @@ export function SectionToggle({
   subtitle?: string;
 }) {
   return (
-    <div className="flex items-center justify-between bg-accent/50 p-4 rounded-lg mb-6 border border-border">
-      <div>
-        <p className="font-semibold text-sm">Show {title}</p>
-        <p className="text-xs text-muted-foreground">{subtitle}</p>
+    <div className="flex items-center justify-between gap-3 bg-accent/50 p-3.5 sm:p-4 rounded-lg mb-6 border border-border">
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-sm leading-tight">Show {title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
-      <Switch checked={enabled} onCheckedChange={onChange} />
+      <Switch checked={enabled} onCheckedChange={onChange} className="shrink-0" />
     </div>
   );
 }

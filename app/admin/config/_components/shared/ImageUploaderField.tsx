@@ -100,88 +100,91 @@ export function ImageUploaderField({
   });
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full min-w-0 max-w-full">
       {/* Input & Action Buttons */}
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full min-w-0">
+        <div className="relative flex-1 min-w-0 w-full">
           <Input
             id={id}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled || uploading}
+            className="w-full text-xs sm:text-sm"
           />
         </div>
 
-        {/* Upload Button */}
-        <label
-          htmlFor={`${id}-file`}
-          className={`flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-md px-3 text-xs font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors ${
-            disabled || uploading ? 'pointer-events-none opacity-50' : ''
-          }`}
-          title="Upload new image from your device"
-        >
-          {uploading ? (
-            <>
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span>Uploading...</span>
-            </>
-          ) : (
-            <>
-              <Upload className="h-3.5 w-3.5" />
-              <span>Upload</span>
-            </>
-          )}
-        </label>
-        <input
-          id={`${id}-file`}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileChange}
-          disabled={disabled || uploading}
-        />
+        <div className="grid grid-cols-2 gap-1.5 w-full sm:flex sm:w-auto sm:items-center sm:gap-2 shrink-0">
+          {/* Upload Button */}
+          <label
+            htmlFor={`${id}-file`}
+            className={`flex h-9 w-full sm:w-auto cursor-pointer items-center justify-center gap-1.5 rounded-md px-2.5 sm:px-3 text-xs font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors ${
+              disabled || uploading ? 'pointer-events-none opacity-50' : ''
+            }`}
+            title="Upload new image from your device"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
+                <span className="truncate">Uploading...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Upload</span>
+              </>
+            )}
+          </label>
+          <input
+            id={`${id}-file`}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+            disabled={disabled || uploading}
+          />
 
-        {/* Browse Library Button */}
-        <Button
-          type="button"
-          variant={showLibrary ? 'secondary' : 'outline'}
-          size="sm"
-          onClick={() => {
-            if (!showLibrary) loadImages(showAllFolders);
-            setShowLibrary(!showLibrary);
-          }}
-          disabled={disabled}
-          className="h-9 gap-1.5 text-xs shrink-0"
-          title="Browse section image gallery"
-        >
-          <Images className="h-3.5 w-3.5" />
-          <span>Library</span>
-        </Button>
+          {/* Browse Library Button */}
+          <Button
+            type="button"
+            variant={showLibrary ? 'secondary' : 'outline'}
+            size="sm"
+            onClick={() => {
+              if (!showLibrary) loadImages(showAllFolders);
+              setShowLibrary(!showLibrary);
+            }}
+            disabled={disabled}
+            className="h-9 w-full sm:w-auto gap-1.5 px-2.5 sm:px-3 text-xs"
+            title="Browse section image gallery"
+          >
+            <Images className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">Library</span>
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-xs text-destructive">{error}</p>}
 
       {/* Selected Image Preview Pill */}
       {value && (
-        <div className="relative flex items-center gap-3 rounded-lg border border-border/60 bg-muted/30 p-2">
+        <div className="relative flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/30 p-1.5 sm:p-2 w-full min-w-0 max-w-full overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={value}
             alt="Preview"
-            className="h-12 w-16 rounded object-cover border border-border bg-background shrink-0"
+            className="h-9 w-12 rounded object-cover border border-border bg-background shrink-0"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
-          <div className="flex-1 min-w-0">
-            <span className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Active Image</span>
-            <p className="truncate text-xs font-mono text-foreground">{value}</p>
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <span className="block text-[9px] uppercase font-semibold text-muted-foreground tracking-wider truncate">Active Image</span>
+            <p className="truncate text-[11px] font-mono text-foreground leading-tight">{value}</p>
           </div>
           <button
             type="button"
             onClick={() => onChange('')}
-            className="text-muted-foreground hover:text-destructive text-xs p-1"
+            className="text-muted-foreground hover:text-destructive text-xs p-1 shrink-0 ml-1"
             title="Clear image"
             disabled={disabled || uploading}
           >

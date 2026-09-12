@@ -413,6 +413,12 @@ export interface TransfersPageConfig {
 }
 
 // ─── Excursions Page ─────────────────────────────────────────────────────────
+export interface ExcursionScheduleItem {
+  time?: string;
+  title: string;
+  description: string;
+}
+
 export interface ExcursionItem {
   id?: string;
   slug?: string;
@@ -440,6 +446,8 @@ export interface ExcursionItem {
   showLocation?: boolean;
   schedule?: string;
   showSchedule?: boolean;
+  scheduleItems?: ExcursionScheduleItem[];
+  showScheduleItems?: boolean;
   groupType?: string;
   showGroupType?: boolean;
   overview?: string;
@@ -451,6 +459,8 @@ export interface ExcursionItem {
   showWhyChoose?: boolean;
   knowBeforeYouGo?: string[];
   showKnowBeforeYouGo?: boolean;
+  whatToCarry?: string[];
+  showWhatToCarry?: boolean;
   metaTitle?: string;
   metaDescription?: string;
   href?: string;
