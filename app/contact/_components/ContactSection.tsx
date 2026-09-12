@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { ContactInfo, ContactFormConfig, DynamicFormField } from '@/types/app-config';
 import { defaultConfig } from '@/config/default-config';
-import { ArrowUpRight, MapPin, Phone, Mail, MessageCircle, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, MapPin, Phone, Mail, MessageCircle, Loader2, CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react';
+import { DatePicker } from '@/components/ui/date-picker';
 
 export function ContactSection({ 
   data, 
@@ -209,90 +210,113 @@ export function ContactSection({
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {fields.map((field) => {
-                    const spanClass = field.halfWidth ? 'md:col-span-1' : 'md:col-span-2';
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {fields.map((field) => {
+                      const spanClass = field.halfWidth ? 'md:col-span-1' : 'md:col-span-2';
 
-                    if (field.type === 'checkbox') {
+                      if (field.type === 'checkbox') {
+                        return (
+                          <div key={field.id} className={`${spanClass} flex items-center gap-3 pt-2`}>
+                            <input
+                              type="checkbox"
+                              id={`cnt-${field.id}`}
+                              checked={Boolean(formData[field.id])}
+                              onChange={(e) => handleChange(field.id, e.target.checked)}
+                              className="h-4 w-4 rounded border-slate-300 accent-primary cursor-pointer shrink-0"
+                              style={{ accentColor: primaryColor }}
+                            />
+                            <label htmlFor={`cnt-${field.id}`} className="text-xs font-semibold text-slate-700 cursor-pointer select-none leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
+                            </label>
+                          </div>
+                        );
+                      }
+
+                      if (field.type === 'select') {
+                        return (
+                          <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-2`}>
+                            <label className="text-xs font-semibold text-slate-500 leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
+                            </label>
+                            <div className="relative">
+                              <select
+                                id={`cnt-${field.id}`}
+                                required={field.required}
+                                value={String(formData[field.id] || '')}
+                                onChange={(e) => handleChange(field.id, e.target.value)}
+                                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 transition-colors bg-white cursor-pointer appearance-none pr-10"
+                              >
+                                {field.placeholder && <option value="">{field.placeholder}</option>}
+                                {(field.options || []).map((opt, i) => (
+                                  <option key={i} value={opt}>
+                                    {opt}
+                                  </option>
+                                ))}
+                              </select>
+                              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-slate-400" />
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      if (field.type === 'textarea') {
+                        return (
+                          <div key={field.id} className={`${spanClass} space-y-2`}>
+                            <label className="text-xs font-semibold text-slate-500 leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
+                            </label>
+                            <textarea
+                              id={`cnt-${field.id}`}
+                              required={field.required}
+                              rows={4}
+                              placeholder={field.placeholder || ''}
+                              value={String(formData[field.id] || '')}
+                              onChange={(e) => handleChange(field.id, e.target.value)}
+                              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 transition-colors resize-none"
+                            />
+                          </div>
+                        );
+                      }
+
+                      if (field.type === 'date') {
+                        return (
+                          <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-2`}>
+                            <label className="text-xs font-semibold text-slate-500 leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
+                            </label>
+                            <DatePicker
+                              id={`cnt-${field.id}`}
+                              value={String(formData[field.id] || '')}
+                              onChange={(val) => handleChange(field.id, val)}
+                              primaryColor={primaryColor}
+                              placeholder={field.placeholder || 'Select date'}
+                              disabled={loading}
+                              required={field.required}
+                              className="h-[46px] rounded-xl border-slate-200 text-sm"
+                            />
+                          </div>
+                        );
+                      }
+
+                      // Text, Email, Tel, Number, Time, Datetime-local
                       return (
-                        <div key={field.id} className={`${spanClass} flex items-center gap-3 pt-2`}>
+                        <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-2`}>
+                          <label className="text-xs font-semibold text-slate-500 leading-snug">
+                            {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
+                          </label>
                           <input
-                            type="checkbox"
                             id={`cnt-${field.id}`}
-                            checked={Boolean(formData[field.id])}
-                            onChange={(e) => handleChange(field.id, e.target.checked)}
-                            className="h-4 w-4 rounded border-slate-300 accent-primary"
-                            style={{ accentColor: primaryColor }}
-                          />
-                          <label htmlFor={`cnt-${field.id}`} className="text-xs font-semibold text-slate-700 cursor-pointer">
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
-                          </label>
-                        </div>
-                      );
-                    }
-
-                    if (field.type === 'select') {
-                      return (
-                        <div key={field.id} className={`${spanClass} space-y-2`}>
-                          <label className="text-xs font-semibold text-slate-500">
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
-                          </label>
-                          <select
-                            id={`cnt-${field.id}`}
+                            type={field.type}
                             required={field.required}
-                            value={String(formData[field.id] || '')}
-                            onChange={(e) => handleChange(field.id, e.target.value)}
-                            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 transition-colors bg-white appearance-none"
-                          >
-                            {field.placeholder && <option value="">{field.placeholder}</option>}
-                            {(field.options || []).map((opt, i) => (
-                              <option key={i} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      );
-                    }
-
-                    if (field.type === 'textarea') {
-                      return (
-                        <div key={field.id} className={`${spanClass} space-y-2`}>
-                          <label className="text-xs font-semibold text-slate-500">
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
-                          </label>
-                          <textarea
-                            id={`cnt-${field.id}`}
-                            required={field.required}
-                            rows={4}
                             placeholder={field.placeholder || ''}
                             value={String(formData[field.id] || '')}
                             onChange={(e) => handleChange(field.id, e.target.value)}
-                            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 transition-colors resize-none"
+                            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 transition-colors"
                           />
                         </div>
                       );
-                    }
-
-                    // Text, Email, Tel, Number, Date, Time, Datetime-local
-                    return (
-                      <div key={field.id} className={`${spanClass} space-y-2`}>
-                        <label className="text-xs font-semibold text-slate-500">
-                          {field.label} {field.required && <span className="text-red-500">*</span>}
-                        </label>
-                        <input
-                          id={`cnt-${field.id}`}
-                          type={field.type}
-                          required={field.required}
-                          placeholder={field.placeholder || ''}
-                          value={String(formData[field.id] || '')}
-                          onChange={(e) => handleChange(field.id, e.target.value)}
-                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-slate-400 transition-colors"
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
+                    })}
+                  </div>
 
                 <button 
                   type="submit" 

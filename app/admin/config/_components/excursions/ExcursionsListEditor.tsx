@@ -13,7 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import type { ExcursionItem, ExcursionScheduleItem } from "@/types/app-config";
-import { defaultConfig, defaultExcursionItems, defaultExcursionSchedule, defaultExcursionGallery } from "@/config/default-config";
+import { defaultConfig, defaultExcursionItems, defaultExcursionSchedule } from "@/config/default-config";
 import type { EditorProps } from "../shared/types";
 import { FieldRow } from "../shared/FieldRow";
 import { SectionToggle } from "../shared/SectionToggle";
@@ -674,73 +674,344 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                   </summary>
 
                   <div className="space-y-4 pt-1">
-                    {/* 1. Hero Card Backdrop */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-4">
+                    {/* 1. Single Excursion Hero & Carousel Photos */}
+                    <div className="rounded-lg border border-sky-500/20 p-4 bg-background shadow-xs space-y-4">
                       <div>
                         <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
-                          1. Single Excursion Hero Card
+                          1. Single Excursion Hero &amp; Carousel Photos
                         </h5>
-                        <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                          Configure the cover photo and fallback background
-                          color for the floating single excursion card.
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          Configure the hero background color, backdrop image, and the interactive photo carousel for this single excursion detail page.
                         </p>
                       </div>
 
                       <BackgroundColorPicker
-                        label="Hero Background Fallback Color"
-                        desc="Fallback background color when no cover image is set."
-                        value={t.heroBackgroundColor || "#0f766e"}
+                        label="Hero Background Color"
+                        desc="Custom hero background color when no hero image is set or behind the overlay."
+                        value={t.heroBackgroundColor || '#0f766e'}
                         onChange={(v) =>
-                          updExcursion(i, "heroBackgroundColor", v)
+                          updExcursion(i, 'heroBackgroundColor', v)
                         }
                       />
 
                       <FieldRow
-                        label="Hero Card Background Image (High Resolution)"
+                        label="Hero Background Image (Behind Title)"
                         id={`exp-hero-img-${i}`}
                       >
                         <ImageUploaderField
                           id={`exp-hero-img-${i}`}
-                          value={t.heroImageUrl || ""}
+                          value={t.heroImageUrl || ''}
                           onChange={(url) =>
-                            updExcursion(i, "heroImageUrl", url)
+                            updExcursion(i, 'heroImageUrl', url)
                           }
                           folder="hero"
                           placeholder="Select hero background image (Optional)..."
                           disabled={!t.enabled || isDeleted}
                         />
                         <p className="text-[10px] text-muted-foreground mt-1">
-                          Hero cover photo displayed with ambient contrast
-                          gradient overlay.
+                          Optional hero backdrop image with dark ambient gradient overlay.
                         </p>
                       </FieldRow>
+
+                      <BackgroundColorPicker
+                        label="Carousel Indicator Color"
+                        desc="Pick a custom color for the active carousel dot indicators."
+                        value={t.indicatorColor || '#f6ab03'}
+                        onChange={(v) =>
+                          updExcursion(i, 'indicatorColor', v)
+                        }
+                      />
+
+                      <div className="space-y-3 pt-2 border-t border-border/60">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-semibold">
+                            Carousel Photos (Auto-scrolling Gallery)
+                          </Label>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const baseImg = t.imageUrl || '/images/hero/hero.jpg';
+                              const currentGallery =
+                                t.gallery && t.gallery.length > 0
+                                  ? t.gallery
+                                  : [baseImg, baseImg, baseImg];
+                              updExcursion(i, 'gallery', [
+                                ...currentGallery,
+                                '/images/hero/hero.jpg',
+                              ]);
+                            }}
+                            disabled={!t.enabled || isDeleted}
+                            className="gap-1.5 h-7 text-xs"
+                          >
+                            <Plus className="h-3 w-3" /> Add Carousel Photo
+                          </Button>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          {(t.gallery && t.gallery.length > 0
+                            ? t.gallery
+                            : [
+                                t.imageUrl || '/images/hero/hero.jpg',
+                                t.imageUrl || '/images/hero/hero.jpg',
+                                t.imageUrl || '/images/hero/hero.jpg',
+                              ]
+                          ).map((imgUrl, gIdx) => {
+                            const baseImg = t.imageUrl || '/images/hero/hero.jpg';
+                            const currentGallery =
+                              t.gallery && t.gallery.length > 0
+                                ? t.gallery
+                                : [baseImg, baseImg, baseImg];
+                            const updGalleryImg = (newUrl: string) => {
+                              const updated = [...currentGallery];
+                              updated[gIdx] = newUrl;
+                              updExcursion(i, 'gallery', updated);
+                            };
+                            const removeGalleryImg = () => {
+                              const updated = currentGallery.filter(
+                                (_, idx) => idx !== gIdx
+                              );
+                              const fallbackImg = t.imageUrl || '/images/hero/hero.jpg';
+                              updExcursion(
+                                i,
+                                'gallery',
+                                updated.length > 0
+                                  ? updated
+                                  : [fallbackImg, fallbackImg, fallbackImg]
+                              );
+                            };
+                            const moveGalleryImg = (dir: 'up' | 'down') => {
+                              const target =
+                                dir === 'up' ? gIdx - 1 : gIdx + 1;
+                              if (
+                                target < 0 ||
+                                target >= currentGallery.length
+                              )
+                                return;
+                              const updated = [...currentGallery];
+                              const temp = updated[gIdx];
+                              updated[gIdx] = updated[target];
+                              updated[target] = temp;
+                              updExcursion(i, 'gallery', updated);
+                            };
+
+                            return (
+                              <div
+                                key={gIdx}
+                                className="rounded-lg border border-border p-3 bg-card shadow-xs space-y-2 min-w-0"
+                              >
+                                <div className="flex items-center justify-between gap-2 pb-1 border-b border-border/40">
+                                  <span className="text-xs font-semibold text-muted-foreground">
+                                    Carousel Photo #{gIdx + 1}
+                                  </span>
+                                  <div className="flex items-center gap-0.5">
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      disabled={
+                                        gIdx === 0 || !t.enabled || isDeleted
+                                      }
+                                      onClick={() => moveGalleryImg('up')}
+                                      title="Move up"
+                                    >
+                                      <ArrowUp className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      disabled={
+                                        gIdx === currentGallery.length - 1 ||
+                                        !t.enabled ||
+                                        isDeleted
+                                      }
+                                      onClick={() => moveGalleryImg('down')}
+                                      title="Move down"
+                                    >
+                                      <ArrowDown className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                                      disabled={
+                                        !t.enabled ||
+                                        currentGallery.length <= 1 ||
+                                        isDeleted
+                                      }
+                                      onClick={removeGalleryImg}
+                                      title="Delete photo"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                </div>
+                                <div className="w-full min-w-0">
+                                  <ImageUploaderField
+                                    id={`exp-gal-${i}-${gIdx}`}
+                                    value={imgUrl}
+                                    onChange={updGalleryImg}
+                                    folder="excursions"
+                                    placeholder="Choose carousel photo..."
+                                    disabled={!t.enabled || isDeleted}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* 2. About This Excursion Overview */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-3">
-                      <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
-                        2. About this excursion
-                      </h5>
-                      <FieldRow
-                        label="Full Narrative Overview"
-                        id={`exp-over-${i}`}
-                      >
-                        <textarea
-                          id={`exp-over-${i}`}
-                          rows={6}
-                          value={t.overview || ""}
-                          placeholder="Full detailed narrative description for the single excursion page..."
-                          onChange={(e) =>
-                            updExcursion(i, "overview", e.target.value)
-                          }
-                          disabled={!t.enabled || isDeleted}
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
-                        />
-                      </FieldRow>
+                    {/* 2. Quick Info Strip Bar */}
+                    <div className="rounded-lg border border-sky-500/20 p-4 bg-background shadow-xs space-y-4">
+                      <div>
+                        <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
+                          2. Quick Info Strip Bar
+                        </h5>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          Configure the quick metadata pills displayed in the strip bar right below the single excursion hero carousel.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="flex gap-2.5 items-start">
+                          <Switch
+                            checked={t.showDuration !== false}
+                            onCheckedChange={(v) =>
+                              updExcursion(i, 'showDuration', v)
+                            }
+                            disabled={!t.enabled || isDeleted}
+                            className="mt-8 shrink-0"
+                            title="Toggle Duration Strip Text On/Off"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <FieldRow
+                              label="Duration Strip Text"
+                              id={`exp-dur-strip-${i}`}
+                            >
+                              <Input
+                                id={`exp-dur-strip-${i}`}
+                                value={t.duration || ''}
+                                placeholder="e.g. Full Day · 8 Hours"
+                                onChange={(e) =>
+                                  updExcursion(i, 'duration', e.target.value)
+                                }
+                                disabled={
+                                  !t.enabled ||
+                                  isDeleted ||
+                                  t.showDuration === false
+                                }
+                              />
+                            </FieldRow>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2.5 items-start">
+                          <Switch
+                            checked={t.showLocation !== false}
+                            onCheckedChange={(v) =>
+                              updExcursion(i, 'showLocation', v)
+                            }
+                            disabled={!t.enabled || isDeleted}
+                            className="mt-8 shrink-0"
+                            title="Toggle Location Strip Text On/Off"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <FieldRow
+                              label="Location Strip Text"
+                              id={`exp-loc-${i}`}
+                            >
+                              <Input
+                                id={`exp-loc-${i}`}
+                                value={t.location || ''}
+                                placeholder="e.g. Watamu Marine Park, Kenya"
+                                onChange={(e) =>
+                                  updExcursion(i, 'location', e.target.value)
+                                }
+                                disabled={
+                                  !t.enabled ||
+                                  isDeleted ||
+                                  t.showLocation === false
+                                }
+                              />
+                            </FieldRow>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2.5 items-start">
+                          <Switch
+                            checked={t.showSchedule !== false}
+                            onCheckedChange={(v) =>
+                              updExcursion(i, 'showSchedule', v)
+                            }
+                            disabled={!t.enabled || isDeleted}
+                            className="mt-8 shrink-0"
+                            title="Toggle Schedule Strip Text On/Off"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <FieldRow
+                              label="Schedule / Season Text"
+                              id={`exp-sched-${i}`}
+                            >
+                              <Input
+                                id={`exp-sched-${i}`}
+                                value={t.schedule || ''}
+                                placeholder="e.g. Daily Departures · 7:30 AM"
+                                onChange={(e) =>
+                                  updExcursion(i, 'schedule', e.target.value)
+                                }
+                                disabled={
+                                  !t.enabled ||
+                                  isDeleted ||
+                                  t.showSchedule === false
+                                }
+                              />
+                            </FieldRow>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2.5 items-start">
+                          <Switch
+                            checked={t.showGroupType !== false}
+                            onCheckedChange={(v) =>
+                              updExcursion(i, 'showGroupType', v)
+                            }
+                            disabled={!t.enabled || isDeleted}
+                            className="mt-8 shrink-0"
+                            title="Toggle Group Suitability Text On/Off"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <FieldRow
+                              label="Group Suitability Text"
+                              id={`exp-grp-${i}`}
+                            >
+                              <Input
+                                id={`exp-grp-${i}`}
+                                value={t.groupType || ''}
+                                placeholder="e.g. Families · Couples · Small Groups"
+                                onChange={(e) =>
+                                  updExcursion(i, 'groupType', e.target.value)
+                                }
+                                disabled={
+                                  !t.enabled ||
+                                  isDeleted ||
+                                  t.showGroupType === false
+                                }
+                              />
+                            </FieldRow>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* 3. Day Schedule Timeline */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-3">
+                    {/* 3. Day Schedule Timeline Steps (Preserved Exactly) */}
+                    <div className="rounded-lg border border-sky-500/20 p-4 bg-background shadow-xs space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
                         <div className="flex items-center gap-2">
                           <Switch
@@ -749,8 +1020,8 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                               t.showSchedule !== false
                             }
                             onCheckedChange={(v) => {
-                              updExcursion(i, "showScheduleItems", v);
-                              updExcursion(i, "showSchedule", v);
+                              updExcursion(i, 'showScheduleItems', v);
+                              updExcursion(i, 'showSchedule', v);
                             }}
                             disabled={!t.enabled || isDeleted}
                             className="shrink-0"
@@ -769,12 +1040,12 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                           onClick={() => {
                             const cur = [...scheduleList];
                             const newStep: ExcursionScheduleItem = {
-                              time: "09:00 - 11:00",
-                              title: "New Schedule Stop",
+                              time: '09:00 - 11:00',
+                              title: 'New Schedule Stop',
                               description:
-                                "Details for this excursion timeline stop...",
+                                'Details for this excursion timeline stop...',
                             };
-                            updExcursion(i, "scheduleItems", [...cur, newStep]);
+                            updExcursion(i, 'scheduleItems', [...cur, newStep]);
                           }}
                           className="h-7 text-xs gap-1 self-start sm:self-auto shrink-0"
                         >
@@ -811,7 +1082,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                                     const temp = cur[sIdx];
                                     cur[sIdx] = cur[sIdx - 1];
                                     cur[sIdx - 1] = temp;
-                                    updExcursion(i, "scheduleItems", cur);
+                                    updExcursion(i, 'scheduleItems', cur);
                                   }}
                                   title="Move stop up"
                                 >
@@ -832,7 +1103,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                                     const temp = cur[sIdx];
                                     cur[sIdx] = cur[sIdx + 1];
                                     cur[sIdx + 1] = temp;
-                                    updExcursion(i, "scheduleItems", cur);
+                                    updExcursion(i, 'scheduleItems', cur);
                                   }}
                                   title="Move stop down"
                                 >
@@ -846,7 +1117,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                                   onClick={() => {
                                     const cur = [...scheduleList];
                                     cur.splice(sIdx, 1);
-                                    updExcursion(i, "scheduleItems", cur);
+                                    updExcursion(i, 'scheduleItems', cur);
                                   }}
                                   className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                                   title="Delete stop"
@@ -859,7 +1130,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                               <div className="sm:col-span-1">
                                 <Input
-                                  value={step.time || ""}
+                                  value={step.time || ''}
                                   placeholder="e.g. 08:00 - 09:30"
                                   onChange={(e) => {
                                     const cur = [...scheduleList];
@@ -867,7 +1138,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                                       ...step,
                                       time: e.target.value,
                                     };
-                                    updExcursion(i, "scheduleItems", cur);
+                                    updExcursion(i, 'scheduleItems', cur);
                                   }}
                                   disabled={!t.enabled || isDeleted}
                                   className="h-8 text-xs"
@@ -875,7 +1146,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                               </div>
                               <div className="sm:col-span-2">
                                 <Input
-                                  value={step.title || ""}
+                                  value={step.title || ''}
                                   placeholder="Stop Title, e.g. Morning Departure"
                                   onChange={(e) => {
                                     const cur = [...scheduleList];
@@ -883,7 +1154,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                                       ...step,
                                       title: e.target.value,
                                     };
-                                    updExcursion(i, "scheduleItems", cur);
+                                    updExcursion(i, 'scheduleItems', cur);
                                   }}
                                   disabled={!t.enabled || isDeleted}
                                   className="h-8 text-xs font-medium"
@@ -893,7 +1164,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
 
                             <textarea
                               rows={3}
-                              value={step.description || ""}
+                              value={step.description || ''}
                               placeholder="Description of activities, scenery, or lunch for this stop..."
                               onChange={(e) => {
                                 const cur = [...scheduleList];
@@ -901,7 +1172,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                                   ...step,
                                   description: e.target.value,
                                 };
-                                updExcursion(i, "scheduleItems", cur);
+                                updExcursion(i, 'scheduleItems', cur);
                               }}
                               disabled={!t.enabled || isDeleted}
                               className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
@@ -911,16 +1182,28 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                       )}
                     </div>
 
-                    {/* 4. What's Included & What to Carry */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                        <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
-                          4. What&apos;s Included &amp; What to Carry
-                        </h5>
-                        <span className="text-[11px] text-muted-foreground">
-                          Side-by-side cards
-                        </span>
-                      </div>
+                    {/* 4. About & Inclusions Details */}
+                    <div className="rounded-lg border border-sky-500/20 p-4 bg-background shadow-xs space-y-4">
+                      <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
+                        4. About &amp; Inclusions Details
+                      </h5>
+
+                      <FieldRow
+                        label="Full Excursion Overview (Main Article)"
+                        id={`exp-over-${i}`}
+                      >
+                        <textarea
+                          id={`exp-over-${i}`}
+                          rows={6}
+                          value={t.overview || ''}
+                          placeholder="Full detailed narrative description for the single excursion page..."
+                          onChange={(e) =>
+                            updExcursion(i, 'overview', e.target.value)
+                          }
+                          disabled={!t.enabled || isDeleted}
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+                        />
+                      </FieldRow>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -928,10 +1211,9 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                             <Switch
                               checked={t.showIncluded !== false}
                               onCheckedChange={(v) =>
-                                updExcursion(i, "showIncluded", v)
+                                updExcursion(i, 'showIncluded', v)
                               }
                               disabled={!t.enabled || isDeleted}
-                              className="shrink-0"
                               title="Toggle What's Included On/Off"
                             />
                             <Label className="text-xs font-semibold">
@@ -939,17 +1221,18 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                             </Label>
                           </div>
                           <textarea
+                            id={`exp-inc-${i}`}
                             rows={7}
-                            value={(t.included || []).join("\n")}
+                            value={(t.included || []).join('\n')}
                             placeholder="Professional guide&#10;Marine park entry permits&#10;Fresh lunch & drinks"
                             onChange={(e) =>
                               updExcursion(
                                 i,
-                                "included",
+                                'included',
                                 e.target.value
-                                  .split("\n")
+                                  .split('\n')
                                   .map((s) => s.trim())
-                                  .filter(Boolean),
+                                  .filter(Boolean)
                               )
                             }
                             disabled={
@@ -964,37 +1247,115 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <Switch
+                              checked={t.showNotIncluded !== false}
+                              onCheckedChange={(v) =>
+                                updExcursion(i, 'showNotIncluded', v)
+                              }
+                              disabled={!t.enabled || isDeleted}
+                              title="Toggle What's Not Included On/Off"
+                            />
+                            <Label className="text-xs font-semibold">
+                              What&apos;s Not Included (1 item per line)
+                            </Label>
+                          </div>
+                          <textarea
+                            id={`exp-notinc-${i}`}
+                            rows={7}
+                            value={(t.notIncluded || []).join('\n')}
+                            placeholder="Driver and excursion guide gratuities&#10;Personal shopping and souvenirs&#10;Personal travel insurance"
+                            onChange={(e) =>
+                              updExcursion(
+                                i,
+                                'notIncluded',
+                                e.target.value
+                                  .split('\n')
+                                  .map((s) => s.trim())
+                                  .filter(Boolean)
+                              )
+                            }
+                            disabled={
+                              !t.enabled ||
+                              isDeleted ||
+                              t.showNotIncluded === false
+                            }
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={t.showWhyChoose !== false}
+                              onCheckedChange={(v) =>
+                                updExcursion(i, 'showWhyChoose', v)
+                              }
+                              disabled={!t.enabled || isDeleted}
+                              title="Toggle Why Choose This Excursion On/Off"
+                            />
+                            <Label className="text-xs font-semibold">
+                              Why Choose This Excursion (1 per line)
+                            </Label>
+                          </div>
+                          <textarea
+                            id={`exp-why-${i}`}
+                            rows={6}
+                            value={(t.whyChoose || []).join('\n')}
+                            placeholder="Licensed local marine skippers&#10;Modern snorkeling & safety equipment&#10;Authentic Swahili seafood lunch"
+                            onChange={(e) =>
+                              updExcursion(
+                                i,
+                                'whyChoose',
+                                e.target.value
+                                  .split('\n')
+                                  .map((s) => s.trim())
+                                  .filter(Boolean)
+                              )
+                            }
+                            disabled={
+                              !t.enabled ||
+                              isDeleted ||
+                              t.showWhyChoose === false
+                            }
+                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Switch
                               checked={
                                 t.showKnowBeforeYouGo !== false &&
                                 t.showWhatToCarry !== false
                               }
                               onCheckedChange={(v) => {
-                                updExcursion(i, "showKnowBeforeYouGo", v);
-                                updExcursion(i, "showWhatToCarry", v);
+                                updExcursion(i, 'showKnowBeforeYouGo', v);
+                                updExcursion(i, 'showWhatToCarry', v);
                               }}
                               disabled={!t.enabled || isDeleted}
-                              className="shrink-0"
-                              title="Toggle What to Carry On/Off"
+                              title="Toggle Know Before You Go On/Off"
                             />
                             <Label className="text-xs font-semibold">
-                              What to Carry (1 item per line)
+                              Know Before You Go (1 per line)
                             </Label>
                           </div>
                           <textarea
-                            rows={7}
+                            id={`exp-know-${i}`}
+                            rows={6}
                             value={(
-                              t.whatToCarry ||
                               t.knowBeforeYouGo ||
+                              t.whatToCarry ||
                               []
-                            ).join("\n")}
-                            placeholder="Wear comfortable walking shoes&#10;Swimwear & beach towel&#10;Hat, sunglasses, and sunscreen&#10;Waterproof camera or dry pouch"
+                            ).join('\n')}
+                            placeholder="Wear comfortable walking shoes&#10;Swimwear & beach towel&#10;Hat, sunglasses, and sunscreen&#10;Waterproof camera recommended"
                             onChange={(e) => {
                               const items = e.target.value
-                                .split("\n")
+                                .split('\n')
                                 .map((s) => s.trim())
                                 .filter(Boolean);
-                              updExcursion(i, "whatToCarry", items);
-                              updExcursion(i, "knowBeforeYouGo", items);
+                              updExcursion(i, 'knowBeforeYouGo', items);
+                              updExcursion(i, 'whatToCarry', items);
                             }}
                             disabled={
                               !t.enabled ||
@@ -1007,252 +1368,10 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                       </div>
                     </div>
 
-                    {/* 5. Why Choose This Excursion */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={t.showWhyChoose !== false}
-                            onCheckedChange={(v) =>
-                              updExcursion(i, "showWhyChoose", v)
-                            }
-                            disabled={!t.enabled || isDeleted}
-                            className="shrink-0"
-                            title="Toggle Why Choose This Excursion On/Off"
-                          />
-                          <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
-                            5. Why Choose This Excursion
-                          </h5>
-                        </div>
-                      </div>
-                      <FieldRow
-                        label="Key Highlights & Reasons to Book (1 item per line)"
-                        id={`exp-why-${i}`}
-                      >
-                        <textarea
-                          id={`exp-why-${i}`}
-                          rows={6}
-                          value={(t.whyChoose || []).join("\n")}
-                          placeholder="Licensed local marine skippers&#10;Modern snorkeling & safety equipment&#10;Authentic Swahili seafood lunch&#10;Flexible hotel pickup schedules"
-                          onChange={(e) =>
-                            updExcursion(
-                              i,
-                              "whyChoose",
-                              e.target.value
-                                .split("\n")
-                                .map((s) => s.trim())
-                                .filter(Boolean),
-                            )
-                          }
-                          disabled={
-                            !t.enabled || isDeleted || t.showWhyChoose === false
-                          }
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
-                        />
-                      </FieldRow>
-                    </div>
-
-                    {/* 6. What's Not Included */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={t.showNotIncluded !== false}
-                            onCheckedChange={(v) =>
-                              updExcursion(i, "showNotIncluded", v)
-                            }
-                            disabled={!t.enabled || isDeleted}
-                            className="shrink-0"
-                            title="Toggle What's Not Included On/Off"
-                          />
-                          <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
-                            6. What&apos;s Not Included
-                          </h5>
-                        </div>
-                      </div>
-                      <FieldRow
-                        label="Exclusions & Non-included Items (1 item per line)"
-                        id={`exp-notinc-${i}`}
-                      >
-                        <textarea
-                          id={`exp-notinc-${i}`}
-                          rows={6}
-                          value={(t.notIncluded || []).join("\n")}
-                          placeholder="Driver and excursion guide gratuities&#10;Personal shopping and souvenirs&#10;Personal travel insurance&#10;Alcoholic spirits & premium bottled drinks"
-                          onChange={(e) =>
-                            updExcursion(
-                              i,
-                              "notIncluded",
-                              e.target.value
-                                .split("\n")
-                                .map((s) => s.trim())
-                                .filter(Boolean),
-                            )
-                          }
-                          disabled={
-                            !t.enabled ||
-                            isDeleted ||
-                            t.showNotIncluded === false
-                          }
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
-                        />
-                      </FieldRow>
-                    </div>
-
-                    {/* 7. Mosaic Gallery Photos */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
-                        <div className="min-w-0 flex-1">
-                          <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
-                            7. Gallery Photos (Mosaic Grid)
-                          </h5>
-                          <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                            Images displayed in the curated mosaic grid (1 large
-                            left, 2 stacked right, 1 panoramic bottom) and
-                            fullscreen lightbox.
-                          </p>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const currentGallery =
-                              t.gallery && t.gallery.length > 0
-                                ? t.gallery
-                                : t.imageUrl
-                                ? [t.imageUrl, ...defaultExcursionGallery.slice(1)]
-                                : defaultExcursionGallery;
-                            updExcursion(i, "gallery", [
-                              ...currentGallery,
-                              defaultExcursionGallery[0],
-                            ]);
-                          }}
-                          disabled={!t.enabled || isDeleted}
-                          className="gap-1.5 h-7 text-xs shrink-0 self-start sm:self-auto"
-                        >
-                          <Plus className="h-3 w-3" /> Add Gallery Photo
-                        </Button>
-                      </div>
-
-                      <div className="space-y-2.5">
-                        {(t.gallery && t.gallery.length > 0
-                          ? t.gallery
-                          : t.imageUrl
-                          ? [t.imageUrl, ...defaultExcursionGallery.slice(1)]
-                          : defaultExcursionGallery
-                        ).map((imgUrl, gIdx) => {
-                          const currentGallery =
-                            t.gallery && t.gallery.length > 0
-                              ? t.gallery
-                              : t.imageUrl
-                              ? [t.imageUrl, ...defaultExcursionGallery.slice(1)]
-                              : defaultExcursionGallery;
-                          const updGalleryImg = (newUrl: string) => {
-                            const updated = [...currentGallery];
-                            updated[gIdx] = newUrl;
-                            updExcursion(i, "gallery", updated);
-                          };
-                          const removeGalleryImg = () => {
-                            const updated = currentGallery.filter(
-                              (_, idx) => idx !== gIdx,
-                            );
-                            updExcursion(
-                              i,
-                              "gallery",
-                              updated.length > 0
-                                ? updated
-                                : t.imageUrl
-                                ? [t.imageUrl, ...defaultExcursionGallery.slice(1)]
-                                : defaultExcursionGallery,
-                            );
-                          };
-                          const moveGalleryImg = (dir: "up" | "down") => {
-                            const target = dir === "up" ? gIdx - 1 : gIdx + 1;
-                            if (target < 0 || target >= currentGallery.length)
-                              return;
-                            const updated = [...currentGallery];
-                            const temp = updated[gIdx];
-                            updated[gIdx] = updated[target];
-                            updated[target] = temp;
-                            updExcursion(i, "gallery", updated);
-                          };
-
-                          return (
-                            <div
-                              key={gIdx}
-                              className="rounded-lg border border-border p-3 bg-card shadow-xs space-y-2 min-w-0"
-                            >
-                              <div className="flex items-center justify-between gap-2 pb-1 border-b border-border/40">
-                                <span className="text-xs font-semibold text-muted-foreground">
-                                  Gallery Photo #{gIdx + 1}
-                                </span>
-                                <div className="flex items-center gap-0.5">
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    disabled={
-                                      gIdx === 0 || !t.enabled || isDeleted
-                                    }
-                                    onClick={() => moveGalleryImg("up")}
-                                    title="Move up"
-                                  >
-                                    <ArrowUp className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7"
-                                    disabled={
-                                      gIdx === currentGallery.length - 1 ||
-                                      !t.enabled ||
-                                      isDeleted
-                                    }
-                                    onClick={() => moveGalleryImg("down")}
-                                    title="Move down"
-                                  >
-                                    <ArrowDown className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                                    disabled={
-                                      !t.enabled ||
-                                      currentGallery.length <= 1 ||
-                                      isDeleted
-                                    }
-                                    onClick={removeGalleryImg}
-                                    title="Delete photo"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <div className="w-full min-w-0">
-                                <ImageUploaderField
-                                  id={`exp-gal-${i}-${gIdx}`}
-                                  value={imgUrl}
-                                  onChange={updGalleryImg}
-                                  folder="excursions"
-                                  placeholder="Choose gallery photo..."
-                                  disabled={!t.enabled || isDeleted}
-                                />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* 8. Single Excursion SEO & Meta */}
-                    <div className="rounded-lg border border-sky-500/20 p-3.5 sm:p-4 bg-background shadow-xs space-y-3">
+                    {/* 5. Single Excursion SEO & Meta */}
+                    <div className="rounded-lg border border-sky-500/20 p-4 bg-background shadow-xs space-y-3">
                       <h5 className="text-xs font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">
-                        8. Single Excursion SEO &amp; Meta
+                        5. Single Excursion SEO &amp; Meta
                       </h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <FieldRow
@@ -1261,14 +1380,14 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                         >
                           <Input
                             id={`exp-mtitle-${i}`}
-                            value={t.metaTitle || ""}
+                            value={t.metaTitle || ''}
                             placeholder={
                               t.title
                                 ? `${t.title} | Excursions Kenya`
-                                : "e.g. Wasini Dolphin Dhow Cruise | Excursions Kenya"
+                                : 'e.g. Wasini Dolphin Dhow Cruise | Excursions Kenya'
                             }
                             onChange={(e) =>
-                              updExcursion(i, "metaTitle", e.target.value)
+                              updExcursion(i, 'metaTitle', e.target.value)
                             }
                             disabled={!t.enabled || isDeleted}
                           />
@@ -1280,10 +1399,10 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                           <textarea
                             id={`exp-mdesc-${i}`}
                             rows={3}
-                            value={t.metaDescription || ""}
+                            value={t.metaDescription || ''}
                             placeholder="Overrides default meta description for this single excursion page..."
                             onChange={(e) =>
-                              updExcursion(i, "metaDescription", e.target.value)
+                              updExcursion(i, 'metaDescription', e.target.value)
                             }
                             disabled={!t.enabled || isDeleted}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"

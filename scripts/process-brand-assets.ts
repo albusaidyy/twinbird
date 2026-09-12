@@ -21,13 +21,26 @@ async function generateAllAssetsFromLogo() {
   
   // 1. Determine input logo path
   const customInputPath = process.argv[2];
-  const inputLogoPath = customInputPath 
-    ? path.resolve(rootDir, customInputPath)
-    : path.join(rootDir, 'public', 'brand', 'logos', 'logo.png');
+  let inputLogoPath: string | null = null;
 
-  if (!fs.existsSync(inputLogoPath)) {
-    console.error(`Error: Source logo not found at ${inputLogoPath}`);
-    console.error(`Please place your master logo at public/brand/logos/logo.png or pass the path as an argument.`);
+  if (customInputPath) {
+    inputLogoPath = path.resolve(rootDir, customInputPath);
+  } else {
+    // Auto-detect common master logo formats
+    const candidateExtensions = ['png', 'jpeg', 'jpg', 'webp', 'svg'];
+    for (const ext of candidateExtensions) {
+      const candidate = path.join(rootDir, 'public', 'brand', 'logos', `logo.${ext}`);
+      if (fs.existsSync(candidate)) {
+        inputLogoPath = candidate;
+        break;
+      }
+    }
+  }
+
+  if (!inputLogoPath || !fs.existsSync(inputLogoPath)) {
+    console.error(`Error: Source logo not found${inputLogoPath ? ` at ${inputLogoPath}` : ''}`);
+    console.error(`Please place your master logo at public/brand/logos/logo.png (or .jpeg / .jpg / .webp) or pass the path as an argument:`);
+    console.error(`  npx tsx scripts/process-brand-assets.ts path/to/image.jpeg`);
     process.exit(1);
   }
 

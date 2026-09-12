@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Loader2, CheckCircle2, AlertCircle, ChevronDown } from 'lucide-react';
 import type { ExcursionItem, ExcursionBookingFormConfig, DynamicFormField } from '@/types/app-config';
 import { defaultConfig } from '@/config/default-config';
 
@@ -113,7 +114,7 @@ export function ExcursionBookingForm({
     <div
       className={
         className ||
-        'rounded-3xl bg-white dark:bg-zinc-900 p-6 sm:p-8 md:p-10 shadow-lg border border-stone-200/70 dark:border-zinc-800'
+        'rounded-3xl bg-white dark:bg-zinc-900 p-6 md:p-8 shadow-xl border border-black/5 dark:border-white/10 sticky top-28'
       }
     >
       <div className="mb-6 border-b border-border/60 pb-4">
@@ -155,23 +156,23 @@ export function ExcursionBookingForm({
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             {fields.map((field) => {
               const spanClass = field.halfWidth ? 'sm:col-span-1' : 'sm:col-span-2';
 
               if (field.type === 'checkbox') {
                 return (
-                  <div key={field.id} className={`${spanClass} flex items-center gap-2.5 pt-1`}>
+                  <div key={field.id} className={`${spanClass} flex items-center gap-2.5 py-1.5`}>
                     <input
                       type="checkbox"
                       id={`dyn-exc-${field.id}`}
                       checked={Boolean(formData[field.id])}
                       onChange={(e) => handleChange(field.id, e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary"
+                      className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary cursor-pointer shrink-0"
                       style={{ accentColor: primaryColor }}
                     />
-                    <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-medium cursor-pointer">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-medium cursor-pointer text-foreground leading-snug">
+                      {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                     </Label>
                   </div>
                 );
@@ -179,24 +180,27 @@ export function ExcursionBookingForm({
 
               if (field.type === 'select') {
                 return (
-                  <div key={field.id} className={`${spanClass} space-y-1.5`}>
-                    <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-semibold text-foreground">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                  <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-1.5`}>
+                    <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                      {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                     </Label>
-                    <select
-                      id={`dyn-exc-${field.id}`}
-                      required={field.required}
-                      value={String(formData[field.id] || '')}
-                      onChange={(e) => handleChange(field.id, e.target.value)}
-                      className="w-full h-10 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                    >
-                      {field.placeholder && <option value="">{field.placeholder}</option>}
-                      {(field.options || []).map((opt, i) => (
-                        <option key={i} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        id={`dyn-exc-${field.id}`}
+                        required={field.required}
+                        value={String(formData[field.id] || '')}
+                        onChange={(e) => handleChange(field.id, e.target.value)}
+                        className="w-full h-10 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none pr-8"
+                      >
+                        {field.placeholder && <option value="">{field.placeholder}</option>}
+                        {(field.options || []).map((opt, i) => (
+                          <option key={i} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-muted-foreground" />
+                    </div>
                   </div>
                 );
               }
@@ -204,8 +208,8 @@ export function ExcursionBookingForm({
               if (field.type === 'textarea') {
                 return (
                   <div key={field.id} className={`${spanClass} space-y-1.5`}>
-                    <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-semibold text-foreground">
-                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                      {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                     </Label>
                     <textarea
                       id={`dyn-exc-${field.id}`}
@@ -220,10 +224,30 @@ export function ExcursionBookingForm({
                 );
               }
 
+              if (field.type === 'date') {
+                return (
+                  <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-1.5`}>
+                    <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                      {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
+                    </Label>
+                    <DatePicker
+                      id={`dyn-exc-${field.id}`}
+                      value={String(formData[field.id] || '')}
+                      onChange={(val) => handleChange(field.id, val)}
+                      primaryColor={primaryColor}
+                      placeholder={field.placeholder || 'Select date'}
+                      disabled={loading}
+                      required={field.required}
+                    />
+                  </div>
+                );
+              }
+
+              // Text, Email, Tel, Number, Time, Datetime-local inputs
               return (
-                <div key={field.id} className={`${spanClass} space-y-1.5`}>
-                  <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-semibold text-foreground">
-                    {field.label} {field.required && <span className="text-red-500">*</span>}
+                <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-1.5`}>
+                  <Label htmlFor={`dyn-exc-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                    {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                   </Label>
                   <Input
                     id={`dyn-exc-${field.id}`}

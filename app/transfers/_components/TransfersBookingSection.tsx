@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Clock, CheckCircle2, MessageCircle, Loader2, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle2, MessageCircle, Loader2, AlertCircle, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/ui/date-picker';
 import { toast } from 'sonner';
 import { TransferRoute, TransferBookingFormConfig, DynamicFormField } from '@/types/app-config';
 import { defaultConfig } from '@/config/default-config';
@@ -353,24 +354,24 @@ export function TransfersBookingSection({
                   )}
 
                   {/* Dynamic Fields Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     {fields.map((field) => {
                       const spanClass = field.halfWidth ? 'sm:col-span-1' : 'sm:col-span-2';
 
                       // 1. CHECKBOX TOGGLE FIELD (e.g. Travelling with luggage)
                       if (field.type === 'checkbox') {
                         return (
-                          <div key={field.id} className={`${spanClass} flex items-center gap-2.5 pt-1`}>
+                          <div key={field.id} className={`${spanClass} flex items-center gap-2.5 py-1.5`}>
                             <input
                               type="checkbox"
                               id={`tr-dyn-${field.id}`}
                               checked={Boolean(formData[field.id])}
                               onChange={(e) => handleChange(field.id, e.target.checked)}
-                              className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary cursor-pointer"
+                              className="h-4 w-4 rounded border-gray-300 accent-primary focus:ring-primary cursor-pointer shrink-0"
                               style={{ accentColor: primaryColor }}
                             />
-                            <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-medium cursor-pointer">
-                              {field.label} {field.required && <span className="text-red-500">*</span>}
+                            <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-medium cursor-pointer text-foreground leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                             </Label>
                           </div>
                         );
@@ -379,24 +380,27 @@ export function TransfersBookingSection({
                       // 2. SELECT FIELD (e.g. Vehicle Type)
                       if (field.type === 'select') {
                         return (
-                          <div key={field.id} className={`${spanClass} space-y-1.5`}>
-                            <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-semibold text-foreground">
-                              {field.label} {field.required && <span className="text-red-500">*</span>}
+                          <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-1.5`}>
+                            <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                             </Label>
-                            <select
-                              id={`tr-dyn-${field.id}`}
-                              required={field.required}
-                              value={String(formData[field.id] || '')}
-                              onChange={(e) => handleChange(field.id, e.target.value)}
-                              className="w-full h-10 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
-                            >
-                              {field.placeholder && <option value="">{field.placeholder}</option>}
-                              {(field.options || []).map((opt, i) => (
-                                <option key={i} value={opt}>
-                                  {opt}
-                                </option>
-                              ))}
-                            </select>
+                            <div className="relative">
+                              <select
+                                id={`tr-dyn-${field.id}`}
+                                required={field.required}
+                                value={String(formData[field.id] || '')}
+                                onChange={(e) => handleChange(field.id, e.target.value)}
+                                className="w-full h-10 rounded-md border border-input bg-background px-3 text-xs focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer appearance-none pr-8"
+                              >
+                                {field.placeholder && <option value="">{field.placeholder}</option>}
+                                {(field.options || []).map((opt, i) => (
+                                  <option key={i} value={opt}>
+                                    {opt}
+                                  </option>
+                                ))}
+                              </select>
+                              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-muted-foreground" />
+                            </div>
                           </div>
                         );
                       }
@@ -405,8 +409,8 @@ export function TransfersBookingSection({
                       if (field.type === 'textarea') {
                         return (
                           <div key={field.id} className={`${spanClass} space-y-1.5`}>
-                            <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-semibold text-foreground">
-                              {field.label} {field.required && <span className="text-red-500">*</span>}
+                            <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                             </Label>
                             <textarea
                               id={`tr-dyn-${field.id}`}
@@ -421,11 +425,30 @@ export function TransfersBookingSection({
                         );
                       }
 
-                      // 4. STANDARD INPUTS (text, email, tel, number, date, time, datetime-local)
+                      if (field.type === 'date') {
+                        return (
+                          <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-1.5`}>
+                            <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                              {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
+                            </Label>
+                            <DatePicker
+                              id={`tr-dyn-${field.id}`}
+                              value={String(formData[field.id] || '')}
+                              onChange={(val) => handleChange(field.id, val)}
+                              primaryColor={primaryColor}
+                              placeholder={field.placeholder || 'Select date'}
+                              disabled={loading}
+                              required={field.required}
+                            />
+                          </div>
+                        );
+                      }
+
+                      // 4. STANDARD INPUTS (text, email, tel, number, time, datetime-local)
                       return (
-                        <div key={field.id} className={`${spanClass} space-y-1.5`}>
-                          <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-semibold text-foreground">
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
+                        <div key={field.id} className={`${spanClass} flex flex-col justify-end space-y-1.5`}>
+                          <Label htmlFor={`tr-dyn-${field.id}`} className="text-xs font-semibold text-foreground leading-snug">
+                            {field.label}{field.required && <span className="text-red-500 ml-0.5 font-bold">*</span>}
                           </Label>
                           <Input
                             id={`tr-dyn-${field.id}`}
