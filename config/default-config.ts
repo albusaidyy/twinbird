@@ -1866,8 +1866,8 @@ export const defaultConfig: AppConfig = {
       size: "medium",
       showEyebrow: true,
       eyebrow: "DOMESTIC & INTERNATIONAL",
-      headline: "Air Ticketing Services",
-      italicText: "",
+      headline: "Air Ticketing & Flight",
+      italicText: "Reservations",
       showSubtitle: true,
       subtitle:
         "Seamless flight bookings, safari bush airstrip transfers, and international ticketing with instant confirmation and dedicated travel support.",
