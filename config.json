@@ -95,6 +95,20 @@
           "location": "Amboseli National Park",
           "overview": "Amboseli National Park is world-renowned for having some of the largest elephant tusker herds in Africa and offering awe-inspiring panoramas of Mount Kilimanjaro, Africa’s tallest peak.\n\nOn this 2-day expedition, traverse Amboseli’s diverse habitats — from dried-up lakebeds and sulfur springs to lush emerald swamps teeming with hippos, pelicans, lions, cheetahs, and zebras. Perfect for photographers, nature lovers, and families seeking an immersive, scenic safari getaway.",
           "schedule": "Daily Departures",
+          "showSchedule": true,
+          "itinerary": [
+            {
+              "day": "Day 1",
+              "title": "Journey to Amboseli & Afternoon Elephant Marsh Safari",
+              "description": "Depart early from Nairobi or the coast, driving through scenic savannah plains to Amboseli National Park. Arrive in time for lunch and settle into your luxury safari lodge with direct views of Mount Kilimanjaro. Embark on an afternoon game drive through the lush Enkongo Narok swamps to see massive elephant herds bathing and grazing alongside hippos and waterbirds."
+            },
+            {
+              "day": "Day 2",
+              "title": "Sunrise Kilimanjaro Game Drive, Observation Hill & Return",
+              "description": "Rise early to witness the snow-capped peak of Mount Kilimanjaro crystal clear in the morning dawn. Head out on a sunrise game drive followed by a visit to Observation Hill for a 360-degree panorama of Amboseli's marshes and plains. Enjoy breakfast at the lodge before checking out and heading back to your destination."
+            }
+          ],
+          "showItinerary": true,
           "groupType": "Families · Couples · Photography Groups",
           "showBadge": true,
           "showPrice": true,
@@ -118,7 +132,6 @@
           "showDuration": true,
           "showIncluded": true,
           "showLocation": true,
-          "showSchedule": true,
           "showGroupType": true,
           "showWhyChoose": true,
           "indicatorColor": "#d97706",
@@ -161,6 +174,25 @@
           "location": "Maasai Mara National Reserve",
           "overview": "Embark on an extraordinary 3-day wildlife safari into the iconic Maasai Mara National Reserve. Famous for its unmatched predator populations and the annual Great Wildebeest Migration, the Mara offers premier game viewing throughout the year.\n\nTravel in a customized 4x4 Safari Land Cruiser with pop-up viewing roofs, guided by seasoned professional naturalists who know every animal territory. Enjoy thrilling sunrise and evening game drives, relax in luxury tented camps surrounded by the sounds of the African bush, and experience authentic Maasai cultural encounters.",
           "schedule": "Daily Departures (Year-Round)",
+          "showSchedule": true,
+          "itinerary": [
+            {
+              "day": "Day 1",
+              "title": "Nairobi to Maasai Mara & Afternoon Predator Drive",
+              "description": "Depart Nairobi in your private 4x4 Safari Land Cruiser, descending the Great Rift Valley escarpment with panoramic photo stops. Arrive at your luxury safari camp in time for lunch. In the afternoon, head out on your first thrilling game drive across the Maasai Mara savannah, searching for lions, cheetahs, and elephants against the golden African sunset."
+            },
+            {
+              "day": "Day 2",
+              "title": "Full-Day Mara Plains Safari & Mara River Crossing Point",
+              "description": "Enjoy a full day of game viewing with a scenic picnic lunch in the wild. Traverse rolling grasslands to the famous Mara River, home to enormous Nile crocodiles and hippo pods. Witness boundless herds of wildebeest and zebras with high predator activity. Optional early morning Hot Air Balloon safari with champagne breakfast available."
+            },
+            {
+              "day": "Day 3",
+              "title": "Sunrise Bush Safari, Maasai Village & Return to Nairobi",
+              "description": "Experience a dawn game drive capturing golden morning light and waking wildlife. Return to camp for a hearty breakfast and check-out. Optional visit to a traditional Maasai cultural village before embarking on the scenic drive back to Nairobi, arriving late afternoon."
+            }
+          ],
+          "showItinerary": true,
           "groupType": "Small Groups · Private 4x4 · Families",
           "showBadge": true,
           "showPrice": true,
@@ -185,7 +217,6 @@
           "showDuration": true,
           "showIncluded": true,
           "showLocation": true,
-          "showSchedule": true,
           "showGroupType": true,
           "showWhyChoose": true,
           "indicatorColor": "#d97706",
@@ -230,6 +261,20 @@
           "location": "Great Rift Valley & National Reserves",
           "overview": "Journey through the dramatic landscapes of the Great Rift Valley to Lake Nakuru National Park and the expansive savannahs of Tsavo. Lake Nakuru serves as an internationally renowned sanctuary for critically endangered black and white rhinos and rare Rothschild’s giraffes.\n\nEnjoy game drives along the lake’s scenic shoreline, climb to Baboon Cliff for panoramic valley vistas, and witness hundreds of bird species including pelicans and flamingos. An essential expedition for wildlife conservationists and enthusiastic safari adventurers.",
           "schedule": "Scheduled Weekly Departures",
+          "showSchedule": true,
+          "itinerary": [
+            {
+              "day": "Day 1",
+              "title": "Nairobi to Lake Nakuru Sanctuary (Rhinos & Flamingos)",
+              "description": "Morning departure from Nairobi descending into the Great Rift Valley. Arrive at Lake Nakuru National Park, a world-famous sanctuary for endangered black and white rhinos and Rothschild's giraffes. Enjoy an extensive game drive along the alkaline lake shores dotted with flamingos and pelicans, and visit Baboon Cliff for panoramic views before dinner at the lodge."
+            },
+            {
+              "day": "Day 2",
+              "title": "Tsavo Red-Elephant Plains & Scenic Return Journey",
+              "description": "Early morning departure heading towards Tsavo's sweeping savannah plains. Track the legendary red-dust elephants, lions, and diverse plains game. Savor a scenic safari lunch before beginning the return journey, concluding an unforgettable multi-reserve wilderness expedition."
+            }
+          ],
+          "showItinerary": true,
           "groupType": "Day Trippers · Wildlife Enthusiasts · Birders",
           "showBadge": true,
           "showPrice": true,
@@ -252,7 +297,6 @@
           "showDuration": true,
           "showIncluded": true,
           "showLocation": true,
-          "showSchedule": true,
           "showGroupType": true,
           "showWhyChoose": true,
           "indicatorColor": "#d97706",
@@ -995,6 +1039,25 @@
           "location": "Maasai Mara National Reserve",
           "overview": "Embark on an extraordinary 3-day wildlife safari into the iconic Maasai Mara National Reserve. Famous for its unmatched predator populations and the annual Great Wildebeest Migration, the Mara offers premier game viewing throughout the year.\n\nTravel in a customized 4x4 Safari Land Cruiser with pop-up viewing roofs, guided by seasoned professional naturalists who know every animal territory. Enjoy thrilling sunrise and evening game drives, relax in luxury tented camps surrounded by the sounds of the African bush, and experience authentic Maasai cultural encounters.",
           "schedule": "Daily Departures (Year-Round)",
+          "showSchedule": true,
+          "itinerary": [
+            {
+              "day": "Day 1",
+              "title": "Nairobi to Maasai Mara & Afternoon Predator Drive",
+              "description": "Depart Nairobi in your private 4x4 Safari Land Cruiser, descending the Great Rift Valley escarpment with panoramic photo stops. Arrive at your luxury safari camp in time for lunch. In the afternoon, head out on your first thrilling game drive across the Maasai Mara savannah, searching for lions, cheetahs, and elephants against the golden African sunset."
+            },
+            {
+              "day": "Day 2",
+              "title": "Full-Day Mara Plains Safari & Mara River Crossing Point",
+              "description": "Enjoy a full day of game viewing with a scenic picnic lunch in the wild. Traverse rolling grasslands to the famous Mara River, home to enormous Nile crocodiles and hippo pods. Witness boundless herds of wildebeest and zebras with high predator activity. Optional early morning Hot Air Balloon safari with champagne breakfast available."
+            },
+            {
+              "day": "Day 3",
+              "title": "Sunrise Bush Safari, Maasai Village & Return to Nairobi",
+              "description": "Experience a dawn game drive capturing golden morning light and waking wildlife. Return to camp for a hearty breakfast and check-out. Optional visit to a traditional Maasai cultural village before embarking on the scenic drive back to Nairobi, arriving late afternoon."
+            }
+          ],
+          "showItinerary": true,
           "groupType": "Small Groups · Private 4x4 · Families",
           "showBadge": true,
           "showPrice": true,
@@ -1019,7 +1082,6 @@
           "showDuration": true,
           "showIncluded": true,
           "showLocation": true,
-          "showSchedule": true,
           "showGroupType": true,
           "showWhyChoose": true,
           "indicatorColor": "#d97706",
@@ -1064,6 +1126,20 @@
           "location": "Amboseli National Park",
           "overview": "Amboseli National Park is world-renowned for having some of the largest elephant tusker herds in Africa and offering awe-inspiring panoramas of Mount Kilimanjaro, Africa’s tallest peak.\n\nOn this 2-day expedition, traverse Amboseli’s diverse habitats — from dried-up lakebeds and sulfur springs to lush emerald swamps teeming with hippos, pelicans, lions, cheetahs, and zebras. Perfect for photographers, nature lovers, and families seeking an immersive, scenic safari getaway.",
           "schedule": "Daily Departures",
+          "showSchedule": true,
+          "itinerary": [
+            {
+              "day": "Day 1",
+              "title": "Journey to Amboseli & Afternoon Elephant Marsh Safari",
+              "description": "Depart early from Nairobi or the coast, driving through scenic savannah plains to Amboseli National Park. Arrive in time for lunch and settle into your luxury safari lodge with direct views of Mount Kilimanjaro. Embark on an afternoon game drive through the lush Enkongo Narok swamps to see massive elephant herds bathing and grazing alongside hippos and waterbirds."
+            },
+            {
+              "day": "Day 2",
+              "title": "Sunrise Kilimanjaro Game Drive, Observation Hill & Return",
+              "description": "Rise early to witness the snow-capped peak of Mount Kilimanjaro crystal clear in the morning dawn. Head out on a sunrise game drive followed by a visit to Observation Hill for a 360-degree panorama of Amboseli's marshes and plains. Enjoy breakfast at the lodge before checking out and heading back to your destination."
+            }
+          ],
+          "showItinerary": true,
           "groupType": "Families · Couples · Photography Groups",
           "showBadge": true,
           "showPrice": true,
@@ -1087,7 +1163,6 @@
           "showDuration": true,
           "showIncluded": true,
           "showLocation": true,
-          "showSchedule": true,
           "showGroupType": true,
           "showWhyChoose": true,
           "indicatorColor": "#d97706",
@@ -1130,6 +1205,20 @@
           "location": "Great Rift Valley & National Reserves",
           "overview": "Journey through the dramatic landscapes of the Great Rift Valley to Lake Nakuru National Park and the expansive savannahs of Tsavo. Lake Nakuru serves as an internationally renowned sanctuary for critically endangered black and white rhinos and rare Rothschild’s giraffes.\n\nEnjoy game drives along the lake’s scenic shoreline, climb to Baboon Cliff for panoramic valley vistas, and witness hundreds of bird species including pelicans and flamingos. An essential expedition for wildlife conservationists and enthusiastic safari adventurers.",
           "schedule": "Scheduled Weekly Departures",
+          "showSchedule": true,
+          "itinerary": [
+            {
+              "day": "Day 1",
+              "title": "Nairobi to Lake Nakuru Sanctuary (Rhinos & Flamingos)",
+              "description": "Morning departure from Nairobi descending into the Great Rift Valley. Arrive at Lake Nakuru National Park, a world-famous sanctuary for endangered black and white rhinos and Rothschild's giraffes. Enjoy an extensive game drive along the alkaline lake shores dotted with flamingos and pelicans, and visit Baboon Cliff for panoramic views before dinner at the lodge."
+            },
+            {
+              "day": "Day 2",
+              "title": "Tsavo Red-Elephant Plains & Scenic Return Journey",
+              "description": "Early morning departure heading towards Tsavo's sweeping savannah plains. Track the legendary red-dust elephants, lions, and diverse plains game. Savor a scenic safari lunch before beginning the return journey, concluding an unforgettable multi-reserve wilderness expedition."
+            }
+          ],
+          "showItinerary": true,
           "groupType": "Day Trippers · Wildlife Enthusiasts · Birders",
           "showBadge": true,
           "showPrice": true,
@@ -1152,7 +1241,6 @@
           "showDuration": true,
           "showIncluded": true,
           "showLocation": true,
-          "showSchedule": true,
           "showGroupType": true,
           "showWhyChoose": true,
           "indicatorColor": "#d97706",

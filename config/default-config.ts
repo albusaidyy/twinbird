@@ -1,10 +1,35 @@
 import type {
   AppConfig,
   TourItem,
+  SafariItineraryItem,
   ExcursionItem,
   ExperienceItem,
   ExcursionScheduleItem,
 } from "@/types/app-config";
+
+/**
+ * Default day-by-day itinerary timeline steps for safari tours.
+ */
+export const defaultSafariItinerary: SafariItineraryItem[] = [
+  {
+    day: "Day 1",
+    title: "Scenic Great Rift Valley Drive & Sunset Game Safari",
+    description:
+      "Depart Nairobi early morning in a custom 4x4 Safari Land Cruiser. Descend into the breathtaking Great Rift Valley with photographic viewpoints along the escarpment. Arrive at the reserve lodge/camp for lunch, check-in, and embark on a thrilling late-afternoon game drive tracking Big Five predators as the sun sets over the savannah.",
+  },
+  {
+    day: "Day 2",
+    title: "Full-Day Wilderness Exploration & Bush Picnic Lunch",
+    description:
+      "Spend a full day immersed in the African bush with extended morning and afternoon game drives. Enjoy an authentic bush picnic lunch under a canopy of acacia trees. Track lion prides, cheetahs, leopards, and massive elephant herds across diverse wilderness habitats.",
+  },
+  {
+    day: "Day 3",
+    title: "Dawn Predator Game Drive & Return Journey",
+    description:
+      "Rise with the dawn for a morning game drive when big cats are most active on the prowl. Return to camp for a full breakfast, check out, and take a scenic return drive back with unforgettable wildlife memories and photography collections.",
+  },
+];
 
 /**
  * Default schedule timeline steps for excursions.
@@ -380,6 +405,27 @@ export const defaultTourItems: TourItem[] = [
     showLocation: true,
     schedule: "Daily Departures (Year-Round)",
     showSchedule: true,
+    itinerary: [
+      {
+        day: "Day 1",
+        title: "Nairobi to Maasai Mara & Afternoon Predator Drive",
+        description:
+          "Depart Nairobi in your private 4x4 Safari Land Cruiser, descending the Great Rift Valley escarpment with panoramic photo stops. Arrive at your luxury safari camp in time for lunch. In the afternoon, head out on your first thrilling game drive across the Maasai Mara savannah, searching for lions, cheetahs, and elephants against the golden African sunset.",
+      },
+      {
+        day: "Day 2",
+        title: "Full-Day Mara Plains Safari & Mara River Crossing Point",
+        description:
+          "Enjoy a full day of game viewing with a scenic picnic lunch in the wild. Traverse rolling grasslands to the famous Mara River, home to enormous Nile crocodiles and hippo pods. Witness boundless herds of wildebeest and zebras with high predator activity. Optional early morning Hot Air Balloon safari with champagne breakfast available.",
+      },
+      {
+        day: "Day 3",
+        title: "Sunrise Bush Safari, Maasai Village & Return to Nairobi",
+        description:
+          "Experience a dawn game drive capturing golden morning light and waking wildlife. Return to camp for a hearty breakfast and check-out. Optional visit to a traditional Maasai cultural village before embarking on the scenic drive back to Nairobi, arriving late afternoon.",
+      },
+    ],
+    showItinerary: true,
     groupType: "Small Groups · Private 4x4 · Families",
     showGroupType: true,
     description:
@@ -453,6 +499,21 @@ export const defaultTourItems: TourItem[] = [
     showLocation: true,
     schedule: "Daily Departures",
     showSchedule: true,
+    itinerary: [
+      {
+        day: "Day 1",
+        title: "Journey to Amboseli & Afternoon Elephant Marsh Safari",
+        description:
+          "Depart early from Nairobi or the coast, driving through scenic savannah plains to Amboseli National Park. Arrive in time for lunch and settle into your luxury safari lodge with direct views of Mount Kilimanjaro. Embark on an afternoon game drive through the lush Enkongo Narok swamps to see massive elephant herds bathing and grazing alongside hippos and waterbirds.",
+      },
+      {
+        day: "Day 2",
+        title: "Sunrise Kilimanjaro Game Drive, Observation Hill & Return",
+        description:
+          "Rise early to witness the snow-capped peak of Mount Kilimanjaro crystal clear in the morning dawn. Head out on a sunrise game drive followed by a visit to Observation Hill for a 360-degree panorama of Amboseli's marshes and plains. Enjoy breakfast at the lodge before checking out and heading back to your destination.",
+      },
+    ],
+    showItinerary: true,
     groupType: "Families · Couples · Photography Groups",
     showGroupType: true,
     description:
@@ -523,6 +584,21 @@ export const defaultTourItems: TourItem[] = [
     showLocation: true,
     schedule: "Scheduled Weekly Departures",
     showSchedule: true,
+    itinerary: [
+      {
+        day: "Day 1",
+        title: "Nairobi to Lake Nakuru Sanctuary (Rhinos & Flamingos)",
+        description:
+          "Morning departure from Nairobi descending into the Great Rift Valley. Arrive at Lake Nakuru National Park, a world-famous sanctuary for endangered black and white rhinos and Rothschild's giraffes. Enjoy an extensive game drive along the alkaline lake shores dotted with flamingos and pelicans, and visit Baboon Cliff for panoramic views before dinner at the lodge.",
+      },
+      {
+        day: "Day 2",
+        title: "Tsavo Red-Elephant Plains & Scenic Return Journey",
+        description:
+          "Early morning departure heading towards Tsavo's sweeping savannah plains. Track the legendary red-dust elephants, lions, and diverse plains game. Savor a scenic safari lunch before beginning the return journey, concluding an unforgettable multi-reserve wilderness expedition.",
+      },
+    ],
+    showItinerary: true,
     groupType: "Day Trippers · Wildlife Enthusiasts · Birders",
     showGroupType: true,
     description:

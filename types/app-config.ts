@@ -57,6 +57,12 @@ export interface StatItem {
   label: string;
 }
 
+export interface SafariItineraryItem {
+  day?: string;
+  title: string;
+  description: string;
+}
+
 export interface TourItem {
   id?: string;
   slug?: string;
@@ -84,6 +90,8 @@ export interface TourItem {
   showLocation?: boolean;
   schedule?: string;
   showSchedule?: boolean;
+  itinerary?: SafariItineraryItem[];
+  showItinerary?: boolean;
   groupType?: string;
   showGroupType?: boolean;
   overview?: string;

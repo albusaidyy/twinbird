@@ -1,7 +1,9 @@
 'use client';
 
-import { CheckCircle2, XCircle, Info, Compass } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2, XCircle, Info, Compass, CalendarDays, ChevronDown } from 'lucide-react';
 import type { TourItem } from '@/types/app-config';
+import { defaultSafariItinerary } from '@/config/default-config';
 
 export function TourDetailsContent({
   tour,
@@ -10,6 +12,8 @@ export function TourDetailsContent({
   tour: TourItem;
   primaryColor: string;
 }) {
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+
   const overview =
     tour.overview ||
     tour.description ||
@@ -49,11 +53,17 @@ export function TourDetailsContent({
   const notIncluded = tour.notIncluded !== undefined ? tour.notIncluded : defaultNotIncluded;
   const whyChoose = tour.whyChoose !== undefined ? tour.whyChoose : defaultWhyChoose;
   const knowBeforeYouGo = tour.knowBeforeYouGo !== undefined ? tour.knowBeforeYouGo : defaultKnowBeforeYouGo;
+  const itinerary =
+    tour.itinerary && tour.itinerary.length > 0
+      ? tour.itinerary
+      : defaultSafariItinerary;
 
   const canShowIncluded = tour.showIncluded !== false && included.length > 0;
   const canShowNotIncluded = tour.showNotIncluded !== false && notIncluded.length > 0;
   const canShowWhyChoose = tour.showWhyChoose !== false && whyChoose.length > 0;
   const canShowKnowBeforeYouGo = tour.showKnowBeforeYouGo !== false && knowBeforeYouGo.length > 0;
+  const canShowItinerary =
+    tour.showItinerary !== false && itinerary.length > 0;
 
   return (
     <div className="space-y-12 text-slate-800 dark:text-slate-200">
@@ -62,10 +72,89 @@ export function TourDetailsContent({
         <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
           Tour Overview
         </h2>
-        <p className="text-base text-muted-foreground leading-relaxed">
+        <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-line">
           {overview}
         </p>
       </section>
+
+      {/* Day-by-Day Safari Itinerary (Vertical Timeline) */}
+      {canShowItinerary && (
+        <section className="space-y-6">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-5 w-5" style={{ color: primaryColor }} />
+            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
+              Day-by-Day Itinerary
+            </h2>
+          </div>
+
+          <div className="relative pl-1 sm:pl-2">
+            {itinerary.map((item, idx) => {
+              const isLast = idx === itinerary.length - 1;
+              const isExpanded = expandedIndex === idx;
+
+              return (
+                <div
+                  key={idx}
+                  className="relative flex items-start gap-4 sm:gap-6 group"
+                >
+                  {/* Left Column: Pill Badge & Vertical Connector Line */}
+                  <div className="flex flex-col items-center shrink-0">
+                    {/* Day Pill Badge */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedIndex((prev) => (prev === idx ? null : idx))
+                      }
+                      className="inline-flex items-center justify-center rounded-full px-3 sm:px-3.5 py-1 text-xs font-semibold text-white shadow-xs z-10 select-none whitespace-nowrap cursor-pointer hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: primaryColor || '#1b4332' }}
+                    >
+                      {item.day || `Day ${idx + 1}`}
+                    </button>
+
+                    {/* Vertical Connector Line */}
+                    {!isLast && (
+                      <div className="w-[1.5px] bg-stone-200 dark:bg-stone-700/80 my-2 grow min-h-[36px]" />
+                    )}
+                  </div>
+
+                  {/* Right Column: Title (always visible) & Description (collapsible) */}
+                  <div
+                    className={`grow ${
+                      isLast ? 'pb-2' : isExpanded ? 'pb-7' : 'pb-5'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setExpandedIndex((prev) => (prev === idx ? null : idx))
+                      }
+                      className="w-full text-left flex items-center justify-between gap-3 group/header focus:outline-none cursor-pointer"
+                      aria-expanded={isExpanded}
+                    >
+                      <h3 className="font-serif text-lg sm:text-xl font-bold text-foreground leading-snug group-hover/header:text-primary transition-colors">
+                        {item.title}
+                      </h3>
+                      <ChevronDown
+                        className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 ${
+                          isExpanded ? 'rotate-180 text-foreground' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {isExpanded && item.description && (
+                      <div className="pt-2 animate-in fade-in-0 duration-200">
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed font-normal whitespace-pre-line">
+                          {item.description}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* What's Included */}
       {canShowIncluded && (

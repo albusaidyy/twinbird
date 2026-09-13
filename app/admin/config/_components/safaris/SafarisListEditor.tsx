@@ -10,9 +10,10 @@ import {
   RotateCcw,
   ArrowUp,
   ArrowDown,
+  CalendarDays,
 } from 'lucide-react';
-import type { TourItem } from '@/types/app-config';
-import { defaultConfig } from '@/config/default-config';
+import type { TourItem, SafariItineraryItem } from '@/types/app-config';
+import { defaultConfig, defaultSafariItinerary } from '@/config/default-config';
 import type { EditorProps } from '../shared/types';
 import { FieldRow } from '../shared/FieldRow';
 import { SectionToggle } from '../shared/SectionToggle';
@@ -34,7 +35,11 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
     return { ...p, toursPage: { ...current, tours: { ...currentTours, enabled: v } } };
   });
 
-  const updTour = (i: number, k: keyof TourItem, v: string | number | boolean | string[]) =>
+  const updTour = (
+    i: number,
+    k: keyof TourItem,
+    v: string | number | boolean | string[] | SafariItineraryItem[] | undefined
+  ) =>
     set((p) => {
       const currentToursPage = p.toursPage || defaultConfig.toursPage!;
       const currentTours = currentToursPage.tours || defaultConfig.toursPage!.tours;
@@ -80,6 +85,8 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
         showLocation: true,
         schedule: 'Daily Departures (Year-Round)',
         showSchedule: true,
+        itinerary: defaultSafariItinerary,
+        showItinerary: true,
         groupType: 'Families · Private 4x4 · Groups',
         showGroupType: true,
         price: 'Contact for pricing',
@@ -234,6 +241,10 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
 
         {toursList.map((t, i) => {
           const isDeleted = Boolean(t.deleted);
+          const itineraryList =
+            t.itinerary && t.itinerary.length > 0
+              ? t.itinerary
+              : defaultSafariItinerary;
           return (
             <div
               key={t.id || `tpl-${i}`}
@@ -714,8 +725,175 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                       </div>
                     </div>
 
+                    {/* 3. Day-by-Day Safari Itinerary */}
+                    <div className="rounded-lg border border-emerald-500/20 p-4 bg-background shadow-xs space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-1">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={t.showItinerary !== false}
+                            onCheckedChange={(v) =>
+                              updTour(i, 'showItinerary', v)
+                            }
+                            disabled={!t.enabled || isDeleted}
+                            className="shrink-0"
+                            title="Toggle Day-by-Day Safari Itinerary On/Off"
+                          />
+                          <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <CalendarDays className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                            <span>3. Day-by-Day Safari Itinerary</span>
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={!t.enabled || isDeleted}
+                          onClick={() => {
+                            const cur = [...itineraryList];
+                            const newDay: SafariItineraryItem = {
+                              day: `Day ${cur.length + 1}`,
+                              title: 'New Safari Day',
+                              description:
+                                'Details of game drives, scenic transfers, meals, and lodge stay for this day...',
+                            };
+                            updTour(i, 'itinerary', [...cur, newDay]);
+                          }}
+                          className="h-7 text-xs gap-1 self-start sm:self-auto shrink-0"
+                        >
+                          <Plus className="h-3.5 w-3.5" /> Add Day
+                        </Button>
+                      </div>
+
+                      {itineraryList.length === 0 ? (
+                        <p className="text-xs text-muted-foreground italic text-center py-2">
+                          No itinerary days added yet. Click &quot;Add Day&quot; above.
+                        </p>
+                      ) : (
+                        itineraryList.map((step, sIdx) => (
+                          <div
+                            key={sIdx}
+                            className="p-3 rounded-lg border border-border/70 bg-card/60 space-y-2.5"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[11px] font-bold text-muted-foreground uppercase">
+                                {step.day || `Day ${sIdx + 1}`}
+                              </span>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  disabled={
+                                    sIdx === 0 || !t.enabled || isDeleted
+                                  }
+                                  onClick={() => {
+                                    const cur = [...itineraryList];
+                                    const temp = cur[sIdx];
+                                    cur[sIdx] = cur[sIdx - 1];
+                                    cur[sIdx - 1] = temp;
+                                    updTour(i, 'itinerary', cur);
+                                  }}
+                                  title="Move day up"
+                                >
+                                  <ArrowUp className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  disabled={
+                                    sIdx === itineraryList.length - 1 ||
+                                    !t.enabled ||
+                                    isDeleted
+                                  }
+                                  onClick={() => {
+                                    const cur = [...itineraryList];
+                                    const temp = cur[sIdx];
+                                    cur[sIdx] = cur[sIdx + 1];
+                                    cur[sIdx + 1] = temp;
+                                    updTour(i, 'itinerary', cur);
+                                  }}
+                                  title="Move day down"
+                                >
+                                  <ArrowDown className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  disabled={!t.enabled || isDeleted}
+                                  onClick={() => {
+                                    const cur = [...itineraryList];
+                                    cur.splice(sIdx, 1);
+                                    updTour(i, 'itinerary', cur);
+                                  }}
+                                  className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                                  title="Delete day"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <div className="sm:col-span-1">
+                                <Input
+                                  value={step.day || ''}
+                                  placeholder="e.g. Day 1"
+                                  onChange={(e) => {
+                                    const cur = [...itineraryList];
+                                    cur[sIdx] = {
+                                      ...step,
+                                      day: e.target.value,
+                                    };
+                                    updTour(i, 'itinerary', cur);
+                                  }}
+                                  disabled={!t.enabled || isDeleted}
+                                  className="h-8 text-xs"
+                                />
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Input
+                                  value={step.title || ''}
+                                  placeholder="Day Title, e.g. Nairobi to Maasai Mara & Sunset Drive"
+                                  onChange={(e) => {
+                                    const cur = [...itineraryList];
+                                    cur[sIdx] = {
+                                      ...step,
+                                      title: e.target.value,
+                                    };
+                                    updTour(i, 'itinerary', cur);
+                                  }}
+                                  disabled={!t.enabled || isDeleted}
+                                  className="h-8 text-xs font-medium"
+                                />
+                              </div>
+                            </div>
+
+                            <textarea
+                              rows={3}
+                              value={step.description || ''}
+                              placeholder="Details of game drives, scenic transfers, meals, and lodge stay for this day..."
+                              onChange={(e) => {
+                                const cur = [...itineraryList];
+                                cur[sIdx] = {
+                                  ...step,
+                                  description: e.target.value,
+                                };
+                                updTour(i, 'itinerary', cur);
+                              }}
+                              disabled={!t.enabled || isDeleted}
+                              className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50"
+                            />
+                          </div>
+                        ))
+                      )}
+                    </div>
+
                     <div className="rounded-lg border border-emerald-500/20 p-4 bg-background shadow-xs space-y-4">
-                      <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">3. About &amp; Inclusions Details</h5>
+                      <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">4. About &amp; Inclusions Details</h5>
                       
                       <FieldRow label="Full Tour Overview (Main Article)" id={`tp-over-${i}`}>
                         <textarea
@@ -856,7 +1034,7 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
 
                     <div className="rounded-lg border border-emerald-500/20 p-4 bg-background shadow-xs space-y-3">
                       <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
-                        4. Single Safari SEO &amp; Meta
+                        5. Single Safari SEO &amp; Meta
                       </h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <FieldRow label="Meta Title (Optional)" id={`tp-mtitle-${i}`}>
