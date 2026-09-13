@@ -23,7 +23,35 @@ function mergeDeep<T>(target: T, source?: unknown): T {
     if (srcVal === undefined) {
       continue;
     }
-    if (Array.isArray(srcVal)) {
+    if (key === "navigation" && Array.isArray(srcVal)) {
+      const srcNav = srcVal as Array<{
+        key: string;
+        href: string;
+        label: string;
+        icon: string;
+        enabled: boolean;
+      }>;
+      const defaultNav = defaultConfig.navigation;
+      const mergedNav = [...srcNav];
+
+      defaultNav.forEach((defItem, defIdx) => {
+        const exists = mergedNav.some(
+          (item) => item.key === defItem.key || item.href === defItem.href
+        );
+        if (!exists) {
+          if (defIdx <= mergedNav.length) {
+            mergedNav.splice(defIdx, 0, defItem);
+          } else {
+            mergedNav.push(defItem);
+          }
+        }
+      });
+      // Exclude 'home' from top-level navigation links
+      const cleanMerged = mergedNav.filter(
+        (item) => item.key !== "home" && item.href !== "/"
+      );
+      output[key] = cleanMerged;
+    } else if (Array.isArray(srcVal)) {
       output[key] = srcVal;
     } else if (isObject(srcVal) && isObject(tgtVal)) {
       output[key] = mergeDeep(tgtVal, srcVal);

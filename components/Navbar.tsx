@@ -21,7 +21,7 @@ export function Navbar({
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [prevPathname, setPrevPathname] = useState(pathname);
-  const visible = nav.filter((n) => n.enabled).slice(0, 6);
+  const visible = nav.filter((n) => n.enabled && n.key !== 'home' && n.href !== '/');
 
   // Close mobile menu when pathname changes (without useEffect to avoid cascading renders)
   if (prevPathname !== pathname) {
@@ -61,7 +61,7 @@ export function Navbar({
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-5 lg:gap-7 xl:gap-8">
           {visible.map((item) => {
             const isActive = pathname === item.href;
             return (

@@ -492,6 +492,95 @@ export interface ExcursionsPageConfig {
   bookingForm?: ExcursionBookingFormConfig;
 }
 
+// ─── Air Ticketing Page ───────────────────────────────────────────────────────
+export interface AirTicketingRoute {
+  id: string;
+  from: string;
+  to: string;
+  duration: string;
+  price?: string;
+  priceLabel?: string;
+  airline?: string;
+  category?: 'local' | 'international';
+  popular?: boolean;
+  enabled: boolean;
+}
+
+export interface AirTicketingFeature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface AirTicketingServiceItem {
+  id: string;
+  name: string;
+  category: string;
+  capacity?: string;
+  baggage?: string;
+  description: string;
+  imageUrl?: string;
+  featured?: boolean;
+  enabled?: boolean;
+}
+
+export interface AirlinePartnerItem {
+  id: string;
+  name: string;
+  category?: string;
+  logoUrl?: string;
+  imageUrl?: string;
+  badge?: string;
+  hub?: string;
+  fleet?: string;
+  routesCount?: string;
+  description?: string;
+  enabled?: boolean;
+}
+
+export interface AirTicketingBookingFormConfig {
+  enabled?: boolean;
+  title: string;
+  subtitle?: string;
+  buttonText?: string;
+  accessKey?: string;
+  whatsappNumber?: string;
+  whatsappText?: string;
+  noticeText?: string;
+  fields?: DynamicFormField[];
+}
+
+export interface AirTicketingServicesSectionConfig {
+  enabled: boolean;
+  title?: string;
+  subtitle?: string;
+  services?: AirTicketingServiceItem[];
+  airlinesTitle?: string;
+  airlinesSubtitle?: string;
+  airlines?: AirlinePartnerItem[];
+}
+
+export interface AirTicketingPageConfig {
+  metaTitle?: string;
+  metaDescription?: string;
+  hero: HeroSection;
+  features: AirTicketingFeature[];
+  routesSection: {
+    enabled: boolean;
+    title: string;
+    subtitle?: string;
+    note?: string;
+    localTitle?: string;
+    localSubtitle?: string;
+    internationalTitle?: string;
+    internationalSubtitle?: string;
+    routes: AirTicketingRoute[];
+  };
+  servicesSection?: AirTicketingServicesSectionConfig;
+  bookingForm: AirTicketingBookingFormConfig;
+  faq?: SectionList<FAQItem>;
+}
+
 // ─── Root config ───────────────────────────────────────────────────────────────
 export interface AppConfig {
   branding: Branding;
@@ -501,6 +590,7 @@ export interface AppConfig {
   toursPage?: ToursPageConfig;
   excursionsPage?: ExcursionsPageConfig;
   transfersPage?: TransfersPageConfig;
+  airTicketingPage?: AirTicketingPageConfig;
   aboutPage?: AboutPageConfig;
   contactPage: ContactPageConfig;
 }

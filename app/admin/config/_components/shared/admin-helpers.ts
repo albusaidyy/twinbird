@@ -12,6 +12,17 @@ export function slugifyNavRoute(label: string): string {
   const trimmed = label.trim().toLowerCase();
   if (trimmed === 'home' || trimmed === 'main' || trimmed === '') return '/';
   if (
+    trimmed === 'air ticketing' ||
+    trimmed === 'air-ticketing' ||
+    trimmed === 'flights' ||
+    trimmed === 'flight' ||
+    trimmed === 'flight booking' ||
+    trimmed === 'air tickets' ||
+    trimmed === 'plane tickets' ||
+    trimmed === 'aviation'
+  )
+    return '/air-ticketing';
+  if (
     trimmed === 'fishing charters' ||
     trimmed === 'charters' ||
     trimmed === 'tours' ||
@@ -42,6 +53,7 @@ export function slugifyNavRoute(label: string): string {
 
 export const NAV_PRESETS = [
   { label: 'Home', href: '/' },
+  { label: 'Air Ticketing', href: '/air-ticketing' },
   { label: 'Safaris', href: '/safaris' },
   { label: 'Excursions', href: '/excursions' },
   { label: 'Transfers', href: '/transfers' },

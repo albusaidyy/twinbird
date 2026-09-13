@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60" fill="none">
+  <g transform="translate(6, 6)">
+    <!-- RwandAir Sun flight symbol -->
+    <circle cx="22" cy="24" r="20" fill="#0284c7" />
+    <path d="M8 24 Q 22 10 36 24 Q 22 18 8 24 Z" fill="#facc15" />
+    <path d="M12 28 Q 22 18 32 28 Q 22 22 12 28 Z" fill="#16a34a" />
+    
+    <!-- Wordmark -->
+    <text x="50" y="28" font-family="'Inter', sans-serif" font-size="20" font-weight="900" fill="#0f172a" letter-spacing="-0.3">Rwand<tspan fill="#0284c7">Air</tspan></text>
+    <text x="51" y="41" font-family="'Inter', sans-serif" font-size="8" font-weight="700" fill="#16a34a" letter-spacing="1.5">FLY THE DREAM OF AFRICA</text>
+  </g>
+</svg>

@@ -47,6 +47,13 @@ import { HomeWhyUsEditor } from './_components/home/HomeWhyUsEditor';
 import { HomeCTAEditor } from './_components/home/HomeCTAEditor';
 import { HomeFooterEditor } from './_components/home/HomeFooterEditor';
 
+// Air Ticketing page editors
+import { AirTicketingHeroEditor } from './_components/air-ticketing/AirTicketingHeroEditor';
+import { AirTicketingRoutesEditor } from './_components/air-ticketing/AirTicketingRoutesEditor';
+import { AirTicketingBookingEditor } from './_components/air-ticketing/AirTicketingBookingEditor';
+import { AirTicketingServicesEditor } from './_components/air-ticketing/AirTicketingServicesEditor';
+import { AirTicketingFAQEditor } from './_components/air-ticketing/AirTicketingFAQEditor';
+
 // Safaris page editors
 import { SafarisHeroEditor } from './_components/safaris/SafarisHeroEditor';
 import { SafarisListEditor } from './_components/safaris/SafarisListEditor';
@@ -575,6 +582,13 @@ export default function AdminConfigPage() {
             {active === 'whyus' && <HomeWhyUsEditor {...editorProps} />}
             {active === 'cta' && <HomeCTAEditor {...editorProps} />}
             {active === 'footer' && <HomeFooterEditor {...editorProps} />}
+
+            {/* Air Ticketing Page */}
+            {active === 'air-ticketing-hero' && <AirTicketingHeroEditor {...editorProps} />}
+            {active === 'air-ticketing-routes' && <AirTicketingRoutesEditor {...editorProps} />}
+            {active === 'air-ticketing-booking' && <AirTicketingBookingEditor {...editorProps} />}
+            {active === 'air-ticketing-services' && <AirTicketingServicesEditor {...editorProps} />}
+            {active === 'air-ticketing-faq' && <AirTicketingFAQEditor {...editorProps} />}
 
             {/* Safaris Page */}
             {active === 'tours-page-hero' && <SafarisHeroEditor {...editorProps} />}

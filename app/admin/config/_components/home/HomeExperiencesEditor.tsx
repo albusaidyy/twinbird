@@ -34,6 +34,7 @@ const ICON_SUGGESTIONS = [
 ];
 
 const QUICK_ROUTES = [
+  { label: 'Air Ticketing', href: '/air-ticketing' },
   { label: 'Safaris', href: '/safaris' },
   { label: 'Excursions', href: '/excursions' },
   { label: 'Transfers', href: '/transfers' },

@@ -114,6 +114,7 @@ export function HomeHeroEditor({ draft, set }: EditorProps) {
           </FieldRow>
           <div className="flex flex-wrap gap-1 mt-1">
             {[
+              { label: 'Air Ticketing', href: '/air-ticketing' },
               { label: 'Safaris', href: '/safaris' },
               { label: 'Excursions', href: '/excursions' },
               { label: 'Transfers', href: '/transfers' },
@@ -163,6 +164,7 @@ export function HomeHeroEditor({ draft, set }: EditorProps) {
           <div className="flex flex-wrap gap-1 mt-1">
             {[
               { label: 'Excursions', href: '/excursions' },
+              { label: 'Air Ticketing', href: '/air-ticketing' },
               { label: 'Safaris', href: '/safaris' },
               { label: 'Transfers', href: '/transfers' },
               { label: 'Contact', href: '/contact' },

@@ -20,6 +20,7 @@ import {
   FileText,
   Users,
   Sparkles,
+  Plane,
 } from 'lucide-react';
 
 export type SectionKey =
@@ -36,6 +37,11 @@ export type SectionKey =
   | 'gallery'
   | 'cta'
   | 'footer'
+  | 'air-ticketing-hero'
+  | 'air-ticketing-routes'
+  | 'air-ticketing-booking'
+  | 'air-ticketing-services'
+  | 'air-ticketing-faq'
   | 'tours-page-hero'
   | 'tours-page-list'
   | 'tours-page-booking'
@@ -100,6 +106,19 @@ export const PAGES: PageItem[] = [
       { key: 'gallery',         label: 'Gallery',             Icon: ImageIcon,  description: 'Catch photo gallery' },
       { key: 'cta',             label: 'CTA Banner',          Icon: Megaphone,  description: 'Bottom call-to-action' },
       { key: 'footer',          label: 'Footer',              Icon: LayoutDashboard, description: 'Site footer & links' },
+    ],
+  },
+  {
+    id: 'air-ticketing',
+    label: 'Air Ticketing',
+    Icon: Plane,
+    href: '/air-ticketing',
+    sections: [
+      { key: 'air-ticketing-hero', label: 'Hero', Icon: Layers, description: 'Air ticketing splash hero' },
+      { key: 'air-ticketing-routes', label: 'Popular Flight Routes', Icon: Map, description: 'Domestic, coastal & bush safari flight routes' },
+      { key: 'air-ticketing-booking', label: 'Booking Form', Icon: Calendar, description: 'Flight inquiry form & dynamic fields' },
+      { key: 'air-ticketing-services', label: 'Airline Partners', Icon: Plane, description: 'Airline partner logos and carousel configuration' },
+      { key: 'air-ticketing-faq', label: 'FAQ', Icon: HelpCircle, description: 'Flight ticketing, baggage & cancellation questions' },
     ],
   },
   {
