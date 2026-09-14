@@ -106,272 +106,303 @@ export const defaultExperienceItems: ExperienceItem[] = [
  */
 export const defaultExcursionItems: ExcursionItem[] = [
   {
-    id: "excursion-wasini-island-dolphin-dhow-cruise",
-    enabled: true,
-    deleted: false,
-    slug: "wasini-island-dolphin-dhow-cruise-snorkeling",
-    href: "/excursions/wasini-island-dolphin-dhow-cruise-snorkeling",
-    badge: "Top Coastal Excursion",
-    showBadge: true,
-    title: "Wasini Island Dolphin Dhow Cruise & Kisite Marine Snorkeling",
-    showTitle: true,
-    price: "From $95 / person",
-    priceLabel: "From $95 / person",
-    showPrice: true,
-    rating: 5.0,
-    showRating: true,
-    duration: "Full Day (7:00 AM - 4:30 PM)",
-    showDuration: true,
-    imageUrl:
-      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
-    heroImageUrl:
-      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
-    heroBackgroundColor: "#0f766e",
-    indicatorColor: "#d97706",
-    location: "Kisite-Mpunguti Marine National Park & Wasini Island",
-    showLocation: true,
-    schedule: "Daily Departures from Diani & Mombasa",
-    showSchedule: true,
-    groupType: "Couples · Families · Snorkelers & Swimmers",
-    showGroupType: true,
-    description:
-      "Sail on a traditional Arabian dhow across the azure waters of the Indian Ocean. Spot playful wild dolphins, snorkel among vibrant coral reefs in Kisite Marine Park, and relish a mouthwatering Swahili seafood feast on Wasini Island.",
-    overview:
-      'Embark on an unforgettable coastal marine adventure starting with an early scenic drive to the historic fishing village of Shimoni. Board a motorized wooden Arabian dhow and glide across the protected marine channels where bottlenose and humpback dolphins frequently leap alongside the bow.\n\nDive into the crystal-clear waters of Kisite-Mpunguti Marine National Park, often hailed as the "Home of the Dolphin." Marvel at pristine coral gardens teeming with tropical reef fish, sea turtles, and stingrays. Afterward, sail to Wasini Island for a sumptuous Swahili seafood lunch (with fresh crab, fish, and coconut rice), followed by a guided boardwalk tour of the ancient coral garden and local village.',
-    included: [
-      "Round-trip air-conditioned hotel transfers (Mombasa / Diani)",
-      "Traditional Arabian dhow cruise with onboard fruits & sodas",
-      "All Kisite Marine National Park conservation & snorkeling fees",
-      "Top-quality snorkeling mask, fins, and life jacket equipment",
-      "Professional marine guide and dolphin spotting crew",
-      "Lavish 3-course Swahili seafood lunch at Wasini Island restaurant",
-      "Guided Shimoni slave caves & Wasini boardwalk excursion",
-    ],
-    showIncluded: true,
-    whyChoose: [
-      "Over 95% dolphin sighting probability in protected marine channels",
-      "World-class shallow coral reef snorkeling with turtles and exotic marine life",
-      "Authentic fresh Swahili seafood cuisine served in open-air oceanfront dining",
-      "Full safety briefing and dedicated certified marine rescue staff",
-    ],
-    showWhyChoose: true,
-    knowBeforeYouGo: [
-      "Bring swimwear, beach towel, reef-safe sunscreen, sunglasses, and a sunhat.",
-      "Waterproof camera or phone dry pouch is highly recommended.",
-      "Vegetarian and chicken meal options are available upon request.",
-      "Shimoni caves entrance fee ($5) supports the local community trust.",
-    ],
-    showKnowBeforeYouGo: true,
-    notIncluded: [
-      "Driver and dhow crew gratuities (optional)",
-      "Alcoholic beverages and personal bar drinks",
-      "Shimoni historical slave caves community entry fee ($5 pp)",
-      "Personal travel and medical insurance",
-    ],
-    showNotIncluded: true,
-    gallery: [
+    "id": "excursion-full-day-arabuko-sokoke-forest-birdwatching",
+    "enabled": true,
+    "deleted": false,
+    "slug": "full-day-arabuko-sokoke-forest-birdwatching",
+    "href": "/excursions/full-day-arabuko-sokoke-forest-birdwatching",
+    "badge": "Birdwatching Sanctuary",
+    "showBadge": true,
+    "title": "Full-Day Arabuko Sokoke Forest Birdwatching",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "priceLabel": "Contact for pricing",
+    "showPrice": true,
+    "rating": 5,
+    "showRating": true,
+    "duration": "Full Day (8 Hours)",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+    "heroBackgroundColor": "#0f766e",
+    "indicatorColor": "#d97706",
+    "gallery": [
       "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=2070&auto=format&fit=crop"
+    ],
+    "location": "Arabuko Sokoke Forest, Watamu",
+    "showLocation": true,
+    "schedule": "Daily Departures (Early Morning 5:30 AM)",
+    "showSchedule": true,
+    "scheduleItems": [
+      {
+        "time": "05:30 - 06:30",
+        "title": "Early Departure & Sunrise Travel",
+        "description": "Your birding safari begins with an early morning pickup from your hotel in Watamu or Malindi to catch the forest at dawn during peak avian activity."
+      },
+      {
+        "time": "06:30 - 07:00",
+        "title": "Arrival at Gede Forest Station & Trail Selection",
+        "description": "Arrive at the main park gate to meet your specialist birding guide from the Arabuko-Sokoke Forest Guides Association. Map out your route through Cynometra, Brachystegia, and mixed forest zones."
+      },
+      {
+        "time": "07:00 - 11:30",
+        "title": "The Morning Endemic Hunt (Active Birding Trek)",
+        "description": "Venture quietly on foot along forest trails targeting rare endemics including the Sokoke Pipit, Clarke’s Weaver, Amani Sunbird, and East Coast Akalat."
+      },
+      {
+        "time": "11:30 - 13:00",
+        "title": "Canopy Views & Aerial Species at Nyari Cliff",
+        "description": "Drive to Nyari Cliff viewpoint overlooking the vast forest canopy to spot raptors like the Southern Banded Snake Eagle and African Crowned Eagle."
+      },
+      {
+        "time": "13:00 - 14:00",
+        "title": "Forest Picnic Lunch",
+        "description": "Enjoy a fresh packed picnic lunch at a shaded forest glade while listening to resident bird calls and observing forest butterflies."
+      },
+      {
+        "time": "14:00 - 16:30",
+        "title": "Midday Wetlands & Kararacha Forest Pools",
+        "description": "Explore the seasonal Kararacha Pools to search for water-associated birds, malachite kingfishers, and forest elephants coming down to drink."
+      },
+      {
+        "time": "16:30 - 18:00",
+        "title": "The Sokoke Scops Owl Sunset Search",
+        "description": "As the afternoon cools, head into the Cynometra thicket with your specialist tracker for the holy grail of coastal birding: the elusive Sokoke Scops Owl."
+      },
+      {
+        "time": "18:00 - 19:00",
+        "title": "Forest Exit & Return Journey",
+        "description": "Bid farewell to your forest guide as dusk settles over the canopy and return comfortably to your hotel in Watamu."
+      }
+    ],
+    "showScheduleItems": true,
+    "groupType": "Birdwatchers · Photographers · Nature Enthusiasts",
+    "showGroupType": true,
+    "description": "Embark on the ultimate full-day birding pilgrimage into East Africa’s largest coastal forest to find rare and endemic species.",
+    "overview": "Embark on the ultimate full-day birding pilgrimage into East Africa’s largest coastal forest. Led by an expert birding guide, this specialized itinerary targets rare, endemic species found nowhere else on earth, including the Sokoke Scops Owl, Clarke’s Weaver, and Sokoke Pipit.\n\nCovering over 400 square kilometers across three distinct forest zones, you will experience sunrise birding, panoramic canopy views from Nyari Cliff, and twilight owl tracking.",
+    "included": [
+      "Round-trip private transfers from Watamu / Malindi hotels",
+      "Specialist licensed birding guide from Arabuko-Sokoke Forest Guides Association",
+      "All Kenya Forest Service (KFS) park entrance fees",
+      "Packed picnic lunch and chilled mineral water throughout the day",
+      "All internal forest game-track vehicle transfers"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Alcoholic beverages and personal extras",
+      "Guide and driver gratuities (optional)",
+      "Personal travel and medical insurance"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Over 270 bird species recorded, including 6 globally endangered endemics",
+      "Led by top-tier certified local ornithological guides",
+      "Includes Nyari Cliff panoramic viewpoint and Kararacha wetland pools",
+      "Dedicated twilight tracking session for the rare Sokoke Scops Owl"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "High-quality binoculars and zoom camera lenses are strongly recommended.",
+      "Wear neutral, earth-toned clothing (greens/khakis) and sturdy walking boots.",
+      "Carry insect repellent and a lightweight rain jacket for humid forest conditions.",
+      "Field guide book to East African birds recommended."
+    ],
+    "showKnowBeforeYouGo": true,
+    "whatToCarry": [
+      "Binoculars (8x42 or 10x42 recommended)",
+      "Camera with telephoto lens",
+      "Comfortable hiking shoes or walking trainers",
+      "Insect repellent, sunhat, and sunglasses",
+      "Small backpack with personal medications and water bottle"
+    ],
+    "showWhatToCarry": true,
+    "metaTitle": "Full-Day Arabuko Sokoke Forest Birdwatching | Ecological Tours Kenya",
+    "metaDescription": "Embark on the ultimate full-day birding pilgrimage into East Africa’s largest coastal forest to find rare and endemic species."
+  },
+  {
+    "id": "excursion-robinson-island-hell-s-kitchen-full-day-excursion",
+    "enabled": true,
+    "deleted": false,
+    "slug": "robinson-island-hell-s-kitchen-full-day-excursion",
+    "href": "/excursions/robinson-island-hell-s-kitchen-full-day-excursion",
+    "badge": "Island & Canyon Sunset",
+    "showBadge": true,
+    "title": "Robinson Island & Hell’s Kitchen Full-Day Excursion",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "priceLabel": "Contact for pricing",
+    "showPrice": true,
+    "rating": 4.9,
+    "showRating": true,
+    "duration": "Full Day (10 Hours)",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+    "heroBackgroundColor": "#0f766e",
+    "indicatorColor": "#d97706",
+    "gallery": [
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop"
+    ],
+    "location": "Robinson Island & Marafa Hell’s Kitchen",
+    "showLocation": true,
+    "schedule": "Daily Departures (Morning 08:30 AM)",
+    "showSchedule": true,
+    "scheduleItems": [
+      {
+        "time": "08:30 - 10:30",
+        "title": "Morning Departure & Sabaki River Estuary Stop",
+        "description": "Pickup from your resort and drive north past Malindi. Stop at the Sabaki River estuary, where the Galana River meets the ocean, to see flamingos, hippos, and wading seabirds."
+      },
+      {
+        "time": "10:30 - 14:30",
+        "title": "Robinson Island Canoe Crossing & Swahili Seafood Feast",
+        "description": "Board a traditional wooden dugout canoe gliding through tranquil mangrove channels. Arrive at Robinson Island to relax on untouched beaches and indulge in a lavish Swahili seafood feast."
+      },
+      {
+        "time": "14:30 - 18:30",
+        "title": "Marafa Hell's Kitchen Canyon Walk at Sunset",
+        "description": "Drive inland to the dramatic Marafa Depression (Hell's Kitchen). Walk through ancient sandstone gorges glowing in vivid hues of white, orange, and deep red under golden-hour sunset."
+      }
+    ],
+    "showScheduleItems": true,
+    "groupType": "Couples · Families · Culture & Nature Lovers",
+    "showGroupType": true,
+    "description": "Experience the best of Kenya’s coast with island relaxation, fresh seafood, and dramatic sunset sandstone canyons at Hell’s Kitchen.",
+    "overview": "Experience the best of Kenya’s coast with a perfect mix of island relaxation and dramatic wilderness. This full-day excursion takes you from a tranquil mangrove lagoon and an incredible Swahili seafood feast on Robinson Island straight to the stunning sandstone gorges of Hell’s Kitchen (Marafa Depression) just in time for a magical golden-hour sunset.",
+    "included": [
+      "Round-trip air-conditioned hotel transport from Watamu / Malindi",
+      "Traditional wooden dugout canoe crossing to Robinson Island",
+      "Lavish Swahili multi-course seafood lunch at Robinson Island",
+      "All community entrance permits and guided walking tour at Marafa Hell’s Kitchen",
+      "Chilled bottled drinking water throughout the excursion"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Extra alcoholic drinks and soft beverages at lunch",
+      "Driver and guide tips / gratuities",
+      "Personal souvenir purchases and village donations"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Combines coastal island scenery with dramatic desert-like sandstone gorges",
+      "Famous open-air seafood dining on Robinson Island (crab, grilled fish, coconut rice)",
+      "Unforgettable golden-hour sunset colors at the Marafa canyon",
+      "Authentic local Giriama folklore and canyon legends told by village guides"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Wear sturdy walking shoes or sandals with grip for the canyon descent.",
+      "Bring beach towels and swimwear if you wish to swim in the lagoon.",
+      "Carry sunscreen, a sunhat, sunglasses, and extra drinking water.",
+      "Camera is essential for sunset landscape photography."
+    ],
+    "showKnowBeforeYouGo": true,
+    "whatToCarry": [
+      "Sturdy walking shoes for canyon trails",
+      "Swimwear and beach towel",
+      "High-SPF sunscreen, sunglasses, and sunhat",
+      "Insect repellent and camera"
+    ],
+    "showWhatToCarry": true,
+    "metaTitle": "Robinson Island & Hell’s Kitchen Full-Day Excursion | Ecological Tours Kenya",
+    "metaDescription": "Experience the best of Kenya’s coast with island relaxation, fresh seafood, and dramatic sunset sandstone canyons at Hell’s Kitchen."
+  },
+  {
+    "id": "excursion-arabuko-sokoke-forest-tour-from-watamu-guided-excursion",
+    "enabled": true,
+    "deleted": false,
+    "slug": "arabuko-sokoke-forest-tour-from-watamu-guided-excursion",
+    "href": "/excursions/arabuko-sokoke-forest-tour-from-watamu-guided-excursion",
+    "badge": "Guided Nature Walk",
+    "showBadge": true,
+    "title": "Arabuko Sokoke Forest Tour from Watamu | Guided Excursion",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "priceLabel": "Contact for pricing",
+    "rating": 4.9,
+    "showRating": true,
+    "duration": "Half Day (4 - 5 Hours)",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=2070&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=2070&auto=format&fit=crop",
+    "heroBackgroundColor": "#0f766e",
+    "indicatorColor": "#d97706",
+    "gallery": [
       "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=2070&auto=format&fit=crop",
-    ],
-  },
-  {
-    id: "excursion-watamu-marine-park-snorkeling-che-shale",
-    enabled: true,
-    deleted: false,
-    slug: "watamu-marine-park-snorkeling-golden-sands",
-    href: "/excursions/watamu-marine-park-snorkeling-golden-sands",
-    badge: "Marine Reserve",
-    showBadge: true,
-    title: "Watamu Marine National Park Snorkeling & Golden Sands Expedition",
-    showTitle: true,
-    price: "From $75 / person",
-    priceLabel: "From $75 / person",
-    showPrice: true,
-    rating: 4.9,
-    showRating: true,
-    duration: "Guided 6 Hours",
-    showDuration: true,
-    imageUrl:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
-    heroImageUrl:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
-    heroBackgroundColor: "#0f766e",
-    indicatorColor: "#d97706",
-    location: "Watamu Marine National Park & Che Shale Golden Sands",
-    showLocation: true,
-    schedule: "Daily Departures (Watamu & Malindi)",
-    showSchedule: true,
-    groupType: "Couples · Families · Nature Enthusiasts",
-    showGroupType: true,
-    description:
-      "Cruise in a glass-bottom boat across UNESCO-protected Watamu coral gardens. Snorkel with green sea turtles and colorful reef fish, then unwind on the idyllic golden sands of Che Shale.",
-    overview:
-      "Recognized as one of the finest coral reefs in East Africa, Watamu Marine National Park offers an enchanting underwater wonderland. Board our custom glass-bottom boat to observe brain corals, clownfish, and graceful green turtles through the viewing hull.\n\nPlunge into calm turquoise lagoons with certified snorkeling instructors. Following your aquatic exploration, take a scenic coastal drive to the untouched dunes and pristine golden sands of Che Shale for fresh tropical refreshments and panoramic Indian Ocean views.",
-    included: [
-      "Glass-bottom boat cruise across Watamu coral reef",
-      "Professional certified snorkeling guide and spotter",
-      "Snorkeling gear (mask, snorkel, life vest, flippers)",
-      "Watamu Marine Park conservation entrance fees",
-      "Chilled mineral water and seasonal tropical fruit platter",
-      "Round-trip hotel pickup and drop-off in Watamu/Malindi",
-    ],
-    showIncluded: true,
-    whyChoose: [
-      "UNESCO Biosphere Reserve with over 500 species of marine fish",
-      "Glass-bottom boat allows non-swimmers to observe coral life effortlessly",
-      "Calm, sheltered coral lagoons ideal for families and beginner snorkelers",
-    ],
-    showWhyChoose: true,
-    knowBeforeYouGo: [
-      "Bring UV-protective rashguard, swimwear, and beach sandals.",
-      "Tide timings determine the optimal departure hour for clear visibility.",
-      "Sunscreen and hats recommended for boat deck relaxation.",
-    ],
-    showKnowBeforeYouGo: true,
-    notIncluded: [
-      "Lunch (can be enjoyed at beachfront restaurant in Che Shale)",
-      "Driver and boat captain gratuities",
-      "Alcoholic beverages",
-    ],
-    showNotIncluded: true,
-    gallery: [
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?q=80&w=2070&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop"
     ],
-  },
-  {
-    id: "excursion-mombasa-city-fort-jesus-heritage",
-    enabled: true,
-    deleted: false,
-    slug: "mombasa-heritage-fort-jesus-old-town-tour",
-    href: "/excursions/mombasa-heritage-fort-jesus-old-town-tour",
-    badge: "Culture & History",
-    showBadge: true,
-    title: "Mombasa Heritage, Fort Jesus & Old Town Cultural Tour",
-    showTitle: true,
-    price: "From $55 / person",
-    priceLabel: "From $55 / person",
-    showPrice: true,
-    rating: 4.8,
-    showRating: true,
-    duration: "Half Day (5 Hours)",
-    showDuration: true,
-    imageUrl:
-      "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070&auto=format&fit=crop",
-    heroImageUrl:
-      "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070&auto=format&fit=crop",
-    heroBackgroundColor: "#0f766e",
-    indicatorColor: "#d97706",
-    location: "Mombasa Island, Fort Jesus & Old Town",
-    showLocation: true,
-    schedule: "Daily Morning & Afternoon Departures",
-    showSchedule: true,
-    groupType: "History Buffs · Photographers · All Ages",
-    showGroupType: true,
-    description:
-      "Step back in time through the narrow cobblestone alleyways of Mombasa Old Town. Explore the 16th-century Portuguese fortress of Fort Jesus, visit the bustling spice market, and marvel at the famous Elephant Tusks landmark.",
-    overview:
-      "Mombasa is a historic melting pot of African, Arabian, Portuguese, and British cultures spanning over eight centuries. On this guided cultural walking tour, wander through the atmospheric streets of Old Town lined with intricately carved Swahili doors and ornate wooden balconies.\n\nTour the UNESCO World Heritage Site Fort Jesus, built by the Portuguese in 1593 to guard the harbor. Visit the vibrant spice markets brimming with cardamom, cloves, and vanilla, stop by the Akamba woodcarving cooperative, and see the giant commemorative aluminum Elephant Tusks along Moi Avenue.",
-    included: [
-      "Air-conditioned private vehicle transport with hotel pickup",
-      "Professional local historian and cultural licensed guide",
-      "Fort Jesus UNESCO World Heritage Site entrance ticket & museum visit",
-      "Mombasa Old Town walking tour and spice market tasting",
-      "Photo stop at the iconic Mombasa Elephant Tusks landmark",
-      "Bottled mineral water throughout the excursion",
+    "location": "Arabuko Sokoke Forest Reserve",
+    "showLocation": true,
+    "schedule": "Daily Morning (6:00 AM) & Afternoon (2:00 PM) Departures",
+    "showSchedule": true,
+    "scheduleItems": [
+      {
+        "time": "06:00 / 14:00",
+        "title": "Hotel Pickup & Transfer to Forest Station",
+        "description": "Direct pickup from your Watamu hotel or villa in a comfortable shuttle, arriving at the Arabuko Sokoke Forest entrance station."
+      },
+      {
+        "time": "06:30 / 14:30",
+        "title": "Guided Forest Trek & Endemic Wildlife Tracking",
+        "description": "Venture deep into prime coastal woodland with licensed local guides tracking rare endemics like the Golden-rumped Elephant Shrew and Sokoke Scops Owl."
+      },
+      {
+        "time": "09:30 / 17:30",
+        "title": "Forest Rest Break with Refreshments",
+        "description": "Enjoy a peaceful break inside the shaded canopy with cold beverages, fresh seasonal snacks, and ecological insights from your guide."
+      },
+      {
+        "time": "10:30 / 18:30",
+        "title": "Return Shuttle to Watamu Hotel",
+        "description": "Relax on the return shuttle transfer back to your accommodation in Watamu with wonderful memories of Kenya's coastal woodland."
+      }
     ],
-    showIncluded: true,
-    whyChoose: [
-      "Comprehensive cultural insight into Kenya’s rich coastal trading history",
-      "Personalized walking tour through authentic, living heritage neighborhoods",
-      "Opportunity to purchase authentic coastal spices, tea, and handcrafted carvings",
+    "showScheduleItems": true,
+    "groupType": "Families · Couples · Nature Lovers & Walkers",
+    "showGroupType": true,
+    "description": "Discover rare birds and endemic wildlife in Arabuko Sokoke Forest on a guided 4 to 5 hour nature trek from Watamu.",
+    "overview": "Discover rare birds and endemic wildlife in Arabuko Sokoke Forest. Book your 5-hour day trip from Watamu with expert guides, park fees, and transport included!\n\nLed by a team of licensed local naturalists whose sharp eyes bring the wilderness to life, venture deep into prime habitats to track rare endemic species found nowhere else on earth, from the tiny Sokoke Scops Owl to the striking Golden-rumped Elephant Shrew.",
+    "included": [
+      "Round-trip transport from your hotel or villa in Watamu",
+      "All Arabuko-Sokoke Forest park and conservation entry fees",
+      "Refreshing drinks and snacks to keep you energized",
+      "Highly experienced, licensed local guide to lead your trek"
     ],
-    showWhyChoose: true,
-    knowBeforeYouGo: [
-      "Dress respectfully covering shoulders and knees when exploring historical quarters.",
-      "Wear comfortable walking shoes for cobblestone streets and stairs.",
-      "Camera fee may apply inside specific museum galleries.",
+    "showIncluded": true,
+    "notIncluded": [
+      "Tips and personal extras",
+      "Personal travel insurance"
     ],
-    showKnowBeforeYouGo: true,
-    notIncluded: [
-      "Personal shopping and souvenir purchases",
-      "Lunch and snacks",
-      "Guide tips and gratuities",
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Convenient morning (6:00 AM) or afternoon (2:00 PM) departures",
+      "Gentle to moderate walking pace suitable for all fitness levels",
+      "Guaranteed entry permits and licensed KFS / community guides",
+      "High probability of spotting the rare Golden-rumped Elephant Shrew"
     ],
-    showNotIncluded: true,
-    gallery: [
-      "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sturdy hiking shoes or trainers with good grip are required.",
+      "Wear light, breathable clothing in neutral earth colors (avoid bright whites/neons).",
+      "Bring a small day pack with sunscreen, brimmed hat, sunglasses, and insect repellent.",
+      "Restroom facilities available at main park headquarters before starting the trail."
     ],
-  },
-  {
-    id: "excursion-diani-beach-quad-biking-village",
-    enabled: true,
-    deleted: false,
-    slug: "diani-beach-quad-biking-kaya-forest-adventure",
-    href: "/excursions/diani-beach-quad-biking-kaya-forest-adventure",
-    badge: "Adventure & Thrills",
-    showBadge: true,
-    title: "Diani Beach Quad Biking & Sacred Kaya Forest Adventure",
-    showTitle: true,
-    price: "From $80 / person",
-    priceLabel: "From $80 / person",
-    showPrice: true,
-    rating: 4.9,
-    showRating: true,
-    duration: "3 - 4 Hours",
-    showDuration: true,
-    imageUrl:
-      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop",
-    heroImageUrl:
-      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop",
-    heroBackgroundColor: "#0f766e",
-    indicatorColor: "#d97706",
-    location: "Diani Beach Outback & Kaya Sacred Forest",
-    showLocation: true,
-    schedule: "Morning (9:00 AM) & Afternoon (2:00 PM) Daily",
-    showSchedule: true,
-    groupType: "Thrill Seekers · Friends · Active Travelers",
-    showGroupType: true,
-    description:
-      "Ride an all-terrain automatic quad bike through rural coastal dirt trails, coconut plantations, and vibrant local villages. Visit the sacred Kaya Kinondo indigenous forest with tribal elders.",
-    overview:
-      "Escape the resort strips and embark on an adrenaline-fueled off-road quad biking expedition across the lush hinterlands of the South Coast. Drive automatic 4-wheel ATVs through dusty savannah tracks, palm plantations, and picturesque rural settlements.\n\nTake a refreshing stop at a traditional village where local elders share ancient medicinal plant wisdom and coastal heritage. An exhilarating combination of off-road adventure, pristine coastal scenery, and authentic community engagement.",
-    included: [
-      "Automatic Yamaha / Polaris 250cc-400cc Quad Bike hire",
-      "Safety helmet, protective goggles, and bandana",
-      "Full safety briefing and professional lead & sweep guides",
-      "Bottled drinking water and fresh coconut water tasting",
-      "Hotel pickup and drop-off within Diani Beach / Galu",
+    "showKnowBeforeYouGo": true,
+    "whatToCarry": [
+      "Sturdy hiking shoes or sneakers with good traction",
+      "Small daypack with light layers and waterproof jacket",
+      "Sunscreen, wide-brim hat, and sunglasses",
+      "Camera and binoculars for bird and mammal watching"
     ],
-    showIncluded: true,
-    whyChoose: [
-      "Easy-to-operate automatic ATVs suitable for beginners and experienced riders",
-      "Off-the-beaten-path route showcasing genuine Kenyan village life",
-      "Action-packed adventure with scenic photography stops along coastal trails",
-    ],
-    showWhyChoose: true,
-    knowBeforeYouGo: [
-      "Minimum driving age is 16 years. Passengers can ride tandem with an adult.",
-      "Wear clothes you do not mind getting dusty or muddy.",
-      "Closed-toe shoes (sneakers) are mandatory for all drivers.",
-    ],
-    showKnowBeforeYouGo: true,
-    notIncluded: [
-      "Gratuities for trail guides",
-      "Village handicraft purchases",
-      "Personal insurance",
-    ],
-    showNotIncluded: true,
-    gallery: [
-      "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2073&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=2070&auto=format&fit=crop",
-    ],
-  },
+    "showWhatToCarry": true,
+    "metaTitle": "Arabuko Sokoke Forest Tour from Watamu | Ecological Tours Kenya",
+    "metaDescription": "Discover rare birds and endemic wildlife in Arabuko Sokoke Forest on a guided 4 to 5 hour nature trek from Watamu."
+  }
 ];
 
 /**
@@ -379,268 +410,771 @@ export const defaultExcursionItems: ExcursionItem[] = [
  */
 export const defaultTourItems: TourItem[] = [
   {
-    id: "safari-maasai-mara-big-five-3day",
-    enabled: true,
-    deleted: false,
-    slug: "maasai-mara-big-five-3day-wildlife-safari",
-    href: "/safaris/maasai-mara-big-five-3day-wildlife-safari",
-    badge: "Most Popular",
-    showBadge: true,
-    title: "3-Day Maasai Mara Big Five Wildlife Safari",
-    showTitle: true,
-    price: "From $650 / person",
-    priceLabel: "From $650 / person",
-    showPrice: true,
-    rating: 5.0,
-    showRating: true,
-    duration: "3 Days / 2 Nights",
-    showDuration: true,
-    imageUrl:
+    "id": "safari-4-day-tsavo-east-tsavo-west-amboseli-safari",
+    "href": "/safaris/4-day-tsavo-east-tsavo-west-amboseli-safari",
+    "slug": "4-day-tsavo-east-tsavo-west-amboseli-safari",
+    "badge": "3 Iconic Parks",
+    "showBadge": true,
+    "title": "4 Day Tsavo East, Tsavo West & Amboseli Safari",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 4.9,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "4 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
+      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop"
+    ],
+    "location": "Tsavo East, Tsavo West & Amboseli",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "Experience the ultimate Kenyan safari on this unforgettable 4-day adventure through Tsavo East National Park, Tsavo West National Park, and Amboseli National Park.",
+    "overview": "Experience the ultimate Kenyan safari on this unforgettable 4-day adventure through Tsavo East National Park, Tsavo West National Park, and Amboseli National Park. Discover the famous red elephants of Tsavo East, explore the rugged landscapes and crystal-clear Mzima Springs in Tsavo West, and enjoy spectacular wildlife viewing against the breathtaking backdrop of snow-capped Mount Kilimanjaro in Amboseli. With exciting morning and afternoon game drives, opportunities to spot elephants, lions, leopards, buffaloes, giraffes, zebras, hippos, crocodiles, rhinos, and countless bird species, this safari offers the perfect combination of diverse landscapes, abundant wildlife, and comfortable lodge accommodation. Ideal for nature lovers, photographers, families, and adventure seekers, this journey showcases three of Kenya's most iconic national parks in one incredible experience.",
+    "itinerary": [
+      {
+        "day": "Day 1",
+        "title": "Watamu – Tsavo East National Park",
+        "description": "Your safari begins with an early morning pickup from your hotel in Watamu at 6:00 AM before departing for Tsavo East National Park, a scenic drive of approximately three hours. Arrive at the park around 10:30 AM and begin your first exciting game drive through Kenya's largest national park, renowned for its vast plains and famous red elephants. At around 1:00 PM, arrive at your lodge for lunch and some time to relax before setting out on an afternoon game drive. Explore the park until sunset before returning to your lodge for dinner and an overnight stay."
+      },
+      {
+        "day": "Day 2",
+        "title": "Tsavo East – Tsavo West National Park",
+        "description": "After an early breakfast and a final morning game drive in Tsavo East, depart for Tsavo West National Park, approximately a two-hour drive away. Arrive at your lodge for check-in and lunch before spending the afternoon exploring the park's spectacular scenery. Tsavo West is known for its volcanic landscapes, lava flows, dense vegetation, and diverse wildlife, including elephants, rhinos, lions, leopards, cheetahs, buffaloes, and hippos. Return to Ngulia Lodge for dinner and a relaxing evening overlooking the surrounding wilderness."
+      },
+      {
+        "day": "Day 3",
+        "title": "Tsavo West – Amboseli National Park",
+        "description": "After an early breakfast, enjoy a game drive as you make your way through Tsavo West, stopping at the famous Mzima Springs, where crystal-clear waters support hippos, Nile crocodiles, fish, and a rich variety of birdlife. Continue to Amboseli National Park, arriving in time for lunch at your safari lodge or tented camp.\n\nLater in the afternoon, head out on a game drive across Amboseli's open plains, famous for its large elephant herds and spectacular views of Mount Kilimanjaro. Keep an eye out for lions, buffaloes, giraffes, zebras, wildebeest, baboons, and the rare black rhino before returning to your lodge for dinner and an overnight stay."
+      },
+      {
+        "day": "Day 4",
+        "title": "Amboseli – Watamu",
+        "description": "Wake up early for a memorable sunrise game drive, offering one last opportunity to admire Mount Kilimanjaro and spot wildlife during the cool morning hours. Return to the lodge for breakfast before enjoying a final game drive as you exit the park.\n\nBegin your journey back to Watamu, arriving at your hotel in the late afternoon with unforgettable memories of Kenya's remarkable wildlife and landscapes."
+      }
+    ],
+    "showItinerary": true,
+    "included": [
+      "Drinking water (Other drinks not included)",
+      "Park Entry Fees",
+      "Licensed local guide",
+      "Full safari insurance (replacement vehicle, rescue service, etc.)",
+      "All transfers aboard 4×4 jeeps with panoramic sunroof for photo safaris",
+      "Overnight stay in a lodge/camp with all-inclusive treatment (drinks with meals excluded)"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Breakfast on the day of departure",
+      "Tips and any personal extras"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sunscreen, hat, sunglasses, lip balm. Insect repellent (preferably a tropical version, reapply approximately every 6-8 hours).",
+      "Comfortable clothing is essential; bring a long change of clothes for the evening and early morning, and a T-shirt and shorts for the day. Remember to bring several changes of clothes, as the red soil of the savannah can be uncomfortable.",
+      "A swimsuit, as accommodations often have a swimming pool",
+      "Comfortable shoes (preferably old ones, not white ones, to avoid staining them)",
+      "A UK-style power adapter and a power bank are also essential",
+      "A camera and, if you want to be sure of seeing animals even from a distance, binoculars"
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "4 Day Tsavo East, Tsavo West & Amboseli Safari | Ecological Safaris Kenya",
+    "metaDescription": "Experience the ultimate Kenyan safari on this unforgettable 4-day adventure through Tsavo East National Park, Tsavo West National Park, and Amboseli National Park."
+  },
+  {
+    "id": "safari-3-day-tsavo-east-tsavo-west-safari-from-watamu",
+    "href": "/safaris/3-day-tsavo-east-tsavo-west-safari-from-watamu",
+    "slug": "3-day-tsavo-east-tsavo-west-safari-from-watamu",
+    "badge": "Kenya's Largest Parks",
+    "showBadge": true,
+    "title": "3 Day Tsavo East & Tsavo West Safari from Watamu",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 4.9,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "3 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
+      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop"
+    ],
+    "location": "Tsavo East & Tsavo West",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "Experience the best of Kenya's iconic Tsavo ecosystem on this unforgettable 3-day safari from Watamu.",
+    "overview": "Experience the best of Kenya's iconic Tsavo ecosystem on this unforgettable 3-day safari from Watamu. Explore the vast plains of Tsavo East National Park, renowned for its famous red elephants, lions, giraffes, zebras, buffaloes, and diverse birdlife, before venturing into the dramatic landscapes of Tsavo West National Park. Enjoy thrilling morning and afternoon game drives, visit the crystal-clear Mzima Springs to see hippos and Nile crocodiles, and stay in comfortable safari lodges surrounded by nature. Combining spectacular wildlife encounters, breathtaking scenery, and unforgettable safari experiences, this adventure is perfect for nature lovers, photographers, couples, families, and anyone seeking an authentic African safari.",
+    "itinerary": [
+      {
+        "day": "Day 1",
+        "title": "Watamu – Tsavo East National Park",
+        "description": "Your safari begins with an early morning pickup from your hotel in Watamu at 6:00 AM. After departing for Tsavo East National Park, enjoy a scenic drive of approximately three hours before arriving at the park around 10:30 AM.\n\nUpon entering the park, begin your first exciting game drive as you search for elephants, lions, giraffes, zebras, buffaloes, antelopes, and a variety of bird species. At around 1:00 PM, arrive at your lodge or tented camp for lunch followed by time to relax by the pool or in your room.\n\nLater in the afternoon, head back into the park for another game drive, exploring the wilderness until sunset. Return to your lodge for dinner and an overnight stay."
+      },
+      {
+        "day": "Day 2",
+        "title": "Tsavo East – Tsavo West National Park",
+        "description": "Start the day with an early morning game drive, one of the best times to witness predators returning from their nightly hunt and enjoy the beautiful African sunrise. Return to the lodge for breakfast before departing for Tsavo West National Park, approximately a two-hour drive away.\n\nIn the afternoon, enjoy another guided game drive through Tsavo West's spectacular landscapes. Visit the famous Mzima Springs, where crystal-clear waters provide a sanctuary for hippos, Nile crocodiles, fish, and numerous bird species.\n\nAs evening approaches, return to Ngulia Lodge where you can unwind while watching wildlife gather around the nearby waterhole, visible from the lodge's restaurant."
+      },
+      {
+        "day": "Day 3",
+        "title": "Tsavo West – Watamu",
+        "description": "After an early breakfast, enjoy one final morning game drive as you take in the beauty of Tsavo West and look out for any wildlife you may have missed.\n\nLater in the morning, exit the park at approximately 10:00 AM and begin your return journey to Watamu. Arrive back at your hotel in the late afternoon, marking the end of your memorable safari adventure."
+      }
+    ],
+    "showItinerary": true,
+    "included": [
+      "Drinking water (Other drinks not included)",
+      "Park Entry Fees",
+      "Licensed local guide",
+      "Full safari insurance (replacement vehicle, rescue service, etc.)",
+      "All transfers aboard 4×4 jeeps with panoramic sunroof for photo safaris",
+      "Overnight stay in a lodge/camp with all-inclusive treatment (drinks with meals excluded)"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Tips and any personal extras",
+      "Breakfast on the day of departure"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sunscreen, hat, sunglasses, lip balm. Insect repellent (preferably a tropical version, reapply approximately every 6-8 hours).",
+      "Comfortable clothing is essential; bring a long change of clothes for the evening and early morning, and a T-shirt and shorts for the day. Remember to bring several changes of clothes, as the red soil of the savannah can be uncomfortable.",
+      "A swimsuit, as accommodations often have a swimming pool",
+      "Comfortable shoes (preferably old ones, not white ones, to avoid staining them)",
+      "A UK-style power adapter and a power bank are also essential",
+      "A camera and, if you want to be sure of seeing animals even from a distance, binoculars"
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "3 Day Tsavo East & Tsavo West Safari from Watamu | Ecological Safaris Kenya",
+    "metaDescription": "Experience the best of Kenya's iconic Tsavo ecosystem on this unforgettable 3-day safari from Watamu."
+  },
+  {
+    "id": "safari-3-day-tsavo-east-amboseli-safari",
+    "href": "/safaris/3-day-tsavo-east-amboseli-safari",
+    "slug": "3-day-tsavo-east-amboseli-safari",
+    "badge": "Kilimanjaro Views",
+    "showBadge": true,
+    "title": "3 Day Tsavo East & Amboseli Safari",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 4.8,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "3 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
+      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
-    heroImageUrl:
-      "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
-    heroBackgroundColor: "#1b4332",
-    indicatorColor: "#d97706",
-    location: "Maasai Mara National Reserve",
-    showLocation: true,
-    schedule: "Daily Departures (Year-Round)",
-    showSchedule: true,
-    itinerary: [
+      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop"
+    ],
+    "location": "Tsavo East & Amboseli National Park",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "Trade the coastal shores of Watamu for a spectacular 3-day journey into two of Kenya's most legendary wildlife sanctuaries.",
+    "overview": "Trade the coastal shores of Watamu for a spectacular 3-day journey into two of Kenya's most legendary wildlife sanctuaries. This carefully curated safari package combines the rugged, red-dust landscapes of Tsavo East National Park with the breathtaking, spring-fed wetlands of Amboseli National Park. Designed for travelers who want to experience iconic African biodiversity without a rushed timeline, you will have front-row seats to track Africa’s famous Big Five, witness unmatched elephant herds grazing beneath a snow-capped Mount Kilimanjaro, and enjoy stunning overnight stays in premium safari lodges and tented camps.",
+    "itinerary": [
       {
-        day: "Day 1",
-        title: "Nairobi to Maasai Mara & Afternoon Predator Drive",
-        description:
-          "Depart Nairobi in your private 4x4 Safari Land Cruiser, descending the Great Rift Valley escarpment with panoramic photo stops. Arrive at your luxury safari camp in time for lunch. In the afternoon, head out on your first thrilling game drive across the Maasai Mara savannah, searching for lions, cheetahs, and elephants against the golden African sunset.",
+        "day": "Day 1",
+        "title": "Watamu to Tsavo East National Park",
+        "description": "Your ultimate safari journey kicks off at 6:00 AM with a direct pickup from your hotel in Watamu. Leaving the coast behind, you will drive along vibrant red-earth roads, crossing through expansive forested landscapes on your way to Tsavo East National Park. Your first scenic stop is at the famous Crocodile Point, where you can safely view massive Nile crocodiles basking along the banks of the Galana River. By 10:30 AM, you will officially enter the park gates to begin an immersive morning game drive, exploring the sweeping savannah in search of lions, zebras, and herds of red-dust elephants.\n\nAt 1:00 PM, you will arrive at your safari lodge or tented camp just in time for a fresh lunch, followed by a relaxing afternoon to unwind in your room or take a cooling dip in the pool. The adventure resumes at 3:30 PM as you head back out for an afternoon game drive, tracking wildlife under the soft golden light of the setting sun. As twilight descends, you will return to Voi Safari Lodge or Voi Wildlife Lodge for a hearty dinner and your overnight stay."
       },
       {
-        day: "Day 2",
-        title: "Full-Day Mara Plains Safari & Mara River Crossing Point",
-        description:
-          "Enjoy a full day of game viewing with a scenic picnic lunch in the wild. Traverse rolling grasslands to the famous Mara River, home to enormous Nile crocodiles and hippo pods. Witness boundless herds of wildebeest and zebras with high predator activity. Optional early morning Hot Air Balloon safari with champagne breakfast available.",
+        "day": "Day 2",
+        "title": "Tsavo East to Amboseli National Park",
+        "description": "After an early breakfast, you will check out and depart Tsavo East for Amboseli National Park, a breathtaking wildlife sanctuary world-renowned for its dramatic, snow-capped backdrops of Mount Kilimanjaro. This diverse park boasts a stunning variety of habitats, ranging from dry savannahs to lush, spring-fed wetlands, and is home to over 600 bird species, big cats, and all of Africa's iconic Big Five. You will arrive at Kibo Safari Camp in time for a delicious lunch, where you can settle into a spacious, beautifully appointed ensuite tent and relax on your private veranda.\n\nIn the late afternoon, you will head out into the heart of Amboseli for an unforgettable game drive, getting up close to some of the largest elephant herds in Africa. The excursion includes a fascinating, short guided nature walk around Mzima Springs, giving you a safe vantage point to view resident hippos and vibrant aquatic birdlife. As night falls, you will head back to camp to enjoy a wonderful dinner, swap stories by the campfire, and rest under the stars."
       },
       {
-        day: "Day 3",
-        title: "Sunrise Bush Safari, Maasai Village & Return to Nairobi",
-        description:
-          "Experience a dawn game drive capturing golden morning light and waking wildlife. Return to camp for a hearty breakfast and check-out. Optional visit to a traditional Maasai cultural village before embarking on the scenic drive back to Nairobi, arriving late afternoon.",
-      },
+        "day": "Day 3",
+        "title": "Amboseli to Watamu",
+        "description": "Wake up early to experience the African wilderness at its absolute finest. Following an early morning breakfast at camp, you will embark on a sunrise game drive, catching predators and plains game at their most active before the heat of the day sets in. If the weather is clear, this morning track offers your best opportunity to capture pristine, unobstructed photographs of Mount Kilimanjaro towering over the savannah.\n\nAt 10:00 AM, you will wrap up your final wildlife tracks, leave the park gates behind, and begin your return drive down to the Kenyan coast. Enjoy a comfortable and relaxed journey as the rugged inland landscapes gradually transition back into tropical palms, arriving safely back at your Watamu resort in the late afternoon with memories to last a lifetime."
+      }
     ],
-    showItinerary: true,
-    groupType: "Small Groups · Private 4x4 · Families",
-    showGroupType: true,
-    description:
-      "Experience the pinnacle of African wildlife safaris in the world-famous Maasai Mara. Track lions, leopards, elephants, buffalos, and rhinos across golden savannah plains.",
-    overview:
-      "Embark on an extraordinary 3-day wildlife safari into the iconic Maasai Mara National Reserve. Famous for its unmatched predator populations and the annual Great Wildebeest Migration, the Mara offers premier game viewing throughout the year.\n\nTravel in a customized 4x4 Safari Land Cruiser with pop-up viewing roofs, guided by seasoned professional naturalists who know every animal territory. Enjoy thrilling sunrise and evening game drives, relax in luxury tented camps surrounded by the sounds of the African bush, and experience authentic Maasai cultural encounters.",
-    included: [
-      "Customized 4x4 Safari Land Cruiser with pop-up roof",
-      "Professional certified safari guide & wildlife tracker",
-      "All Maasai Mara National Reserve conservation entry fees",
-      "2 nights full-board accommodation at luxury tented camp",
-      "Unlimited bottled mineral water during all game drives",
-      "Morning and late afternoon extended game drives",
-      "Round-trip transfers from Nairobi (hotel or airport)",
+    "showItinerary": true,
+    "included": [
+      "Drinking water in safari vehicle (Other drinks not included)",
+      "All National Park & Conservation Entry Fees",
+      "Licensed professional English/multilingual local driver-guide",
+      "Full safari emergency evacuation insurance",
+      "All game drives & transfers in 4x4 Land Cruiser / Jeep with pop-up photographic roof",
+      "Full board accommodation in lodges/camps as specified in the itinerary"
     ],
-    showIncluded: true,
-    whyChoose: [
-      "Guaranteed window seats for every traveler in custom 4x4 vehicles",
-      "Silver and gold-level certified KPSGA safari guides",
-      "Handpicked luxury eco-camps inside prime wildlife sectors",
-      "High success rate for Big Five predator sightings",
-    ],
-    showWhyChoose: true,
-    knowBeforeYouGo: [
-      "Pack lightweight, neutral/earth-toned clothing (khaki, green, beige).",
-      "Bring a warm fleece or jacket for early morning game drives.",
-      "Carry binoculars, wide-brim hat, sunscreen, and insect repellent.",
-      "Camera gear with extra batteries and memory cards is highly recommended.",
-      "Optional hot air balloon safari with champagne breakfast available on Day 2.",
-      "Passport required for reserve entry registration.",
-    ],
-    showKnowBeforeYouGo: true,
-    notIncluded: [
-      "Driver-guide and camp staff gratuities (optional)",
-      "Hot air balloon safari excursion (available as add-on)",
+    "showIncluded": true,
+    "notIncluded": [
+      "Breakfast on departure morning & drinks during meals",
+      "Driver-guide and lodge staff gratuities / tips",
       "Personal travel, medical, and baggage insurance",
-      "Alcoholic spirits and premium bottled beverages",
-      "Optional visit to a traditional Maasai cultural village ($30 pp)",
+      "Optional cultural village visits or personal souvenir purchases"
     ],
-    showNotIncluded: true,
-    gallery: [
-      "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop",
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
     ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Pack lightweight, neutral/earth-toned clothing (khaki, green, beige).",
+      "Bring a warm sweater or light jacket for early morning game drives.",
+      "Carry high-SPF sunscreen, wide-brim hat, sunglasses, and insect repellent.",
+      "Camera with zoom lens, extra batteries, and memory cards recommended.",
+      "Passport / National ID required for park gate registration."
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "3 Day Tsavo East & Amboseli Safari | Ecological Safaris Kenya",
+    "metaDescription": "Trade the coastal shores of Watamu for a spectacular 3-day journey into two of Kenya's most legendary wildlife sanctuaries."
   },
   {
-    id: "safari-amboseli-kilimanjaro-elephants-2day",
-    enabled: true,
-    deleted: false,
-    slug: "amboseli-kilimanjaro-elephant-safari",
-    href: "/safaris/amboseli-kilimanjaro-elephant-safari",
-    badge: "Spectacular Views",
-    showBadge: true,
-    title: "2-Day Amboseli Kilimanjaro & Elephant Safari",
-    showTitle: true,
-    price: "From $420 / person",
-    priceLabel: "From $420 / person",
-    showPrice: true,
-    rating: 4.9,
-    showRating: true,
-    duration: "2 Days / 1 Night",
-    showDuration: true,
-    imageUrl:
-      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
-    heroImageUrl:
-      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
-    heroBackgroundColor: "#1b4332",
-    indicatorColor: "#d97706",
-    location: "Amboseli National Park",
-    showLocation: true,
-    schedule: "Daily Departures",
-    showSchedule: true,
-    itinerary: [
-      {
-        day: "Day 1",
-        title: "Journey to Amboseli & Afternoon Elephant Marsh Safari",
-        description:
-          "Depart early from Nairobi or the coast, driving through scenic savannah plains to Amboseli National Park. Arrive in time for lunch and settle into your luxury safari lodge with direct views of Mount Kilimanjaro. Embark on an afternoon game drive through the lush Enkongo Narok swamps to see massive elephant herds bathing and grazing alongside hippos and waterbirds.",
-      },
-      {
-        day: "Day 2",
-        title: "Sunrise Kilimanjaro Game Drive, Observation Hill & Return",
-        description:
-          "Rise early to witness the snow-capped peak of Mount Kilimanjaro crystal clear in the morning dawn. Head out on a sunrise game drive followed by a visit to Observation Hill for a 360-degree panorama of Amboseli's marshes and plains. Enjoy breakfast at the lodge before checking out and heading back to your destination.",
-      },
-    ],
-    showItinerary: true,
-    groupType: "Families · Couples · Photography Groups",
-    showGroupType: true,
-    description:
-      "Witness legendary herds of free-ranging African elephants against the majestic backdrop of snow-capped Mount Kilimanjaro in Amboseli National Park.",
-    overview:
-      "Amboseli National Park is world-renowned for having some of the largest elephant tusker herds in Africa and offering awe-inspiring panoramas of Mount Kilimanjaro, Africa’s tallest peak.\n\nOn this 2-day expedition, traverse Amboseli’s diverse habitats — from dried-up lakebeds and sulfur springs to lush emerald swamps teeming with hippos, pelicans, lions, cheetahs, and zebras. Perfect for photographers, nature lovers, and families seeking an immersive, scenic safari getaway.",
-    included: [
-      "Custom 4x4 Safari Land Cruiser with pop-up roof",
-      "Professional certified driver-guide",
-      "All Amboseli National Park conservation entry fees",
-      "1 night full-board accommodation at safari lodge / tented camp",
-      "Unlimited bottled drinking water in safari vehicle",
-      "Observation Hill panoramic viewpoint visit",
-      "Hotel / Airport pickup and drop-off",
-    ],
-    showIncluded: true,
-    whyChoose: [
-      "Unobstructed postcard views of Mount Kilimanjaro at sunrise & sunset",
-      "Close-up ethical encounters with legendary elephant matriarch herds",
-      "Observation Hill walk overlooking Amboseli’s thriving marshlands",
-      "Expert photography guidance for iconic wildlife portraits",
-    ],
-    showWhyChoose: true,
-    knowBeforeYouGo: [
-      "Best mountain visibility is typically in the early morning and late afternoon.",
-      "Bring dust protection (bandana or camera cover) for dry lakebed drives.",
-      "Sunscreen, polarized sunglasses, and safari hat are recommended.",
-      "Comfortable walking shoes for Observation Hill trail.",
-    ],
-    showKnowBeforeYouGo: true,
-    notIncluded: [
-      "Driver-guide gratuities and tips",
-      "Personal travel & medical insurance",
-      "Alcoholic drinks and personal lodge extras",
-      "Souvenirs and optional Maasai cultural village visit",
-    ],
-    showNotIncluded: true,
-    gallery: [
-      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "id": "safari-2-day-tsavo-east-national-park-safari",
+    "href": "/safaris/2-day-tsavo-east-national-park-safari",
+    "slug": "2-day-tsavo-east-national-park-safari",
+    "badge": "Express Overnight",
+    "showBadge": true,
+    "title": "2 Day Tsavo East National Park Safari",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 4.9,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "2 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
       "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop"
     ],
+    "location": "Tsavo East National Park",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "Swop the white sands of Watamu for the red-dust plains of Tsavo East on this action-packed, 2-day overnight safari.",
+    "overview": "Swop the white sands of Watamu for the red-dust plains of Tsavo East on this action-packed, 2-day overnight safari. Perfect for travelers short on time but eager for adventure, this curated journey brings you face-to-face with Kenya's iconic big cats, massive elephant herds, and breathtaking landscapes like Mudanda Rock and Lugard's Falls. Complete with a magical lunch experience overlooking a bustling wilderness watering hole, it is the ultimate coastal escape into the heart of the wild.",
+    "itinerary": [
+      {
+        "day": "Day 1",
+        "title": "To Tsavo East",
+        "description": "Your adventure begins at 6:00 AM with a prompt pickup from your hotel in Watamu. Leaving the Indian Ocean breeze behind, you will journey inland toward Tsavo East National Park, an expansive wilderness spanning over 13,500 square kilometers of open grasslands and towering ancient baobab trees. Arriving at the park gates around 10:30 AM, you will immediately dive into your first game drive, scanning the vast plains for lions, cheetahs, rhinos, and Tsavo's famous red-dust elephants.\n\nBy midday, you will head to the remotely located Satao Camp for a fresh, delicious lunch. This unique camp directly overlooks a bustling natural watering hole, offering you the unforgettable experience of watching large elephant herds come down for a drink while you dine. After lunch, take some time to unwind and absorb the peaceful wilderness surroundings. In the late afternoon, you will head back out into the bush with your expert guide to explore iconic landmarks like Mudanda Rock—a massive rock formation that acts as a vital water catchment for wildlife—and the dramatic rapids of Lugard’s Falls on the Galana River. As the sun sets, you will head to your accommodation for a relaxing evening, dinner, and a peaceful night under the African stars."
+      },
+      {
+        "day": "Day 2",
+        "title": "Day 2 Safari & Game Drives",
+        "description": "Wake up early to catch the savannah at its most magical. After a hearty early morning breakfast at your lodge, you will head out for a sunrise game drive. The early morning hours offer the absolute best opportunity to witness big cats on the hunt and active plains game before the tropical sun heats the earth. Your guide will track the freshest prints through the morning dew, giving you plenty of chances for spectacular wildlife photography.\n\nAt 10:00 AM, you will conclude your wildlife viewing, check out of the park gates, and begin your return journey back toward the Kenyan coast. Enjoy a relaxed drive as the rugged wilderness gradually shifts back into tropical palms, arriving safely at your Watamu hotel in the late afternoon with unforgettable safari memories."
+      }
+    ],
+    "showItinerary": true,
+    "included": [
+      "Drinking water (Other drinks not included)",
+      "Park Entry Fees",
+      "Licensed local guide",
+      "Full safari insurance (replacement vehicle, rescue service, etc.)",
+      "All transfers aboard 4×4 jeeps with panoramic sunroof for photo safaris",
+      "Overnight stay in a lodge/camp with all-inclusive treatment (drinks with meals excluded)"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Breakfast on the day of departure",
+      "Tips and any personal extras"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sunscreen, hat, sunglasses, lip balm. Insect repellent (preferably a tropical version, reapply approximately every 6-8 hours).",
+      "Comfortable clothing is essential; bring a long change of clothes for the evening and early morning, and a T-shirt and shorts for the day. Remember to bring several changes of clothes, as the red soil of the savannah can be uncomfortable.",
+      "A swimsuit, as accommodations often have a swimming pool",
+      "Comfortable shoes (preferably old ones, not white ones, to avoid staining them)",
+      "A UK-style power adapter and a power bank are also essential",
+      "A camera and, if you want to be sure of seeing animals even from a distance, binoculars"
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "2 Day Tsavo East National Park Safari | Ecological Safaris Kenya",
+    "metaDescription": "Swop the white sands of Watamu for the red-dust plains of Tsavo East on this action-packed, 2-day overnight safari."
   },
   {
-    id: "safari-lake-nakuru-tsavo-wilderness",
-    enabled: true,
-    deleted: false,
-    slug: "lake-nakuru-tsavo-rhino-wildlife-safari",
-    href: "/safaris/lake-nakuru-tsavo-rhino-wildlife-safari",
-    badge: "Rhino Sanctuary",
-    showBadge: true,
-    title: "Lake Nakuru & Tsavo Wilderness Expedition",
-    showTitle: true,
-    price: "From $380 / person",
-    priceLabel: "From $380 / person",
-    showPrice: true,
-    rating: 4.8,
-    showRating: true,
-    duration: "Full Day / Multi-Day Option",
-    showDuration: true,
-    imageUrl:
-      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
-    heroImageUrl:
-      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
-    heroBackgroundColor: "#1b4332",
-    indicatorColor: "#d97706",
-    location: "Great Rift Valley & National Reserves",
-    showLocation: true,
-    schedule: "Scheduled Weekly Departures",
-    showSchedule: true,
-    itinerary: [
-      {
-        day: "Day 1",
-        title: "Nairobi to Lake Nakuru Sanctuary (Rhinos & Flamingos)",
-        description:
-          "Morning departure from Nairobi descending into the Great Rift Valley. Arrive at Lake Nakuru National Park, a world-famous sanctuary for endangered black and white rhinos and Rothschild's giraffes. Enjoy an extensive game drive along the alkaline lake shores dotted with flamingos and pelicans, and visit Baboon Cliff for panoramic views before dinner at the lodge.",
-      },
-      {
-        day: "Day 2",
-        title: "Tsavo Red-Elephant Plains & Scenic Return Journey",
-        description:
-          "Early morning departure heading towards Tsavo's sweeping savannah plains. Track the legendary red-dust elephants, lions, and diverse plains game. Savor a scenic safari lunch before beginning the return journey, concluding an unforgettable multi-reserve wilderness expedition.",
-      },
-    ],
-    showItinerary: true,
-    groupType: "Day Trippers · Wildlife Enthusiasts · Birders",
-    showGroupType: true,
-    description:
-      "Track endangered black and white rhinos in the Lake Nakuru sanctuary, marvel at flocks of flamingos, and encounter the famous red-dust elephants of Tsavo.",
-    overview:
-      "Journey through the dramatic landscapes of the Great Rift Valley to Lake Nakuru National Park and the expansive savannahs of Tsavo. Lake Nakuru serves as an internationally renowned sanctuary for critically endangered black and white rhinos and rare Rothschild’s giraffes.\n\nEnjoy game drives along the lake’s scenic shoreline, climb to Baboon Cliff for panoramic valley vistas, and witness hundreds of bird species including pelicans and flamingos. An essential expedition for wildlife conservationists and enthusiastic safari adventurers.",
-    included: [
-      "4x4 Safari vehicle with pop-up roof",
-      "Professional safari naturalist & tracker",
-      "National park entrance & conservation fees",
-      "Buffet lunch at a panoramic safari lodge",
-      "Unlimited bottled mineral water on game drives",
-      "Baboon Cliff viewpoint excursion",
-      "Hotel pickup and return transfers",
-    ],
-    showIncluded: true,
-    whyChoose: [
-      "Guaranteed sightings of black and white rhinos in a protected haven",
-      "Spectacular birding with over 450 recorded avian species",
-      "Dramatic Rift Valley escarpment viewpoints and waterfall stops",
-      "Small intimate groups with dedicated naturalist commentary",
-    ],
-    showWhyChoose: true,
-    knowBeforeYouGo: [
-      "Departure is early morning at 6:00 AM to maximize morning animal activity.",
-      "Bring binoculars for exceptional birdwatching and predator spotting.",
-      "Camera zoom lens recommended for shoreline bird and rhino photography.",
-      "Wear comfortable safari attire with layers for temperature shifts.",
-    ],
-    showKnowBeforeYouGo: true,
-    notIncluded: [
-      "Driver-guide gratuities and tips",
-      "Personal travel and medical insurance",
-      "Alcoholic beverages and personal purchases",
-    ],
-    showNotIncluded: true,
-    gallery: [
-      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+    "id": "safari-northern-kenya-adventure-culture-wildlife",
+    "href": "/safaris/northern-kenya-adventure-culture-wildlife",
+    "slug": "northern-kenya-adventure-culture-wildlife",
+    "badge": "Wild Frontier",
+    "showBadge": true,
+    "title": "Northern Kenya: Adventure, Culture & Wildlife",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 5,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "15 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
       "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2071&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop"
     ],
+    "location": "Northern Kenya & Samburu",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "A 15-day round trip from Nairobi through the Great Rift Valley, the Northern deserts, and Kenya's wildest frontier — encountering ancient tribes, volcanic lakes, and landscapes found nowhere else o...",
+    "overview": "A 15-day round trip from Nairobi through the Great Rift Valley, the Northern deserts, and Kenya's wildest frontier — encountering ancient tribes, volcanic lakes, and landscapes found nowhere else on Earth.",
+    "itinerary": [
+      {
+        "day": "Day 1",
+        "title": "Nairobi to Lake Baringo via Nakuru",
+        "description": "You will depart early from Nairobi to beat the city traffic, descending down the dramatic Great Rift Valley escarpment. Passing through Nakuru, the drive continues north into the increasingly arid landscapes toward Kampi Ya Samaki, the main gateway village on the western shores of Lake Baringo.\n\nScenery: Watch the lush, high-altitude green farmlands slowly shift into dry acacia scrubland.\n\nStay: Check into your lake house or lodge on the shores around Kampi ya Samaki, enjoying a serene evening as the sun sets over the water."
+      },
+      {
+        "day": "Day 2",
+        "title": "Birdwatching & Boat Explorations on Lake Baringo",
+        "description": "Lake Baringo is a freshwater haven in a sea of alkaline environments, making it a world-renowned paradise for ornithologists and nature lovers.\n\nBoat Ride: A morning boat excursion introduces you to local fishermen using traditional ambach boats and gives you upfront views of massive hippos and crocodiles.\n\nAvian Abundance: Keep your eyes peeled and cameras ready for the iconic African fish eagle swooping down for a catch, alongside hundreds of other bird species."
+      },
+      {
+        "day": "Day 3",
+        "title": "Excursion to the Dramatic Lake Bogoria",
+        "description": "Take a short half-day excursion south to Lake Bogoria, an intensely alkaline lake that offers a starkly different environment than Baringo.\n\nGeothermal Activity: Explore the shoreline on foot to witness violent geysers and bubbling hot springs shooting steaming water into the air.\n\nFlamingo Spectacle: Depending on water levels, the lake is frequently painted an incredible shade of pink by millions of lesser flamingos feeding on the abundant blue-green algae."
+      },
+      {
+        "day": "Day 4",
+        "title": "Journey into the Highlands to Maralal",
+        "description": "Leave the Rift Valley floor behind as you climb steadily up the rugged escarpments toward Maralal, the vibrant heartland of the Samburu people.\n\n\nWildlife: Spend the afternoon exploring the Maralal National Sanctuary, an unfenced wilderness area where you can spot zebras, impalas, and hyenas moving freely.\n\nCulture & Comfort: Take time to visit a traditional Samburu village to learn about their deeply preserved pastoralist customs before retiring to your eco-lodge for the night."
+      },
+      {
+        "day": "Day 5",
+        "title": "The Wild Track to Loiyangalani (Lake Turkana)",
+        "description": "This is one of the most iconic, raw overland drives in East Africa. You will wind your way through dramatic rocky valleys, past remote settlements, down toward the starkly beautiful shores of the Jade Sea.\n\nRemote Picnic: Enjoy a packed picnic lunch surrounded by wide-open horizons and surreal volcanic landscapes.\nArrival: Arrive in Loiyangalani on the eastern edge of Lake Turkana and settle into Palm Shade camp for a warm desert evening."
+      },
+      {
+        "day": "Day 6",
+        "title": "Day Trip to the Biosphere of Mount Kulal",
+        "description": "Take a rugged excursion out of the desert heat and ascend the slopes of Mount Kulal, an isolated volcanic mountain that rises dramatically out of the arid plains.\n\nUnique Ecosystem: The mountain acts as a sky island, topped with a dense montane forest that contrasts sharply with the desert below and serves as a vital water catchment area.\n\nViews & Tribes: Take in panoramic vistas looking back down toward Lake Turkana and interact with the local communities who navigate this unique ecosystem."
+      },
+      {
+        "day": "Day 7",
+        "title": "Into the Vast Chalbi Desert",
+        "description": "Bid farewell to the lake shores and cross into the shimmering expanses of the Chalbi Desert, Kenya’s only true desert land.\n\nSurreal Terrain: Drive over massive salt flats, bleached white pans, and fields of dark volcanic rock under an endless blue sky.\n\nDesert Communities: You will encounter the resilient Gabbra people, nomadic pastoralists who have masterfully adapted their lives to these harsh, striking conditions."
+      },
+      {
+        "day": "Day 8",
+        "title": "Desert Dunes & Star-Filled Skies",
+        "description": "Spend a dedicated day soaking in the isolation and unique natural features of the desert interior.\n\nDune Exploration: Seek out the shifting sand dunes that rise out of the flats, capturing incredible photographs of the undulating patterns.\n\nUnparalleled Stargazing: With zero light pollution for hundreds of miles, your overnight stay under the open desert sky will reveal a breathtaking, crystal-clear canopy of stars."
+      },
+      {
+        "day": "Day 9",
+        "title": "Crossing the Plains to Marsabit",
+        "description": "Travel southward out of the low desert plains, climbing the massive volcanic shield that forms the oasis town of Marsabit.\n\nTransition: The oppressive desert heat drops away as you ascend into the cool, mist-shrouded highlands of Marsabit County.\n\nRest: Check into your accommodation in town or near the park gate to rest after several heavy days of desert driving."
+      },
+      {
+        "day": "Day 10",
+        "title": "Forest Exploration in Marsabit National Park",
+        "description": "Spend the day immersed in the thick, tropical montane forest of Marsabit National Park, a mountain oasis completely surrounded by arid land.\n\nCrater Lakes: Visit the famous Lake Paradise, a pristine crater lake tucked deep inside the forest canopy that serves as a vital watering hole.\n\nGiant Tuskers: Keep watch for the park's famous, uniquely large-tusked elephants, carrying on the legacy of the legendary elephant \"Ahmed.\""
+      },
+      {
+        "day": "Day 11",
+        "title": "Decending to Archer’s Post",
+        "description": "Drive down from the Marsabit highlands along the smooth, paved A2 highway—a welcome break from the rough dirt tracks—heading south toward the lively trading outpost of Archer's Post.\nRiverfront Retreat: Check into Lions Cave Camp, perfectly elevated on the scenic cliffs right above the brown waters of the Ewaso Nyiro River.\n\nRelaxation: Unwind on the camp's open terraces, listening to the rushing river below and watching wildlife come to drink."
+      },
+      {
+        "day": "Day 12",
+        "title": "Big Game Safaris in Samburu National Reserve",
+        "description": "Dedicate a full day to exploring the arid plains of the Samburu National Reserve, an exceptional wildlife sanctuary split by the Ewaso Nyiro River.\n\nThe Samburu Special Five: Actively track the unique dry-country species found here: the Somali ostrich, Grevy's zebra, reticulated giraffe, long-necked gerenuk, and the elegant beisa oryx.\n\nPredator Action: The park boasts high concentrations of leopards, lions, and large herds of desert-adapted elephants."
+      },
+      {
+        "day": "Day 13",
+        "title": "Drive Southwest to Nanyuki",
+        "description": "Drive further south, passing through the bustling town of Isiolo as you climb into the fertile, cool foothills of Mount Kenya.\n\nLandscape Shift: Watch the environment completely transform from arid bushland back into lush wheat fields and timber forests.\n\nEquator Crossing: Stop at the formal Equator marker just outside Nanyuki town for a quick photo and geographic demonstration before checking into your lodge."
+      },
+      {
+        "day": "Day 14",
+        "title": "Rhino & Chimpanzee Tracking at Ol Pejeta",
+        "description": "Spend a thrilling final safari day exploring the private expanses of the Ol Pejeta Conservancy.\n\nRhino Sanctuary: As the largest sanctuary for black rhinos in East Africa, you'll have unparalleled chances to see these majestic, highly protected creatures up close.\n\nSweetwaters Chimpanzees: Visit the dedicated rescue center to observe rescued chimpanzees thriving in an expansive, natural riverine habitat."
+      },
+      {
+        "day": "Day 15",
+        "title": "Return Journey to Nairobi",
+        "description": "Enjoy a relaxed morning breakfast overlooking the plains before making the final drive back down to Nairobi. You will arrive back in the capital city by afternoon, bringing a definitive, unforgettable conclusion to your epic Northern Kenyan loop."
+      }
+    ],
+    "showItinerary": true,
+    "included": [
+      "Park Entry Fees",
+      "Licensed local guide",
+      "Drinking water (Other drinks not included)",
+      "Full safari insurance (replacement vehicle, rescue service, etc.)",
+      "All transfers aboard 4×4 jeeps with panoramic sunroof for photo safaris",
+      "Overnight stay in a lodge/camp with all-inclusive treatment (drinks with meals excluded)"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Breakfast on the day of departure",
+      "Tips and any personal extras"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sunscreen, hat, sunglasses, lip balm. Insect repellent (preferably a tropical version, reapply approximately every 6-8 hours).",
+      "Comfortable clothing is essential; bring a long change of clothes for the evening and early morning, and a T-shirt and shorts for the day. Remember to bring several changes of clothes, as the red soil of the savannah can be uncomfortable.",
+      "A swimsuit, as accommodations often have a swimming pool",
+      "Comfortable shoes (preferably old ones, not white ones, to avoid staining them)",
+      "A UK-style power adapter and a power bank are also essential",
+      "A camera and, if you want to be sure of seeing animals even from a distance, binoculars"
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "Northern Kenya: Adventure, Culture & Wildlife | Ecological Safaris Kenya",
+    "metaDescription": "A 15-day round trip from Nairobi through the Great Rift Valley, the Northern deserts, and Kenya's wildest frontier — encountering ancient tribes, volcanic lakes, and landscapes found nowhere else o..."
   },
+  {
+    "id": "safari-4-days-safari-tsavo-east-taita-hills-amboseli",
+    "href": "/safaris/4-days-safari-tsavo-east-taita-hills-amboseli",
+    "slug": "4-days-safari-tsavo-east-taita-hills-amboseli",
+    "badge": "Immersive Game Drives",
+    "showBadge": true,
+    "title": "4 Days Safari - Tsavo East , Taita Hills & Amboseli",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 4.9,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "4 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
+      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop"
+    ],
+    "location": "Tsavo East, Taita Hills & Amboseli",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "Embark on an unforgettable 4-day journey from the beaches of Watamu to three of Kenya's most iconic wildlife havens.",
+    "overview": "Embark on an unforgettable 4-day journey from the beaches of Watamu to three of Kenya's most iconic wildlife havens. From tracking the famous red elephants of Tsavo East to sleeping above a bustling watering hole at the unique Sarova Salt Lick Lodge, this safari offers the perfect blend of adventure and spectacular views. Your journey culminates in Amboseli, where massive elephant herds roam against the magnificent backdrop of snow-capped Mt. Kilimanjaro.",
+    "itinerary": [
+      {
+        "day": "Day 1",
+        "title": "Watamu – Tsavo East",
+        "description": "We will pick you up from your hotel at 6:00am, after breakfast we proceed to Tsavo East National Park, where we will arrive at 10:30am. Tsavo East National Park is home of the Red Elephants, with game drives route to Ashnil Aruba Lodge where we check in for lunch. After lunch, relax, then afternoon game drives in the park. We have the chance to watch zebras, buffalos, giraffes, gazelle, waterbucks and big families of elephants. Look out also for a diversity of resident bird species which includes hornbills, eagles, kingfishers, weavers, giant bustards, storks and marabou. In the sunset we return to Voi Safari Lodge for dinner and overnight."
+      },
+      {
+        "day": "Day 2",
+        "title": "Tsavo east - Taita Hills",
+        "description": "Early morning game drive in Tsavo east National park, followed by breakfast and departure drive to the Taita Hills Sanctuary arriving in time for lunch at Sarova Taita Hills Lodge, followed by game drive in the conservancy and later on check in at Salt Lick Lodge. Salt Lick Lodge is a truly unique architectural concept, with luxurious oval-shaped rooms, overlooking a waterhole, which attracts a large number of wildlife, especially the elephants. In the evenings, the animals gather at the waterhole-a spectacular site to behold to drink at the watering hole."
+      },
+      {
+        "day": "Day 3",
+        "title": "Taita Hills – Amboseli national park",
+        "description": "After breakfast, we depart for Amboseli National Park at around 7:30am arriving in time at our camp for check in and lunch. Freshen up in your room or soak in the fabulously constructed swimming pool overlooking the Snow Capped Mt. Kilimanjaro, before an introductory late afternoon game drive at 1630hrs in the Park with a perfect view of Africa's highest mountain, Kilimanjaro in the backdrop!\nWe return to the camp for dinner and overnight stay."
+      },
+      {
+        "day": "Day 4",
+        "title": "End of Safari Back to Watamu",
+        "description": "Morning game drive before breakfast to see the beautiful morning sunrise, back to the lodge for breakfast after which a game drive is conducted as we try to make our way home arriving back to your hotel in the evening."
+      }
+    ],
+    "showItinerary": true,
+    "included": [
+      "Drinking water (Other drinks not included)",
+      "Park Entry Fees",
+      "Licensed local guide",
+      "Full safari insurance (replacement vehicle, rescue service, etc.)",
+      "All transfers aboard 4×4 jeeps with panoramic sunroof for photo safaris",
+      "Overnight stay in a lodge/camp with all-inclusive treatment (drinks with meals excluded)"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Breakfast on the day of departure",
+      "Tips and any personal extras"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sunscreen, hat, sunglasses, lip balm. Insect repellent (preferably a tropical version, reapply approximately every 6-8 hours).",
+      "Comfortable clothing is essential; bring a long change of clothes for the evening and early morning, and a T-shirt and shorts for the day. Remember to bring several changes of clothes, as the red soil of the savannah can be uncomfortable.",
+      "A swimsuit, as accommodations often have a swimming pool",
+      "Comfortable shoes (preferably old ones, not white ones, to avoid staining them)",
+      "A UK-style power adapter and a power bank are also essential",
+      "A camera and, if you want to be sure of seeing animals even from a distance, binoculars"
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "4 Days Safari - Tsavo East , Taita Hills & Amboseli | Ecological Safaris Kenya",
+    "metaDescription": "Embark on an unforgettable 4-day journey from the beaches of Watamu to three of Kenya's most iconic wildlife havens."
+  },
+  {
+    "id": "safari-3-days-tsavo-east-amboseli-safari-from-watamu",
+    "href": "/safaris/3-days-tsavo-east-amboseli-safari-from-watamu",
+    "slug": "3-days-tsavo-east-amboseli-safari-from-watamu",
+    "badge": "Mt. Kilimanjaro View",
+    "showBadge": true,
+    "title": "3 Days Tsavo East & Amboseli Safari from Watamu",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 4.8,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "3 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
+      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2000&auto=format&fit=crop"
+    ],
+    "location": "Tsavo East & Amboseli National Park",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "Maximize your holiday with an action-packed 3-day safari from Watamu to Tsavo East and Amboseli National Park.",
+    "overview": "Maximize your holiday with an action-packed 3-day safari from Watamu to Tsavo East and Amboseli National Park. This budget-friendly, high-reward itinerary treats you to thrilling game drives, magnificent views of Mt. Kilimanjaro, and up-close encounters with Kenya's iconic big tuskers and predators. It’s the ultimate short-duration African wilderness getaway.",
+    "itinerary": [
+      {
+        "day": "Day 1",
+        "title": "Watamu - Tsavo East",
+        "description": "You will be picked up from your Hotel and then we will departure from Watamu to 06:00\nThe road to get to the Tsavo East park is red earth and cross the largest forest of Kenya. The first stop will be at the Crocodile Point, where you will see the crocodiles in the river Galana and enter the park around 10:30 and we will begin our Game Drive looking for all the animals in the African savannah. At 13:00 we arrive at the lodge or tented camp for lunch. Time for a little relaxation in your room or by the pool. \nAt 15:30 you will have for the second game drive to explore the park until sunset.\nWe will then return to the lodge or camp for dinner and overnight."
+      },
+      {
+        "day": "Day 2",
+        "title": "Tsavo East – Amboseli National Park",
+        "description": "Kilimanjaro and the Elephants of Amboseli\nDepart Tsavo East for Amboseli, a fantastic park with great views of Mount Kilimanjaro and is one of the best places in Africa to encounter large herds of elephants up close! Amboseli has several habitat types ranging from savannahs to wetlands and you can find over 600 species of birds, big cats and many other species of mammals including all the Big Five! You’ll arrive in time for lunch at Kibo, a very nice tented camp, each spacious tent has a double or twin bed, a fully equipped ensuite bathroom and small veranda where you can relax. The camp has a large dining area, bar, swimming pool to cool off, a small art gallery and souvenir shop. Late afternoon you'll head out into Amboseli for a game drive to explore the park, you'll also stop off at Mzima springs for a short nature walk where you can see hippos and many species of bird. The next day will be spent on game drives exploring Amboseli with all meals in camp."
+      },
+      {
+        "day": "Day 3",
+        "title": "End of Safari",
+        "description": "You will have a morning game drive after an early breakfast; you will leave the park at 10:00am, you will drive back to your hotel arriving in the late afternoon."
+      }
+    ],
+    "showItinerary": true,
+    "included": [
+      "Drinking water (Other drinks not included)",
+      "Park Entry Fees",
+      "Licensed local guide",
+      "Full safari insurance (replacement vehicle, rescue service, etc.)",
+      "All transfers aboard 4×4 jeeps with panoramic sunroof for photo safaris",
+      "Overnight stay in a lodge/camp with all-inclusive treatment (drinks with meals excluded)"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Tips",
+      "Breakfast on the day of departure"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sunscreen, hat, sunglasses, lip balm. Insect repellent (preferably a tropical version, reapply approximately every 6-8 hours)",
+      "Comfortable clothing is essential; bring a long change of clothes for the evening and early morning, and a T-shirt and shorts for the day. Remember to bring several changes of clothes, as the red soil of the savannah can be uncomfortable.",
+      "A swimsuit, as accommodations often have a swimming pool.",
+      "Comfortable shoes (preferably old ones, not white ones, to avoid staining them)",
+      "A UK-style power adapter and a power bank are also essential",
+      "A camera and, if you want to be sure of seeing animals even from a distance, binoculars"
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "3 Days Tsavo East & Amboseli Safari from Watamu | Ecological Safaris Kenya",
+    "metaDescription": "Maximize your holiday with an action-packed 3-day safari from Watamu to Tsavo East and Amboseli National Park."
+  },
+  {
+    "id": "safari-7-day-safari-masai-mara-lake-nakuru-amboseli-tsavo-east",
+    "href": "/safaris/7-day-safari-masai-mara-lake-nakuru-amboseli-tsavo-east",
+    "slug": "7-day-safari-masai-mara-lake-nakuru-amboseli-tsavo-east",
+    "badge": "Big Five Viewing",
+    "showBadge": true,
+    "title": "7 Day Safari Masai Mara, Lake Nakuru, Amboseli, Tsavo East",
+    "showTitle": true,
+    "price": "Contact for Pricing",
+    "showPrice": true,
+    "priceLabel": "Contact for pricing",
+    "rating": 5,
+    "showRating": true,
+    "deleted": false,
+    "enabled": true,
+    "duration": "7 Days",
+    "showDuration": true,
+    "imageUrl": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
+    "heroImageUrl": "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
+    "heroBackgroundColor": "#1b4332",
+    "indicatorColor": "#d97706",
+    "gallery": [
+      "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=2068&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?q=80&w=2000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=2000&auto=format&fit=crop"
+    ],
+    "location": "Masai Mara, Lake Nakuru, Amboseli & Tsavo East",
+    "showLocation": true,
+    "schedule": "Daily Departures (Year-Round)",
+    "showSchedule": true,
+    "groupType": "Small Groups · Private 4x4 · Families",
+    "showGroupType": true,
+    "description": "This tour takes you to one of the best National parks in Kenya where you will experience memorable moments, a visit to Masai Mara National reserve will give you a guarantee to watch animals in the ...",
+    "overview": "This tour takes you to one of the best National parks in Kenya where you will experience memorable moments, a visit to Masai Mara National reserve will give you a guarantee to watch animals in the most concentrated animal areas in Kenya. Amboseli National Park hosts the slopes of Mt Kilimanjaro and will make a very good backdrop for your photos.",
+    "itinerary": [
+      {
+        "day": "Day 1",
+        "title": "Nairobi – Masai Mara",
+        "description": "After an early arrival at the Airport you get a very warm welcome by our professional driver guide, we will then have a first tour briefing we drive to the Masai Mara National Reserve considered as one of the largest and most beautiful protected areas of Kenya and reveal the originality of Africa. Arrive and check in at Mara Sopa lodge time for lunch, after lunch we will have some time to relax before we embark on the first game drive through the savannah landscape of the Masai Mara Game Reserve, with a good chance to track down the Big Five (elephant, buffalo, lion, rhino, leopard). Come back for dinner and overnight at the lodge."
+      },
+      {
+        "day": "Day 2",
+        "title": "Explore Masai Mara",
+        "description": "After breakfast, we will do a full day game drives in the Masai Mara National Reserve. This park is famous for its savannah landscapes and its wildlife concentration per square km. The prospects are good to observe all those fascinating animals that can usually only be seen in numerous nature documentaries. We will have a picnic at a site in the Mara River, bordering the Serengeti. The river is part of the Masai Mara-Serengeti ecosystem, which is particularly known for the largest wildlife migration on earth in the world. Every year, Wildebeests, zebras and antelopes form a huge animal trains cross the brown, foaming river full of crocodiles."
+      },
+      {
+        "day": "Day 3",
+        "title": "Masai Mara National Reserve - Lake Naivasha",
+        "description": "After breakfast we drive to Lake Naivasha which is the highest and most beautiful lake in the Rift Valley, where especially the bird-watchers, with over 400 documented bird species will be pleased. At an altitude of 1910 m, the water is crystal clear and surrounded by thick papyrus. Arrive and check in at Lake Naivasha sopa lodge in time for lunch, after a shot rest, we will to a boat trip to the lake and experience more of the attractions found in the lake. The Lake Naivasha Sopa Lodge is surrounded by a vast terrain, which varies in landscape. Thus we find steppe landscape, but also grass and trees come close like in a local park. You may be able to observe the many animals roaming around the Lodge in search of food. At night it is fun to look out the window and see the hippopotamus within a few meters from the lodge warthogs or even giraffes on your way. Overnight and dinner at Lake Naivasha sopa lodge."
+      },
+      {
+        "day": "Day 4",
+        "title": "Lake Naivasha - Amboseli",
+        "description": "Today we will proceed to the world-famous Amboseli National Park and reach our camp in time for lunch. The afternoon will be spend just relaxing at the swimming pool where you can also watch some animals in the nearby park. In option, you can take a walk with a Masai guide to the village. Dinner and overnight at Kibo Safari camp."
+      },
+      {
+        "day": "Day 5",
+        "title": "Amboseli National Park",
+        "description": "After breakfast we will drive to Amboseli National park and make full day game viewing at the park. Picnic lunch will be taken at the Observation hill. This park jewel is not only a unique panorama of Mount Kilimanjaro, but also one of the best wildlife areas to observe elephants at close quarters. Amboseli is a small park with numerous zebras, wildebeests, Thomson gazelles, Grant gazelles, buffalos, waterbucks, hippos, lions, cheetahs, jackals and hyenas. A highlight of the park is the Observation Hill, from which we will have a stunning view over the swamp and savannah landscape. You have the possibility to relax at the pool and to enjoy the view on Mount Kilimanjaro. Overnight at Kibo Safari Camp."
+      },
+      {
+        "day": "Day 6",
+        "title": "Amboseli National Park - Tsavo East",
+        "description": "After an early morning game drive, we proceed to Tsavo East National Park, home of the Red Elephants, with game drives en route to Ashnil Aruba Lodge where we check in for lunch. After lunch, relax, then afternoon game drives in the park. We have the chance to watch zebras, buffalos, giraffes, gazellen, waterbucks and big families of elephants. Look out also for a diversity of resident bird species which includes hornbills, eagles, kingfishers, weavers, giant bustards, storks and marabou. In the sunset we return to Ashnil Aruba Lodge for dinner and overnight."
+      },
+      {
+        "day": "Day 7",
+        "title": "End of Safari",
+        "description": "Before breakfast we will go on a game drive to watch the animals during their activities in the early morning. After breakfast we drive to Bachuma Gate with game enroute and take our lunch there before we proceed to Mombasa where our journey comes to an end."
+      }
+    ],
+    "showItinerary": true,
+    "included": [
+      "Drinking water (Other drinks not included)",
+      "Park Entry Fees",
+      "Licensed local guide",
+      "Full safari insurance (replacement vehicle, rescue service, etc.)",
+      "All transfers aboard 4×4 jeeps with panoramic sunroof for photo safaris",
+      "Overnight stay in a lodge/camp with all-inclusive treatment (drinks with meals excluded)"
+    ],
+    "showIncluded": true,
+    "notIncluded": [
+      "Breakfast on the day of departure",
+      "Tips and any personal extras"
+    ],
+    "showNotIncluded": true,
+    "whyChoose": [
+      "Guaranteed window seats in custom 4x4 Safari Land Cruisers with pop-up roofs",
+      "Professional KPSGA certified local naturalist guide",
+      "Handpicked safari lodges and tented camps with full board dining",
+      "Comprehensive game drives covering premier wildlife corridors"
+    ],
+    "showWhyChoose": true,
+    "knowBeforeYouGo": [
+      "Sunscreen, hat, sunglasses, lip balm. Insect repellent (preferably a tropical version, reapply approximately every 6-8 hours).",
+      "Comfortable clothing is essential; bring a long change of clothes for the evening and early morning, and a T-shirt and shorts for the day. Remember to bring several changes of clothes, as the red soil of the savannah can be uncomfortable.",
+      "A swimsuit, as accommodations often have a swimming pool",
+      "Comfortable shoes (preferably old ones, not white ones, to avoid staining them)",
+      "A UK-style power adapter and a power bank are also essential",
+      "A camera and, if you want to be sure of seeing animals even from a distance, binoculars"
+    ],
+    "showKnowBeforeYouGo": true,
+    "metaTitle": "7 Day Safari Masai Mara, Lake Nakuru, Amboseli, Tsavo East | Ecological Safaris Kenya",
+    "metaDescription": "This tour takes you to one of the best National parks in Kenya where you will experience memorable moments, a visit to Masai Mara National reserve will give you a guarantee to watch animals in the ..."
+  }
 ];
 
 /**
@@ -652,6 +1186,8 @@ export const defaultConfig: AppConfig = {
     appName: "Twinbird Travel Agency",
     logoUrl: "/brand/logos/logo.png",
     logoDarkUrl: "/brand/logos/logo-white.png",
+    logoNavUrl: "/brand/logos/logo-nav.png",
+    logoNavDarkUrl: "/brand/logos/logo-nav-white.png",
     darkMode: false,
     faviconUrl: "/brand/favicons/favicon.ico",
     accentColor: "#d97706",

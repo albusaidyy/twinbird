@@ -11,11 +11,13 @@ export function Navbar({
   primaryColor,
   appName,
   logoUrl,
+  logoNavUrl,
   nav,
 }: {
   primaryColor: string;
   appName: string;
   logoUrl: string | null;
+  logoNavUrl?: string | null;
   nav: { key: string; label: string; href: string; enabled: boolean }[];
 }) {
   const pathname = usePathname();
@@ -29,15 +31,20 @@ export function Navbar({
     setMobileMenuOpen(false);
   }
 
+  // Resolve nav-specific logo (without bottom tagline/description)
+  const effectiveLogo = logoNavUrl || (logoUrl && logoUrl.includes('/brand/logos/logo.')
+    ? logoUrl.replace('/brand/logos/logo.', '/brand/logos/logo-nav.')
+    : logoUrl);
+
   return (
     <nav 
       className="sticky inset-x-0 top-0 z-50 transition-all duration-300 border-b bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md shadow-sm border-border"
     >
       <div className="flex items-center justify-between px-6 lg:px-12 py-3">
         <Link href="/" className="flex items-center gap-2.5">
-          {logoUrl && logoUrl.trim() !== '' ? (
+          {effectiveLogo && effectiveLogo.trim() !== '' ? (
             <Image
-              src={logoUrl}
+              src={effectiveLogo}
               alt={appName}
               width={160}
               height={48}

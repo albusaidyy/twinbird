@@ -7,6 +7,8 @@ export interface Branding {
   font: string;
   logoUrl: string | null;
   logoDarkUrl?: string | null;
+  logoNavUrl?: string | null;
+  logoNavDarkUrl?: string | null;
   faviconUrl: string | null;
   darkMode: boolean;
 }

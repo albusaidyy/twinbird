@@ -205,6 +205,25 @@ async function generateAllAssetsFromLogo() {
   fs.writeFileSync(path.join(logosDir, 'logo-dark.png'), processedDarkBuffer);
   console.log('✓ Updated dark master logo: public/brand/logos/logo-white.png & logo-dark.png');
 
+  // Generate Nav Logos (without bottom tagline/description)
+  const { data: rawLightData, info: rawLightInfo } = await sharp(processedLightBuffer).raw().toBuffer({ resolveWithObject: true });
+  const cropH = Math.round(rawLightInfo.height * (730 / 969));
+  const navLightRaw = rawLightData.subarray(0, rawLightInfo.width * Math.min(rawLightInfo.height, cropH) * rawLightInfo.channels);
+  const navLightBuffer = await sharp(navLightRaw, {
+    raw: { width: rawLightInfo.width, height: Math.min(rawLightInfo.height, cropH), channels: rawLightInfo.channels },
+  }).trim().png({ quality: 100 }).toBuffer();
+
+  const { data: rawDarkData, info: rawDarkInfo } = await sharp(processedDarkBuffer).raw().toBuffer({ resolveWithObject: true });
+  const navDarkRaw = rawDarkData.subarray(0, rawDarkInfo.width * Math.min(rawDarkInfo.height, cropH) * rawDarkInfo.channels);
+  const navDarkBuffer = await sharp(navDarkRaw, {
+    raw: { width: rawDarkInfo.width, height: Math.min(rawDarkInfo.height, cropH), channels: rawDarkInfo.channels },
+  }).trim().png({ quality: 100 }).toBuffer();
+
+  fs.writeFileSync(path.join(logosDir, 'logo-nav.png'), navLightBuffer);
+  fs.writeFileSync(path.join(logosDir, 'logo-nav-white.png'), navDarkBuffer);
+  fs.writeFileSync(path.join(logosDir, 'logo-nav-dark.png'), navDarkBuffer);
+  console.log('✓ Updated nav master logos: logo-nav.png & logo-nav-white.png');
+
   // Generate SVG Wrappers
   const lightMeta = await sharp(processedLightBuffer).metadata();
   const lWidth = lightMeta.width || 500;
@@ -227,6 +246,23 @@ async function generateAllAssetsFromLogo() {
   fs.writeFileSync(path.join(logosDir, 'logo-white.svg'), darkSvg);
   fs.writeFileSync(path.join(logosDir, 'logo-dark.svg'), darkSvg);
   console.log('✓ Updated master SVGs: logo.svg, logo-white.svg, logo-dark.svg');
+
+  // Nav SVG wrappers
+  const nlMeta = await sharp(navLightBuffer).metadata();
+  const nlSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${nlMeta.width} ${nlMeta.height}" width="100%" height="100%">
+  <image href="data:image/png;base64,${navLightBuffer.toString('base64')}" width="${nlMeta.width}" height="${nlMeta.height}" />
+</svg>
+`;
+  fs.writeFileSync(path.join(logosDir, 'logo-nav.svg'), nlSvg);
+
+  const ndMeta = await sharp(navDarkBuffer).metadata();
+  const ndSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ndMeta.width} ${ndMeta.height}" width="100%" height="100%">
+  <image href="data:image/png;base64,${navDarkBuffer.toString('base64')}" width="${ndMeta.width}" height="${ndMeta.height}" />
+</svg>
+`;
+  fs.writeFileSync(path.join(logosDir, 'logo-nav-white.svg'), ndSvg);
+  fs.writeFileSync(path.join(logosDir, 'logo-nav-dark.svg'), ndSvg);
+  console.log('✓ Updated nav SVGs: logo-nav.svg, logo-nav-white.svg, logo-nav-dark.svg');
 
   // Save isolated symbol master
   fs.writeFileSync(path.join(logosDir, 'symbol.png'), isolatedSymbolBuffer);
