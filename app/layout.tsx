@@ -11,12 +11,35 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getAppConfig();
   const favicon = config.branding.faviconUrl || '/brand/favicons/favicon.ico';
+  const title = config.branding.appName || 'Twinbird Travel Agency';
+  const description =
+    config.branding.metaDescription ||
+    'Book domestic & international flight tickets, customized Kenya safari expeditions, and unforgettable travel packages with Twinbird Travel Agency.';
+  const ogImage = config.branding.ogImageUrl || '/brand/icon.png';
 
   return {
-    title: config.branding.appName || 'Twinbird Travel Agency',
-    description:
-      config.branding.metaDescription ||
-      'Premier African wildlife safaris, Big Five game drives, and luxury bush expeditions in Kenya.',
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      siteName: title,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
     icons: {
       icon: [
         { url: '/brand/favicons/favicon.svg', type: 'image/svg+xml' },

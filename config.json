@@ -8,9 +8,10 @@
     "logoNavDarkUrl": "/brand/logos/logo-nav-white.png",
     "darkMode": false,
     "faviconUrl": "/brand/favicons/favicon.ico",
+    "ogImageUrl": "/brand/icon.png",
     "accentColor": "#d97706",
     "primaryColor": "#1b4332",
-    "metaDescription": "Premier African wildlife safaris, Big Five game drives, and luxury bush expeditions in Kenya."
+    "metaDescription": "Book domestic & international flight tickets, customized Kenya safari expeditions, and unforgettable travel packages with Twinbird Travel Agency."
   },
   "features": {
     "tours": true,
@@ -1360,6 +1361,15 @@
     },
     "experiences": {
       "items": [
+        {
+          "id": "exp-1789312112068",
+          "icon": "Plane",
+          "title": "Air Ticketing",
+          "ctaHref": "/air-ticketing",
+          "enabled": true,
+          "ctaLabel": "Book Now",
+          "description": "Book domestic and international flights to, from, and within Kenya."
+        },
         {
           "id": "exp-tailored-safaris",
           "icon": "Trees",

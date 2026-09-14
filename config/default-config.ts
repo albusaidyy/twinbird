@@ -1190,10 +1190,11 @@ export const defaultConfig: AppConfig = {
     logoNavDarkUrl: "/brand/logos/logo-nav-white.png",
     darkMode: false,
     faviconUrl: "/brand/favicons/favicon.ico",
+    ogImageUrl: "/brand/icon.png",
     accentColor: "#d97706",
     primaryColor: "#1b4332",
     metaDescription:
-      "Premier African wildlife safaris, Big Five game drives, and luxury bush expeditions in Kenya.",
+      "Book domestic & international flight tickets, customized Kenya safari expeditions, and unforgettable travel packages with Twinbird Travel Agency.",
   },
 
   features: {

@@ -10,6 +10,7 @@ export interface Branding {
   logoNavUrl?: string | null;
   logoNavDarkUrl?: string | null;
   faviconUrl: string | null;
+  ogImageUrl?: string | null;
   darkMode: boolean;
 }
 
