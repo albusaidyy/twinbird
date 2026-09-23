@@ -271,7 +271,7 @@ export interface ContactFormConfig {
   title: string;
   subtitle?: string;
   buttonText: string;
-  accessKey: string;
+  accessKey?: string;
   fields?: DynamicFormField[];
 }
 

@@ -1771,7 +1771,6 @@ export const defaultConfig: AppConfig = {
       enabled: true,
       subtitle:
         "Secure your private 4x4 vehicle and luxury safari lodge reservation.",
-      accessKey: "",
       buttonText: "Submit Safari Reservation",
       fields: [
         {
@@ -1885,7 +1884,6 @@ export const defaultConfig: AppConfig = {
       enabled: true,
       subtitle:
         "Book your spot for an incredible day trip and coastal experience.",
-      accessKey: "",
       buttonText: "Submit Excursion Reservation",
       fields: [
         {
@@ -2050,7 +2048,6 @@ export const defaultConfig: AppConfig = {
       ],
       enabled: true,
       subtitle: "Our safari team typically responds within 2-4 hours.",
-      accessKey: "",
       buttonText: "Submit Safari Request",
       backgroundColor: "#ffffff",
     },

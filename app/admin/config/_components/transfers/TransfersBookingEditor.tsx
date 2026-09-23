@@ -127,16 +127,6 @@ export function TransfersBookingEditor({ draft, set }: EditorProps) {
           />
         </FieldRow>
 
-        <FieldRow label="Web3Forms Access Key (Optional override)" id="trb-key">
-          <Input
-            id="trb-key"
-            value={f.accessKey || ''}
-            placeholder="Leave blank to use Contact Page access key"
-            onChange={(e) => updF('accessKey', e.target.value)}
-            disabled={f.enabled === false}
-          />
-        </FieldRow>
-
         <FieldRow label="Notice Footer Text" id="trb-notice">
           <Input
             id="trb-notice"

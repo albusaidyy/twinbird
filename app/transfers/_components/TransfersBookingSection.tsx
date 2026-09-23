@@ -84,7 +84,7 @@ export function TransfersBookingSection({
     toast.success(`Selected route: ${formatted}`);
   };
 
-  const accessKey = fConfig.accessKey || defaultAccessKey;
+  const accessKey = fConfig.accessKey || defaultAccessKey || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 
   // Dynamic Form Submission
   const handleSubmit = async (e: React.FormEvent) => {

@@ -59,7 +59,9 @@ export function ContactSection({
 
       const customerName = String(formData.name || formData.fullName || 'Valued Guest');
 
-      if (fConfig.accessKey && fConfig.accessKey.trim() !== '') {
+      const accessKey = fConfig.accessKey || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+      if (accessKey && accessKey.trim() !== '') {
         const response = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
           headers: {
@@ -67,7 +69,7 @@ export function ContactSection({
             Accept: 'application/json',
           },
           body: JSON.stringify({
-            access_key: fConfig.accessKey,
+            access_key: accessKey,
             subject: `Contact Inquiry: ${customerName}`,
             from_name: customerName,
             ...payload,

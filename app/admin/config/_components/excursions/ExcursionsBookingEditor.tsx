@@ -128,19 +128,6 @@ export function ExcursionsBookingEditor({ draft, set }: EditorProps) {
           />
         </FieldRow>
 
-        <FieldRow label="Web3Forms Access Key (Optional override)" id="ebf-key">
-          <Input
-            id="ebf-key"
-            value={f.accessKey || ''}
-            placeholder="Leave blank to use Contact Page access key"
-            onChange={(e) => updF('accessKey', e.target.value)}
-            disabled={f.enabled === false}
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            If left blank, it automatically uses the access key configured on the Contact Page form.
-          </p>
-        </FieldRow>
-
         <Separator />
 
         {/* Dynamic Form Fields Builder */}

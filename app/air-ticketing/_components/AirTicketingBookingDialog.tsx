@@ -125,7 +125,7 @@ export function AirTicketingBookingDialog({
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
   };
 
-  const accessKey = fConfig.accessKey || defaultAccessKey;
+  const accessKey = fConfig.accessKey || defaultAccessKey || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {

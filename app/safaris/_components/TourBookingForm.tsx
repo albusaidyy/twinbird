@@ -49,7 +49,7 @@ export function TourBookingForm({
     return null;
   }
 
-  const accessKey = formConfig.accessKey || defaultAccessKey;
+  const accessKey = formConfig.accessKey || defaultAccessKey || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
 
   const handleChange = (fieldId: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [fieldId]: value }));

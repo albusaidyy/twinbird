@@ -84,10 +84,6 @@ export function ContactDetailsEditor({ draft, set }: EditorProps) {
         <FieldRow label="Submit Button Text" id="cf-btn">
           <Input id="cf-btn" value={f.buttonText} onChange={(e) => updF('buttonText', e.target.value)} />
         </FieldRow>
-        <FieldRow label="Web3Forms Access Key" id="cf-key">
-          <Input id="cf-key" value={f.accessKey} onChange={(e) => updF('accessKey', e.target.value)} placeholder="Enter key from web3forms.com" />
-          <p className="text-xs text-muted-foreground mt-1">Get your free access key from <a href="https://web3forms.com/" target="_blank" rel="noreferrer" className="underline text-blue-500">web3forms.com</a> to receive emails.</p>
-        </FieldRow>
 
         <Separator />
 

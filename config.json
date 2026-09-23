@@ -2439,7 +2439,6 @@
       ],
       "enabled": true,
       "subtitle": "Secure your private 4x4 vehicle and luxury safari lodge reservation.",
-      "accessKey": "",
       "buttonText": "Submit Safari Reservation"
     },
     "metaDescription": "Explore our luxury African wildlife safaris, Big Five game drives, and national park expeditions in Maasai Mara, Amboseli, and Tsavo."
@@ -2583,7 +2582,6 @@
       ],
       "enabled": true,
       "subtitle": "Our safari team typically responds within 2-4 hours.",
-      "accessKey": "0d68a0e7-cd00-48c8-86f3-4fab7af13020",
       "buttonText": "Submit Safari Request",
       "backgroundColor": "#ffffff"
     },
@@ -3305,7 +3303,6 @@
       ],
       "enabled": true,
       "subtitle": "Book your spot for an incredible day trip and coastal experience.",
-      "accessKey": "",
       "buttonText": "Submit Excursion Reservation"
     },
     "metaDescription": "Discover unforgettable day tours, marine park snorkeling, cultural excursions, and coastal adventures across Kenya."

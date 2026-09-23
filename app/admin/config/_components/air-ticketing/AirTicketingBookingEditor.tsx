@@ -127,16 +127,6 @@ export function AirTicketingBookingEditor({ draft, set }: EditorProps) {
           />
         </FieldRow>
 
-        <FieldRow label="Web3Forms Access Key (Optional override)" id="atb-key">
-          <Input
-            id="atb-key"
-            value={f.accessKey || ''}
-            placeholder="Leave blank to use Contact Page access key"
-            onChange={(e) => updF('accessKey', e.target.value)}
-            disabled={f.enabled === false}
-          />
-        </FieldRow>
-
         <FieldRow label="Notice Footer Text" id="atb-notice">
           <Input
             id="atb-notice"
