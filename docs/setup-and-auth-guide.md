@@ -186,7 +186,7 @@ create table if not exists site_config_versions (
 );
 ```
 
-> **Safety**: The migration is fully idempotent (`create table if not exists` and schema validation). It is safe to run multiple times.
+> **Safety & RLS**: The migration is fully idempotent. For Row Level Security (RLS) policies securing `site_config` against unauthorized public writes, see [Database Security & RLS Guide](./database-security-and-rls.md).
 
 ---
 
