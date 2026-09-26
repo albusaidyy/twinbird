@@ -50,6 +50,8 @@ export interface MediaItem {
   name: string;
   source: 'local' | 'uploaded';
   folder?: string;
+  storagePath?: string;
+  size?: number;
 }
 
 export interface MediaLibraryResult {
@@ -172,7 +174,15 @@ export async function getMediaLibrary(
     : await getLocalImagesForFolder(folder);
 
   // 2. Fetch uploaded images from Supabase Storage for this folder
-  let uploadedUrls: string[] = [];
+  interface UploadedItemRecord {
+    url: string;
+    name: string;
+    folder: string;
+    storagePath: string;
+    size?: number;
+  }
+  const uploadedRecords: UploadedItemRecord[] = [];
+
   try {
     const foldersToFetch: string[] = [];
     if (includeAll) {
@@ -199,34 +209,70 @@ export async function getMediaLibrary(
             const { data: urlData } = supabase.storage
               .from(MEDIA_BUCKET)
               .getPublicUrl(`${f}/${item.name}`);
-            return urlData.publicUrl;
+            const size =
+              typeof item.metadata?.size === 'number'
+                ? item.metadata.size
+                : typeof item.metadata?.contentLength === 'number'
+                  ? item.metadata.contentLength
+                  : undefined;
+            return {
+              url: urlData.publicUrl,
+              name: item.name,
+              folder: f,
+              storagePath: `${f}/${item.name}`,
+              size,
+            };
           });
       })
     );
 
     for (const res of results) {
       if (res.status === 'fulfilled') {
-        uploadedUrls.push(...res.value);
+        uploadedRecords.push(...res.value);
       }
     }
   } catch {
     // Supabase storage query fails gracefully
   }
 
-  uploadedUrls = Array.from(new Set(uploadedUrls));
+  // Deduplicate records by URL
+  const seenUrls = new Set<string>();
+  const uniqueRecords = uploadedRecords.filter((rec) => {
+    if (seenUrls.has(rec.url)) return false;
+    seenUrls.add(rec.url);
+    return true;
+  });
+
+  const uploadedUrls = uniqueRecords.map((r) => r.url);
+
+  function getLocalFileSize(relPath: string): number | undefined {
+    try {
+      const cleanRel = relPath.replace(/^\/+/, '');
+      const fullPath = path.join(getPublicDir(), cleanRel);
+      if (fs.existsSync(fullPath)) {
+        return fs.statSync(fullPath).size;
+      }
+    } catch {
+      // ignore
+    }
+    return undefined;
+  }
 
   const items: MediaItem[] = [
-    ...uploadedUrls.map((url) => ({
-      url,
-      name: url.split('/').pop() || 'uploaded-image',
+    ...uniqueRecords.map((rec) => ({
+      url: rec.url,
+      name: rec.name || rec.url.split('/').pop() || 'uploaded-image',
       source: 'uploaded' as const,
-      folder: url.includes('/uploads/') ? 'uploads' : folder,
+      folder: rec.folder,
+      storagePath: rec.storagePath,
+      size: rec.size,
     })),
     ...localImages.map((url) => ({
       url,
       name: url.split('/').pop() || 'local-image',
       source: 'local' as const,
       folder: url.split('/').slice(1, -1).join('/') || folder,
+      size: getLocalFileSize(url),
     })),
   ];
 
@@ -254,23 +300,24 @@ export async function getMediaFiles(folder: string = 'uploads'): Promise<string[
 export async function uploadImage(
   formData: FormData,
   folder: string = 'uploads'
-): Promise<{ url: string } | { error: string }> {
+): Promise<{ url: string; storagePath?: string; size?: number } | { error: string }> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return { error: 'Unauthorized' };
 
   const file = formData.get('file') as File | null;
   if (!file) return { error: 'No file provided' };
 
-  const ext = file.name.split('.').pop();
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'webp';
   const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
+  const contentType = file.type || (ext === 'webp' ? 'image/webp' : 'application/octet-stream');
 
   const { error } = await supabase.storage
     .from(MEDIA_BUCKET)
     .upload(fileName, buffer, {
-      contentType: file.type,
+      contentType,
       upsert: false,
     });
 
@@ -280,7 +327,63 @@ export async function uploadImage(
     .from(MEDIA_BUCKET)
     .getPublicUrl(fileName);
 
-  return { url: urlData.publicUrl };
+  return { url: urlData.publicUrl, storagePath: fileName, size: file.size };
+}
+
+/**
+ * Extracts the storage object path relative to the bucket from a public URL or raw path.
+ */
+function extractStoragePath(urlOrPath: string, bucket: string = MEDIA_BUCKET): string {
+  if (!urlOrPath.startsWith('http://') && !urlOrPath.startsWith('https://')) {
+    return urlOrPath.replace(/^\/+/, '');
+  }
+
+  try {
+    const parsed = new URL(urlOrPath);
+    const pathname = decodeURIComponent(parsed.pathname);
+
+    // Look for /storage/v1/object/(?:public|sign)/<bucket>/(.+)
+    const prefixMatch = pathname.match(new RegExp(`/storage/v1/object/(?:public|sign)/${bucket}/(.+)$`));
+    if (prefixMatch && prefixMatch[1]) {
+      return prefixMatch[1];
+    }
+
+    // Look for /<bucket>/(.+)
+    const bucketIdx = pathname.indexOf(`/${bucket}/`);
+    if (bucketIdx !== -1) {
+      return pathname.substring(bucketIdx + bucket.length + 2);
+    }
+  } catch {
+    // fallback
+  }
+
+  return urlOrPath.replace(/^\/+/, '');
+}
+
+/**
+ * Deletes an uploaded image from Supabase Storage.
+ * Requires an active admin session.
+ */
+export async function deleteUploadedImage(
+  urlOrPath: string
+): Promise<{ success: true } | { error: string }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { error: 'Unauthorized' };
+
+  if (!urlOrPath) return { error: 'No image path provided' };
+
+  const storagePath = extractStoragePath(urlOrPath);
+  if (!storagePath) return { error: 'Could not resolve storage path' };
+
+  const { error } = await supabase.storage
+    .from(MEDIA_BUCKET)
+    .remove([storagePath]);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: true };
 }
 
 // ─── Config helpers ────────────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -150,10 +151,12 @@ export function BrandingEditor({ draft, set }: EditorProps) {
             <div className="max-w-md mx-auto rounded-2xl border border-border/60 bg-card overflow-hidden shadow-xs text-card-foreground">
               <div className="relative aspect-[1.91/1] w-full bg-muted flex items-center justify-center overflow-hidden">
                 {previewImage ? (
-                  <img
+                  <Image
                     src={previewImage}
                     alt={previewTitle}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <span className="text-xs text-muted-foreground">No image specified</span>
@@ -172,10 +175,12 @@ export function BrandingEditor({ draft, set }: EditorProps) {
             <div className="max-w-md mx-auto rounded-none border border-[#dadde1] dark:border-border bg-card overflow-hidden text-card-foreground">
               <div className="relative aspect-[1.91/1] w-full bg-muted flex items-center justify-center overflow-hidden">
                 {previewImage ? (
-                  <img
+                  <Image
                     src={previewImage}
                     alt={previewTitle}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                 ) : (
                   <span className="text-xs text-muted-foreground">No image specified</span>
@@ -195,10 +200,12 @@ export function BrandingEditor({ draft, set }: EditorProps) {
               <div className="rounded-lg overflow-hidden border border-black/10 dark:border-white/10 bg-white dark:bg-[#0b2420]">
                 <div className="relative aspect-[1.91/1] w-full bg-muted overflow-hidden">
                   {previewImage ? (
-                    <img
+                    <Image
                       src={previewImage}
                       alt={previewTitle}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <span className="text-xs text-muted-foreground">No image specified</span>

@@ -11,8 +11,12 @@ import {
   Search,
   HardDrive,
   Cloud,
+  Trash2,
 } from 'lucide-react';
-import { uploadImage, getMediaLibrary, type MediaItem } from '../../actions';
+import { toast } from 'sonner';
+import { uploadImage, getMediaLibrary, deleteUploadedImage, type MediaItem } from '../../actions';
+import { optimizeImageToWebP, formatFileSize } from '@/lib/image-optimizer';
+import { ImageDeleteConfirmDialog } from './ImageDeleteConfirmDialog';
 
 export function ImageUploaderField({
   id,
@@ -38,6 +42,8 @@ export function ImageUploaderField({
   const [filterTab, setFilterTab] = useState<'all' | 'local' | 'uploaded'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showAllFolders, setShowAllFolders] = useState(false);
+  const [deletingItem, setDeletingItem] = useState<MediaItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadImages = async (includeAll = showAllFolders) => {
     setLoadingLibrary(true);
@@ -52,14 +58,41 @@ export function ImageUploaderField({
     }
   };
 
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
+    setIsDeleting(true);
+    try {
+      const pathToDelete = deletingItem.storagePath || deletingItem.url;
+      const res = await deleteUploadedImage(pathToDelete);
+      if ('error' in res) {
+        toast.error(res.error || 'Failed to delete image');
+      } else {
+        toast.success('Image permanently deleted from storage');
+        setMediaItems((prev) => prev.filter((item) => item.url !== deletingItem.url));
+        if (value === deletingItem.url) {
+          onChange('');
+        }
+        setDeletingItem(null);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete image';
+      toast.error(msg);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
     setError(null);
     try {
+      // Optimize image client-side to WebP (resizes & compresses to keep payload tiny)
+      const { file: optimizedFile } = await optimizeImageToWebP(file, { folder });
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', optimizedFile);
       const res = await uploadImage(formData, folder);
       if ('error' in res) {
         setError(res.error);
@@ -67,11 +100,14 @@ export function ImageUploaderField({
         onChange(res.url);
         const newItem: MediaItem = {
           url: res.url,
-          name: file.name || res.url.split('/').pop() || 'uploaded-image',
+          name: optimizedFile.name || res.url.split('/').pop() || 'uploaded-image',
           source: 'uploaded',
           folder,
+          storagePath: res.storagePath,
+          size: optimizedFile.size,
         };
         setMediaItems((prev) => [newItem, ...prev.filter((item) => item.url !== res.url)]);
+        toast.success('Image optimized & uploaded as WebP');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Upload failed';
@@ -178,7 +214,20 @@ export function ImageUploaderField({
             }}
           />
           <div className="flex-1 min-w-0 overflow-hidden">
-            <span className="block text-[9px] uppercase font-semibold text-muted-foreground tracking-wider truncate">Active Image</span>
+            <div className="flex items-center gap-1.5">
+              <span className="block text-[9px] uppercase font-semibold text-muted-foreground tracking-wider truncate">
+                Active Image
+              </span>
+              {(() => {
+                const active = mediaItems.find((i) => i.url === value);
+                const sizeStr = active?.size ? formatFileSize(active.size) : null;
+                return sizeStr ? (
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    ({sizeStr})
+                  </span>
+                ) : null;
+              })()}
+            </div>
             <p className="truncate text-[11px] font-mono text-foreground leading-tight">{value}</p>
           </div>
           <button
@@ -332,30 +381,38 @@ export function ImageUploaderField({
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 max-h-64 overflow-y-auto p-1">
               {filteredItems.map((item) => {
                 const isSelected = value === item.url;
+                const canDelete = !isSelected && item.source === 'uploaded';
+                const formattedSize = formatFileSize(item.size);
+
                 return (
-                  <button
+                  <div
                     key={item.url}
-                    type="button"
-                    onClick={() => onChange(item.url)}
-                    className={`group relative aspect-video rounded-md overflow-hidden border-2 transition-all text-left bg-muted/40 hover:opacity-95 ${
+                    className={`group relative aspect-video rounded-md overflow-hidden border-2 transition-all bg-muted/40 ${
                       isSelected
                         ? 'border-primary ring-2 ring-primary/30'
-                        : 'border-border/60 hover:border-foreground/40'
+                        : 'border-border/60 hover:border-foreground/30'
                     }`}
-                    title={`${item.name} (${item.url})`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={item.url}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
+                    {/* Clickable Image Selection Area */}
+                    <button
+                      type="button"
+                      onClick={() => onChange(item.url)}
+                      className="absolute inset-0 w-full h-full text-left cursor-pointer focus:outline-none"
+                      aria-label={`Select ${item.name}`}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.url}
+                        alt={item.name}
+                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </button>
 
-                    {/* Source Tag Badge */}
-                    <div className="absolute top-1 left-1">
+                    {/* Source & Size Tags (Top Left) */}
+                    <div className="pointer-events-none absolute top-1.5 left-1.5 z-10 flex items-center gap-1">
                       <span
-                        className={`text-[9px] font-semibold px-1 py-0.5 rounded shadow-sm uppercase tracking-wider ${
+                        className={`text-[9px] font-semibold px-1.5 py-0.5 rounded shadow-xs uppercase tracking-wider ${
                           item.source === 'local'
                             ? 'bg-slate-900/80 text-slate-100'
                             : 'bg-blue-600/90 text-white'
@@ -363,26 +420,65 @@ export function ImageUploaderField({
                       >
                         {item.source === 'local' ? 'Local' : 'Upload'}
                       </span>
+                      {formattedSize && (
+                        <span
+                          className={`text-[9px] font-mono px-1.5 py-0.5 rounded shadow-xs backdrop-blur-xs ${
+                            (item.size ?? 0) > 1024 * 1024
+                              ? 'bg-amber-500/90 text-black font-semibold'
+                              : 'bg-black/60 text-white/90 font-medium'
+                          }`}
+                        >
+                          {formattedSize}
+                        </span>
+                      )}
                     </div>
 
-                    {/* Selected Checkmark */}
-                    {isSelected && (
-                      <div className="absolute top-1 right-1 rounded-full bg-primary p-0.5 text-primary-foreground shadow-sm">
-                        <Check className="h-3 w-3 stroke-[3]" />
+                    {/* Top Right: Selected Checkmark OR Delete button for unselected uploaded items */}
+                    {isSelected ? (
+                      <div className="pointer-events-none absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md ring-2 ring-background">
+                        <Check className="h-3.5 w-3.5 stroke-[3]" />
                       </div>
-                    )}
+                    ) : canDelete ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingItem(item);
+                        }}
+                        disabled={disabled || uploading || isDeleting}
+                        aria-label="Delete image"
+                        className="absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-black/60 text-white/90 hover:bg-destructive hover:text-white shadow-md opacity-0 group-hover:opacity-100 transition-all duration-150 cursor-pointer"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    ) : null}
 
-                    {/* Overlay Filename */}
-                    <div className="absolute inset-x-0 bottom-0 bg-black/70 px-1.5 py-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="truncate text-[9px] font-medium text-white">{item.name}</p>
+                    {/* Smooth Gradient Hover Overlay with Filename & Size */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent pt-6 pb-1.5 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <p className="truncate text-[10px] font-medium text-white drop-shadow-xs">
+                        {item.name}
+                      </p>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
           )}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ImageDeleteConfirmDialog
+        isOpen={!!deletingItem}
+        imageName={deletingItem?.name || ''}
+        imageUrl={deletingItem?.url || ''}
+        imageSize={deletingItem?.size}
+        isDeleting={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => {
+          if (!isDeleting) setDeletingItem(null);
+        }}
+      />
     </div>
   );
 }
