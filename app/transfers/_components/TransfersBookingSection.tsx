@@ -18,7 +18,6 @@ interface TransfersBookingSectionProps {
   formConfig?: TransferBookingFormConfig;
   primaryColor?: string;
   accentColor?: string;
-  defaultAccessKey?: string;
 }
 
 export function TransfersBookingSection({
@@ -29,7 +28,6 @@ export function TransfersBookingSection({
   formConfig,
   primaryColor = '#1b4332',
   accentColor = '#d97706',
-  defaultAccessKey,
 }: TransfersBookingSectionProps) {
   const fConfig: TransferBookingFormConfig = formConfig || defaultConfig.transfersPage!.bookingForm!;
 
@@ -84,7 +82,7 @@ export function TransfersBookingSection({
     toast.success(`Selected route: ${formatted}`);
   };
 
-  const accessKey = fConfig.accessKey || defaultAccessKey || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
 
   // Dynamic Form Submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -104,30 +102,42 @@ export function TransfersBookingSection({
         payload[f.label || f.id] = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : (val || 'N/A');
       });
 
-      const customerName = String(formData.fullName || formData.name || 'Valued Guest');
-
-      if (accessKey && accessKey.trim() !== '') {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: accessKey,
-            subject: `Transfer Booking Request: ${customerName} (${selectedRouteName || 'Custom Route'})`,
-            from_name: customerName,
-            ...payload,
-          }),
-        });
-
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error(result.message || 'Submission failed. Please try again.');
+      // Also include any extra keys in formData that might not match fields explicitly
+      Object.entries(formData).forEach(([k, v]) => {
+        const matchedField = fields.find((f) => f.id === k);
+        const label = matchedField ? (matchedField.label || matchedField.id) : k;
+        if (payload[label] === undefined) {
+          payload[label] = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : (v || 'N/A');
         }
-      } else {
-        // Mock submission delay if no accessKey is configured
-        await new Promise((resolve) => setTimeout(resolve, 600));
+      });
+
+      const customerName = String(formData.fullName || formData.name || 'Valued Guest');
+      const customerEmail = String(formData.email || formData.emailAddress || '');
+
+      const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+      const formPayload = new FormData();
+      if (accessKey) {
+        formPayload.append('access_key', accessKey);
+      }
+      formPayload.append('subject', `Transfer Booking Request: ${customerName} (${selectedRouteName || 'Custom Route'})`);
+      formPayload.append('from_name', customerName);
+      if (customerEmail) {
+        formPayload.append('email', customerEmail);
+      }
+
+      // Append each field individually for clean styled email view
+      Object.entries(payload).forEach(([k, v]) => {
+        formPayload.append(k, String(v));
+      });
+
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formPayload,
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Submission failed. Please try again.');
       }
 
       setSubmitted(true);

@@ -102,7 +102,6 @@ export default function SingleTourPage({
                 tour={tour}
                 config={toursPage.bookingForm}
                 primaryColor={primaryColor}
-                defaultAccessKey={config.contactPage?.form?.accessKey}
               />
             </div>
           </div>

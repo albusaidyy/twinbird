@@ -54,7 +54,6 @@ export default function AirTicketingPage() {
         formConfig={airTicketingPage.bookingForm}
         primaryColor={primaryColor}
         accentColor={accentColor}
-        defaultAccessKey={config.contactPage?.form?.accessKey}
       />
 
       {/* 4. Partner Airlines & Flight Operators Logo Carousel */}

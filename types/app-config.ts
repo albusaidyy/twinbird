@@ -236,7 +236,6 @@ export interface TourBookingFormConfig {
   title?: string;
   subtitle?: string;
   buttonText?: string;
-  accessKey?: string;
   fields?: DynamicFormField[];
 }
 
@@ -271,7 +270,6 @@ export interface ContactFormConfig {
   title: string;
   subtitle?: string;
   buttonText: string;
-  accessKey?: string;
   fields?: DynamicFormField[];
 }
 
@@ -395,7 +393,6 @@ export interface TransferBookingFormConfig {
   title: string;
   subtitle?: string;
   buttonText?: string;
-  accessKey?: string;
   whatsappNumber?: string;
   whatsappText?: string;
   noticeText?: string;
@@ -546,7 +543,6 @@ export interface AirTicketingBookingFormConfig {
   title: string;
   subtitle?: string;
   buttonText?: string;
-  accessKey?: string;
   whatsappNumber?: string;
   whatsappText?: string;
   noticeText?: string;

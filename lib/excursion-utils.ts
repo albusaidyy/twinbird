@@ -11,7 +11,17 @@ export function slugifyExcursion(title: string): string {
 
 export function getExcursionSlug(excursion: ExcursionItem): string {
   if (excursion.slug && excursion.slug.trim() !== "") {
-    return excursion.slug;
+    return excursion.slug.trim().toLowerCase();
+  }
+  if (excursion.href && excursion.href.trim() !== "") {
+    const extracted = excursion.href
+      .replace(/^https?:\/\/[^/]+/i, "")
+      .replace(/^\/?excursions\//i, "")
+      .replace(/^\/+|\/+$/g, "")
+      .trim();
+    if (extracted && !extracted.startsWith("http")) {
+      return extracted.toLowerCase();
+    }
   }
   return slugifyExcursion(excursion.title);
 }

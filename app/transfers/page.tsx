@@ -50,7 +50,6 @@ export default function TransfersPage() {
         formConfig={transfersPage.bookingForm}
         primaryColor={primaryColor}
         accentColor={accentColor}
-        defaultAccessKey={config.contactPage?.form?.accessKey}
       />
 
       {/* 3. Modern Fleet Overview */}

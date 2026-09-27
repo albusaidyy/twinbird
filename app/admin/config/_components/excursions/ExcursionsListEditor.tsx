@@ -26,8 +26,9 @@ import { BackgroundColorPicker } from "../shared/BackgroundColorPicker";
 import { SectionHeaderFields } from "../shared/SectionHeaderFields";
 import { ImageUploaderField } from "../shared/ImageUploaderField";
 import { TourDeleteConfirmDialog } from "../shared/TourDeleteConfirmDialog";
-import { isExcursionMatch } from "@/lib/excursion-utils";
+import { isExcursionMatch, slugifyExcursion } from "@/lib/excursion-utils";
 import { MultilineArrayField } from "../shared/MultilineArrayField";
+import { CarouselPhotosManager } from "../shared/CarouselPhotosManager";
 
 export function ExcursionsListEditor({ draft, set }: EditorProps) {
   const fallbackExcursions = defaultConfig.homepage.excursions || {
@@ -145,16 +146,27 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
         ...(currentTours.items || defaultConfig.excursionsPage!.tours.items),
       ];
 
+      const baseSlug = slugifyExcursion("New Coastal Excursion");
+      const existingSlugs = new Set(
+        epItems.map((item) => (item.slug || slugifyExcursion(item.title)).toLowerCase())
+      );
+      let uniqueSlug = baseSlug;
+      let counter = 1;
+      while (existingSlugs.has(uniqueSlug)) {
+        counter++;
+        uniqueSlug = `${baseSlug}-${counter}`;
+      }
+
       const newId = `exc_${Date.now()}`;
       const newExcursion: ExcursionItem = {
         id: newId,
-        title: "New Coastal Excursion",
-        slug: "new-coastal-excursion",
+        title: counter > 1 ? `New Coastal Excursion ${counter}` : "New Coastal Excursion",
+        slug: uniqueSlug,
         badge: "Day Adventure",
         duration: "Full Day · 8 Hours",
         rating: 4.9,
         price: "From $95 / person",
-        href: `/excursions/${newId}`,
+        href: `/excursions/${uniqueSlug}`,
         imageUrl: "/images/hero/hero.jpg",
         description:
           "Experience an unforgettable coastal day trip and marine exploration.",
@@ -707,9 +719,17 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                         <Input
                           id={`exp-title-${i}`}
                           value={t.title}
-                          onChange={(e) =>
-                            updExcursion(i, "title", e.target.value)
-                          }
+                          onChange={(e) => {
+                            const newTitle = e.target.value;
+                            updExcursion(i, "title", newTitle);
+                            // Only auto-fill the URL slug if it is a new item with default placeholder slug
+                            const isNew = !t.slug || t.slug.startsWith("new-coastal-excursion");
+                            if (isNew) {
+                              const newSlug = slugifyExcursion(newTitle);
+                              updExcursion(i, "slug", newSlug);
+                              updExcursion(i, "href", `/excursions/${newSlug}`);
+                            }
+                          }}
                           disabled={!t.enabled || isDeleted}
                           className={
                             isDeleted
@@ -822,14 +842,40 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                     </div>
                   </div>
 
-                  <FieldRow label="Custom URL / Slug" id={`exp-href-${i}`}>
-                    <Input
-                      id={`exp-href-${i}`}
-                      value={t.href || ""}
-                      placeholder="/excursions/..."
-                      onChange={(e) => updExcursion(i, "href", e.target.value)}
-                      disabled={!t.enabled || isDeleted}
-                    />
+                  <FieldRow
+                    label="URL Slug (Custom Link)"
+                    id={`exp-slug-${i}`}
+                    desc="Defines the unique web address: /excursions/[slug]"
+                  >
+                    <div className="flex items-center rounded-md border border-input bg-background shadow-xs overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                      <span className="px-2.5 py-1.5 text-xs text-muted-foreground bg-muted/50 border-r border-border shrink-0 select-none">
+                        /excursions/
+                      </span>
+                      <Input
+                        id={`exp-slug-${i}`}
+                        value={
+                          t.slug !== undefined
+                            ? t.slug
+                            : (t.href
+                                ? t.href
+                                    .replace(/^https?:\/\/[^/]+/i, "")
+                                    .replace(/^\/?excursions\//i, "")
+                                    .replace(/^\/+|\/+$/g, "")
+                                : slugifyExcursion(t.title))
+                        }
+                        placeholder="e.g. wasini-island-dolphin-dhow-tour"
+                        onChange={(e) => {
+                          const val = e.target.value
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")
+                            .replace(/[^a-z0-9_-]/g, "");
+                          updExcursion(i, "slug", val);
+                          updExcursion(i, "href", val ? `/excursions/${val}` : "/excursions");
+                        }}
+                        disabled={!t.enabled || isDeleted}
+                        className="border-0 shadow-none rounded-none focus-visible:ring-0 text-xs font-mono"
+                      />
+                    </div>
                   </FieldRow>
                 </div>
 
@@ -927,150 +973,16 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                         }
                       />
 
-                      <div className="space-y-3 pt-2 border-t border-border/60">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-xs font-semibold">
-                            Carousel Photos (Auto-scrolling Gallery)
-                          </Label>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const baseImg = t.imageUrl || '/images/hero/hero.jpg';
-                              const currentGallery =
-                                t.gallery && t.gallery.length > 0
-                                  ? t.gallery
-                                  : [baseImg, baseImg, baseImg];
-                              updExcursion(i, 'gallery', [
-                                ...currentGallery,
-                                '/images/hero/hero.jpg',
-                              ]);
-                            }}
-                            disabled={!t.enabled || isDeleted}
-                            className="gap-1.5 h-7 text-xs"
-                          >
-                            <Plus className="h-3 w-3" /> Add Carousel Photo
-                          </Button>
-                        </div>
-
-                        <div className="space-y-2.5">
-                          {(t.gallery && t.gallery.length > 0
-                            ? t.gallery
-                            : [
-                                t.imageUrl || '/images/hero/hero.jpg',
-                                t.imageUrl || '/images/hero/hero.jpg',
-                                t.imageUrl || '/images/hero/hero.jpg',
-                              ]
-                          ).map((imgUrl, gIdx) => {
-                            const baseImg = t.imageUrl || '/images/hero/hero.jpg';
-                            const currentGallery =
-                              t.gallery && t.gallery.length > 0
-                                ? t.gallery
-                                : [baseImg, baseImg, baseImg];
-                            const updGalleryImg = (newUrl: string) => {
-                              const updated = [...currentGallery];
-                              updated[gIdx] = newUrl;
-                              updExcursion(i, 'gallery', updated);
-                            };
-                            const removeGalleryImg = () => {
-                              const updated = currentGallery.filter(
-                                (_, idx) => idx !== gIdx
-                              );
-                              const fallbackImg = t.imageUrl || '/images/hero/hero.jpg';
-                              updExcursion(
-                                i,
-                                'gallery',
-                                updated.length > 0
-                                  ? updated
-                                  : [fallbackImg, fallbackImg, fallbackImg]
-                              );
-                            };
-                            const moveGalleryImg = (dir: 'up' | 'down') => {
-                              const target =
-                                dir === 'up' ? gIdx - 1 : gIdx + 1;
-                              if (
-                                target < 0 ||
-                                target >= currentGallery.length
-                              )
-                                return;
-                              const updated = [...currentGallery];
-                              const temp = updated[gIdx];
-                              updated[gIdx] = updated[target];
-                              updated[target] = temp;
-                              updExcursion(i, 'gallery', updated);
-                            };
-
-                            return (
-                              <div
-                                key={gIdx}
-                                className="rounded-lg border border-border p-3 bg-card shadow-xs space-y-2 min-w-0"
-                              >
-                                <div className="flex items-center justify-between gap-2 pb-1 border-b border-border/40">
-                                  <span className="text-xs font-semibold text-muted-foreground">
-                                    Carousel Photo #{gIdx + 1}
-                                  </span>
-                                  <div className="flex items-center gap-0.5">
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      disabled={
-                                        gIdx === 0 || !t.enabled || isDeleted
-                                      }
-                                      onClick={() => moveGalleryImg('up')}
-                                      title="Move up"
-                                    >
-                                      <ArrowUp className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      disabled={
-                                        gIdx === currentGallery.length - 1 ||
-                                        !t.enabled ||
-                                        isDeleted
-                                      }
-                                      onClick={() => moveGalleryImg('down')}
-                                      title="Move down"
-                                    >
-                                      <ArrowDown className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                                      disabled={
-                                        !t.enabled ||
-                                        currentGallery.length <= 1 ||
-                                        isDeleted
-                                      }
-                                      onClick={removeGalleryImg}
-                                      title="Delete photo"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </div>
-                                </div>
-                                <div className="w-full min-w-0">
-                                  <ImageUploaderField
-                                    id={`exp-gal-${i}-${gIdx}`}
-                                    value={imgUrl}
-                                    onChange={updGalleryImg}
-                                    folder="excursions"
-                                    placeholder="Choose carousel photo..."
-                                    disabled={!t.enabled || isDeleted}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <CarouselPhotosManager
+                        id={`exp-carousel-${i}`}
+                        images={t.gallery}
+                        fallbackImage={t.imageUrl || '/images/hero/hero.jpg'}
+                        onChange={(imgs) => updExcursion(i, 'gallery', imgs)}
+                        folder="excursions"
+                        disabled={!t.enabled || isDeleted}
+                        title="Hero Carousel Photos"
+                        description="Configure the interactive photo carousel for this single excursion detail page. Slide #1 serves as the cover photo."
+                      />
                     </div>
 
                     {/* 2. Quick Info Strip Bar */}

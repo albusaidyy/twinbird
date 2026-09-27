@@ -28,6 +28,8 @@ import { ImageUploaderField } from '../shared/ImageUploaderField';
 import { TourDeleteConfirmDialog } from '../shared/TourDeleteConfirmDialog';
 import { isTourMatch } from '../shared/admin-helpers';
 import { MultilineArrayField } from '../shared/MultilineArrayField';
+import { CarouselPhotosManager } from '../shared/CarouselPhotosManager';
+import { slugifyTour } from '@/lib/tour-utils';
 
 export function SafarisListEditor({ draft, set }: EditorProps) {
   const currentToursPage = draft.toursPage || defaultConfig.toursPage!;
@@ -93,11 +95,23 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
       const hpItems = [...(p.homepage?.tours?.items || [])];
       const tpItems = [...(currentToursPage.tours?.items || [])];
       const uniqueId = `safari-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+
+      const baseSlug = slugifyTour('New Safari Package');
+      const existingSlugs = new Set(tpItems.map((item) => (item.slug || slugifyTour(item.title)).toLowerCase()));
+      let uniqueSlug = baseSlug;
+      let counter = 1;
+      while (existingSlugs.has(uniqueSlug)) {
+        counter++;
+        uniqueSlug = `${baseSlug}-${counter}`;
+      }
+
       const newTour: TourItem = {
         id: uniqueId,
+        slug: uniqueSlug,
+        href: `/safaris/${uniqueSlug}`,
         enabled: true,
         deleted: false,
-        title: 'New Safari Package',
+        title: counter > 1 ? `New Safari Package ${counter}` : 'New Safari Package',
         badge: 'Popular',
         description: 'Experience premier wildlife safaris and Big Five game drives in Kenya...',
         duration: '3 Days / 2 Nights',
@@ -535,7 +549,17 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                         <Input
                           id={`tp-title-${i}`}
                           value={t.title}
-                          onChange={(e) => updTour(i, 'title', e.target.value)}
+                          onChange={(e) => {
+                            const newTitle = e.target.value;
+                            updTour(i, 'title', newTitle);
+                            // Only auto-fill the URL slug if it is a new item with default placeholder slug
+                            const isNew = !t.slug || t.slug.startsWith('new-safari-package');
+                            if (isNew) {
+                              const newSlug = slugifyTour(newTitle);
+                              updTour(i, 'slug', newSlug);
+                              updTour(i, 'href', `/safaris/${newSlug}`);
+                            }
+                          }}
                           disabled={!t.enabled || isDeleted}
                           className={isDeleted ? 'line-through text-muted-foreground' : ''}
                         />
@@ -630,14 +654,40 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                     </div>
                   </div>
 
-                  <FieldRow label="Custom URL" id={`tp-href-${i}`}>
-                    <Input
-                      id={`tp-href-${i}`}
-                      value={t.href || ''}
-                      placeholder="/safaris/..."
-                      onChange={(e) => updTour(i, 'href', e.target.value)}
-                      disabled={!t.enabled || isDeleted}
-                    />
+                  <FieldRow
+                    label="URL Slug (Custom Link)"
+                    id={`tp-slug-${i}`}
+                    desc="Defines the unique web address: /safaris/[slug]"
+                  >
+                    <div className="flex items-center rounded-md border border-input bg-background shadow-xs overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+                      <span className="px-2.5 py-1.5 text-xs text-muted-foreground bg-muted/50 border-r border-border shrink-0 select-none">
+                        /safaris/
+                      </span>
+                      <Input
+                        id={`tp-slug-${i}`}
+                        value={
+                          t.slug !== undefined
+                            ? t.slug
+                            : (t.href
+                                ? t.href
+                                    .replace(/^https?:\/\/[^/]+/i, '')
+                                    .replace(/^\/?safaris\//i, '')
+                                    .replace(/^\/+|\/+$/g, '')
+                                : slugifyTour(t.title))
+                        }
+                        placeholder="e.g. 3-day-maasai-mara-safari"
+                        onChange={(e) => {
+                          const val = e.target.value
+                            .toLowerCase()
+                            .replace(/\s+/g, '-')
+                            .replace(/[^a-z0-9_-]/g, '');
+                          updTour(i, 'slug', val);
+                          updTour(i, 'href', val ? `/safaris/${val}` : '/safaris');
+                        }}
+                        disabled={!t.enabled || isDeleted}
+                        className="border-0 shadow-none rounded-none focus-visible:ring-0 text-xs font-mono"
+                      />
+                    </div>
                   </FieldRow>
                 </div>
 
@@ -718,106 +768,16 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                         onChange={(v) => updTour(i, 'indicatorColor', v)}
                       />
 
-                      <div className="space-y-3 pt-2 border-t border-border/60">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-xs font-semibold">Carousel Photos (Like Catch Gallery)</Label>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const baseImg = t.imageUrl || '/images/hero/hero.jpg';
-                              const currentGallery = t.gallery && t.gallery.length > 0 ? t.gallery : [baseImg, baseImg, baseImg];
-                              updTour(i, 'gallery', [...currentGallery, '/images/hero/hero.jpg']);
-                            }}
-                            disabled={!t.enabled || isDeleted}
-                            className="gap-1.5 h-7 text-xs"
-                          >
-                            <Plus className="h-3 w-3" /> Add Carousel Photo
-                          </Button>
-                        </div>
-
-                        <div className="space-y-2.5">
-                          {(t.gallery && t.gallery.length > 0 ? t.gallery : [t.imageUrl || '/images/hero/hero.jpg', t.imageUrl || '/images/hero/hero.jpg', t.imageUrl || '/images/hero/hero.jpg']).map((imgUrl, gIdx) => {
-                            const baseImg = t.imageUrl || '/images/hero/hero.jpg';
-                            const currentGallery = t.gallery && t.gallery.length > 0 ? t.gallery : [baseImg, baseImg, baseImg];
-                            const updGalleryImg = (newUrl: string) => {
-                              const updated = [...currentGallery];
-                              updated[gIdx] = newUrl;
-                              updTour(i, 'gallery', updated);
-                            };
-                            const removeGalleryImg = () => {
-                              const updated = currentGallery.filter((_, idx) => idx !== gIdx);
-                              const baseImg = t.imageUrl || '/images/hero/hero.jpg';
-                              updTour(i, 'gallery', updated.length > 0 ? updated : [baseImg, baseImg, baseImg]);
-                            };
-                            const moveGalleryImg = (dir: 'up' | 'down') => {
-                              const target = dir === 'up' ? gIdx - 1 : gIdx + 1;
-                              if (target < 0 || target >= currentGallery.length) return;
-                              const updated = [...currentGallery];
-                              const temp = updated[gIdx];
-                              updated[gIdx] = updated[target];
-                              updated[target] = temp;
-                              updTour(i, 'gallery', updated);
-                            };
-
-                            return (
-                              <div key={gIdx} className="rounded-lg border border-border p-3 bg-card shadow-xs space-y-2 min-w-0">
-                                <div className="flex items-center justify-between gap-2 pb-1 border-b border-border/40">
-                                   <span className="text-xs font-semibold text-muted-foreground">
-                                    Carousel Photo #{gIdx + 1}
-                                  </span>
-                                  <div className="flex items-center gap-0.5">
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      disabled={gIdx === 0 || !t.enabled || isDeleted}
-                                      onClick={() => moveGalleryImg('up')}
-                                      title="Move up"
-                                    >
-                                      <ArrowUp className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      disabled={gIdx === currentGallery.length - 1 || !t.enabled || isDeleted}
-                                      onClick={() => moveGalleryImg('down')}
-                                      title="Move down"
-                                    >
-                                      <ArrowDown className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                                      disabled={!t.enabled || currentGallery.length <= 1 || isDeleted}
-                                      onClick={removeGalleryImg}
-                                      title="Delete photo"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </div>
-                                </div>
-                                <div className="w-full min-w-0">
-                                  <ImageUploaderField
-                                    id={`tp-gal-${i}-${gIdx}`}
-                                    value={imgUrl}
-                                    onChange={updGalleryImg}
-                                    folder="tours"
-                                    placeholder="Choose carousel photo..."
-                                    disabled={!t.enabled || isDeleted}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
+                      <CarouselPhotosManager
+                        id={`tp-carousel-${i}`}
+                        images={t.gallery}
+                        fallbackImage={t.imageUrl || '/images/hero/hero.jpg'}
+                        onChange={(imgs) => updTour(i, 'gallery', imgs)}
+                        folder="tours"
+                        disabled={!t.enabled || isDeleted}
+                        title="Hero Carousel Photos"
+                        description="Configure the interactive photo carousel for this single safari detail page. Slide #1 serves as the cover photo."
+                      />
                     </div>
 
                     {/* Quick Info Strip Bar (Hours, Location, Schedule, Group Suitability) */}

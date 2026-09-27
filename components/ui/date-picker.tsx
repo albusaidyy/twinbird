@@ -92,6 +92,7 @@ export function DatePicker({
   const [prevValue, setPrevValue] = useState(value);
   const [viewDate, setViewDate] = useState(() => parseViewFromValue(value));
 
+
   // Sync viewDate when value changes externally (React recommended state adjustment pattern)
   if (value !== prevValue) {
     setPrevValue(value);
@@ -240,7 +241,7 @@ export function DatePicker({
       {isOpen && (
         <div
           className={cn(
-            'absolute top-full mt-2 z-50 w-full min-w-[280px] sm:min-w-[310px] max-w-[340px] p-3.5 sm:p-4',
+            'absolute top-full mt-2 z-50 w-[300px] sm:w-[320px] max-w-[calc(100vw-24px)] p-3.5 sm:p-4',
             'rounded-2xl bg-white dark:bg-zinc-900 border border-border/80 dark:border-white/10',
             'shadow-2xl shadow-black/15 dark:shadow-black/60 backdrop-blur-md',
             'animate-in fade-in-0 zoom-in-95 duration-150 select-none',

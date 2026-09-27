@@ -18,7 +18,6 @@ interface AirTicketingBookingSectionProps {
   formConfig?: AirTicketingBookingFormConfig;
   primaryColor?: string;
   accentColor?: string;
-  defaultAccessKey?: string;
 }
 
 export function AirTicketingBookingSection({
@@ -33,7 +32,6 @@ export function AirTicketingBookingSection({
   formConfig,
   primaryColor = '#1b4332',
   accentColor = '#d97706',
-  defaultAccessKey,
 }: AirTicketingBookingSectionProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRouteName, setSelectedRouteName] = useState('');
@@ -287,7 +285,6 @@ export function AirTicketingBookingSection({
         formConfig={formConfig}
         primaryColor={primaryColor}
         accentColor={accentColor}
-        defaultAccessKey={defaultAccessKey}
       />
     </section>
   );

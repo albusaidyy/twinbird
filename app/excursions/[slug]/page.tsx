@@ -115,7 +115,6 @@ export default function SingleExcursionPage({
                 excursion={excursion}
                 config={excursionsPage.bookingForm}
                 primaryColor={primaryColor}
-                defaultAccessKey={config.contactPage?.form?.accessKey}
               />
             </div>
           </div>

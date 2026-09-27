@@ -11,7 +11,17 @@ export function slugifyTour(title: string): string {
 
 export function getTourSlug(tour: TourItem): string {
   if (tour.slug && tour.slug.trim() !== '') {
-    return tour.slug;
+    return tour.slug.trim().toLowerCase();
+  }
+  if (tour.href && tour.href.trim() !== '') {
+    const extracted = tour.href
+      .replace(/^https?:\/\/[^/]+/i, '')
+      .replace(/^\/?safaris\//i, '')
+      .replace(/^\/+|\/+$/g, '')
+      .trim();
+    if (extracted && !extracted.startsWith('http')) {
+      return extracted.toLowerCase();
+    }
   }
   return slugifyTour(tour.title);
 }

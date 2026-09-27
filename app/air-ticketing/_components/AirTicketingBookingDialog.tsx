@@ -20,7 +20,6 @@ interface AirTicketingBookingDialogProps {
   formConfig?: AirTicketingBookingFormConfig;
   primaryColor?: string;
   accentColor?: string;
-  defaultAccessKey?: string;
 }
 
 export function AirTicketingBookingDialog({
@@ -31,7 +30,6 @@ export function AirTicketingBookingDialog({
   defaultDestination = '',
   formConfig,
   primaryColor = '#111827',
-  defaultAccessKey,
 }: AirTicketingBookingDialogProps) {
   const [mounted, setMounted] = useState(false);
   const fConfig: AirTicketingBookingFormConfig = formConfig || defaultConfig.airTicketingPage!.bookingForm!;
@@ -125,7 +123,7 @@ export function AirTicketingBookingDialog({
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
   };
 
-  const accessKey = fConfig.accessKey || defaultAccessKey || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
 
   // Form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -145,30 +143,42 @@ export function AirTicketingBookingDialog({
         payload[f.label || f.id] = typeof val === 'boolean' ? (val ? 'Yes' : 'No') : (val || 'N/A');
       });
 
-      const customerName = String(formData.fullName || formData.name || 'Valued Passenger');
-
-      if (accessKey && accessKey.trim() !== '') {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: accessKey,
-            subject: `Flight Ticket Inquiry: ${customerName} (${selectedRoute || 'Custom Route'})`,
-            from_name: customerName,
-            ...payload,
-          }),
-        });
-
-        const result = await response.json();
-        if (!result.success) {
-          throw new Error(result.message || 'Submission failed. Please try again.');
+      // Also include any extra keys in formData that might not match fields explicitly
+      Object.entries(formData).forEach(([k, v]) => {
+        const matchedField = fields.find((f) => f.id === k);
+        const label = matchedField ? (matchedField.label || matchedField.id) : k;
+        if (payload[label] === undefined) {
+          payload[label] = typeof v === 'boolean' ? (v ? 'Yes' : 'No') : (v || 'N/A');
         }
-      } else {
-        // Mock delay
-        await new Promise((resolve) => setTimeout(resolve, 600));
+      });
+
+      const customerName = String(formData.fullName || formData.name || 'Valued Passenger');
+      const customerEmail = String(formData.email || formData.emailAddress || '');
+
+      const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+      const formPayload = new FormData();
+      if (accessKey) {
+        formPayload.append('access_key', accessKey);
+      }
+      formPayload.append('subject', `Flight Ticket Inquiry: ${customerName} (${selectedRoute || 'Custom Route'})`);
+      formPayload.append('from_name', customerName);
+      if (customerEmail) {
+        formPayload.append('email', customerEmail);
+      }
+
+      // Append each field individually for clean styled email view
+      Object.entries(payload).forEach(([k, v]) => {
+        formPayload.append(k, String(v));
+      });
+
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formPayload,
+      });
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || 'Submission failed. Please try again.');
       }
 
       setSubmitted(true);
