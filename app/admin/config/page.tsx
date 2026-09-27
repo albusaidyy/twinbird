@@ -138,6 +138,23 @@ export default function AdminConfigPage() {
       cleanedDraft.excursionsPage.tours.items = deduplicateList(cleanedDraft.excursionsPage.tours.items)!;
     }
 
+    const cleanTourArrays = <T extends { included?: string[]; notIncluded?: string[]; whyChoose?: string[]; knowBeforeYouGo?: string[]; tags?: string[]; highlights?: string[] }>(items?: T[]) => {
+      if (!items) return;
+      items.forEach((item) => {
+        if (item.included) item.included = item.included.map((s) => s.trim()).filter(Boolean);
+        if (item.notIncluded) item.notIncluded = item.notIncluded.map((s) => s.trim()).filter(Boolean);
+        if (item.whyChoose) item.whyChoose = item.whyChoose.map((s) => s.trim()).filter(Boolean);
+        if (item.knowBeforeYouGo) item.knowBeforeYouGo = item.knowBeforeYouGo.map((s) => s.trim()).filter(Boolean);
+        if (item.tags) item.tags = item.tags.map((s) => s.trim()).filter(Boolean);
+        if (item.highlights) item.highlights = item.highlights.map((s) => s.trim()).filter(Boolean);
+      });
+    };
+
+    cleanTourArrays(cleanedDraft.toursPage?.tours?.items);
+    cleanTourArrays(cleanedDraft.excursionsPage?.tours?.items);
+    cleanTourArrays(cleanedDraft.homepage?.tours?.items);
+    cleanTourArrays(cleanedDraft.homepage?.excursions?.items);
+
     if (cleanedDraft.toursPage?.bookingForm?.fields) {
       cleanedDraft.toursPage.bookingForm.fields.forEach((f) => {
         if (f.type === 'select' && f.options) {

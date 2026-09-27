@@ -49,10 +49,11 @@ export function TourDetailsContent({
     'Booking: Advance reservations recommended to secure park permits and lodge bookings',
   ];
 
-  const included = tour.included !== undefined ? tour.included : defaultIncluded;
-  const notIncluded = tour.notIncluded !== undefined ? tour.notIncluded : defaultNotIncluded;
-  const whyChoose = tour.whyChoose !== undefined ? tour.whyChoose : defaultWhyChoose;
-  const knowBeforeYouGo = tour.knowBeforeYouGo !== undefined ? tour.knowBeforeYouGo : defaultKnowBeforeYouGo;
+  const cleanList = (list: string[]) => list.map((s) => s.trim()).filter(Boolean);
+  const included = cleanList(tour.included !== undefined ? tour.included : defaultIncluded);
+  const notIncluded = cleanList(tour.notIncluded !== undefined ? tour.notIncluded : defaultNotIncluded);
+  const whyChoose = cleanList(tour.whyChoose !== undefined ? tour.whyChoose : defaultWhyChoose);
+  const knowBeforeYouGo = cleanList(tour.knowBeforeYouGo !== undefined ? tour.knowBeforeYouGo : defaultKnowBeforeYouGo);
   const itinerary =
     tour.itinerary && tour.itinerary.length > 0
       ? tour.itinerary

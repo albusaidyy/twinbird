@@ -48,21 +48,26 @@ export function ExcursionDetailsContent({
     'Waterproof camera or phone dry pouch recommended',
   ];
 
-  const knowBeforeYouGo =
+  const cleanList = (list: string[]) => list.map((s) => s.trim()).filter(Boolean);
+  const knowBeforeYouGo = cleanList(
     excursion.knowBeforeYouGo && excursion.knowBeforeYouGo.length > 0
       ? excursion.knowBeforeYouGo
       : excursion.whatToCarry && excursion.whatToCarry.length > 0
       ? excursion.whatToCarry
-      : defaultKnowBeforeYouGo;
+      : defaultKnowBeforeYouGo
+  );
 
-  const included =
-    excursion.included !== undefined ? excursion.included : defaultIncluded;
-  const notIncluded =
+  const included = cleanList(
+    excursion.included !== undefined ? excursion.included : defaultIncluded
+  );
+  const notIncluded = cleanList(
     excursion.notIncluded !== undefined
       ? excursion.notIncluded
-      : defaultNotIncluded;
-  const whyChoose =
-    excursion.whyChoose !== undefined ? excursion.whyChoose : defaultWhyChoose;
+      : defaultNotIncluded
+  );
+  const whyChoose = cleanList(
+    excursion.whyChoose !== undefined ? excursion.whyChoose : defaultWhyChoose
+  );
   const scheduleItems =
     excursion.scheduleItems && excursion.scheduleItems.length > 0
       ? excursion.scheduleItems

@@ -268,137 +268,140 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
           </Button>
         </div>
 
-        {/* Horizontal Tab Navigation Strip */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1 scrollbar-thin">
-          {toursList.map((t, idx) => {
-            const isSelected = idx === safeActiveIndex;
-            const isDeleted = Boolean(t.deleted);
-            const title = t.title
-              ? t.title.length > 22
-                ? t.title.slice(0, 20) + '…'
-                : t.title
-              : `Safari #${idx + 1}`;
-            return (
-              <button
-                key={t.id || `tab-${idx}`}
-                type="button"
-                onClick={() => setActiveTourIndex(idx)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border shrink-0 cursor-pointer ${
-                  isSelected
-                    ? 'text-white border-transparent shadow-xs ring-1 ring-black/10'
-                    : isDeleted
-                    ? 'bg-destructive/10 text-destructive/80 border-dashed border-destructive/30 hover:bg-destructive/15'
-                    : t.enabled === false
-                    ? 'bg-muted/60 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
-                    : 'bg-card text-foreground border-border hover:border-foreground/30 shadow-2xs'
-                }`}
-                style={isSelected ? { backgroundColor: draft.branding.primaryColor || '#1b4332' } : undefined}
-              >
-                <span
-                  className={`h-2 w-2 rounded-full shrink-0 ${
+        {/* Sticky Tab Navigation & Pager Bar */}
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-md pb-2.5 pt-1 space-y-2.5 border-b border-border/40 shadow-xs">
+          {/* Horizontal Tab Navigation Strip */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+            {toursList.map((t, idx) => {
+              const isSelected = idx === safeActiveIndex;
+              const isDeleted = Boolean(t.deleted);
+              const title = t.title
+                ? t.title.length > 22
+                  ? t.title.slice(0, 20) + '…'
+                  : t.title
+                : `Safari #${idx + 1}`;
+              return (
+                <button
+                  key={t.id || `tab-${idx}`}
+                  type="button"
+                  onClick={() => setActiveTourIndex(idx)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border shrink-0 cursor-pointer ${
                     isSelected
-                      ? 'bg-white'
+                      ? 'text-white border-transparent shadow-xs ring-1 ring-black/10'
                       : isDeleted
-                      ? 'bg-destructive'
+                      ? 'bg-destructive/10 text-destructive/80 border-dashed border-destructive/30 hover:bg-destructive/15'
                       : t.enabled === false
-                      ? 'bg-muted-foreground/50'
-                      : 'bg-emerald-500'
+                      ? 'bg-muted/60 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                      : 'bg-card text-foreground border-border hover:border-foreground/30 shadow-2xs'
                   }`}
-                />
-                <span>#{idx + 1} {title}</span>
-                {isDeleted && <span className="text-[10px] opacity-75">(Deleted)</span>}
-                {!isDeleted && t.enabled === false && <span className="text-[10px] opacity-75">(Hidden)</span>}
-              </button>
-            );
-          })}
+                  style={isSelected ? { backgroundColor: draft.branding.primaryColor || '#1b4332' } : undefined}
+                >
+                  <span
+                    className={`h-2 w-2 rounded-full shrink-0 ${
+                      isSelected
+                        ? 'bg-white'
+                        : isDeleted
+                        ? 'bg-destructive'
+                        : t.enabled === false
+                        ? 'bg-muted-foreground/50'
+                        : 'bg-emerald-500'
+                    }`}
+                  />
+                  <span>#{idx + 1} {title}</span>
+                  {isDeleted && <span className="text-[10px] opacity-75">(Deleted)</span>}
+                  {!isDeleted && t.enabled === false && <span className="text-[10px] opacity-75">(Hidden)</span>}
+                </button>
+              );
+            })}
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddTour}
-            className="h-8 gap-1 text-xs font-semibold whitespace-nowrap shrink-0 border-dashed hover:border-solid"
-          >
-            <Plus className="h-3.5 w-3.5" /> Add Package
-          </Button>
-        </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleAddTour}
+              className="h-8 gap-1 text-xs font-semibold whitespace-nowrap shrink-0 border-dashed hover:border-solid"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add Package
+            </Button>
+          </div>
 
-        {/* Active Tour Pager Bar */}
-        {toursList.length > 0 && activeTour && (
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3 rounded-lg border border-border/60">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-md text-white text-xs font-bold shadow-xs shrink-0"
-                style={{ backgroundColor: draft.branding.primaryColor || '#1b4332' }}
-              >
-                #{safeActiveIndex + 1}
-              </span>
-              <div className="min-w-0">
-                <h5 className="text-sm font-bold text-foreground truncate">
-                  {activeTour.title || `Safari #${safeActiveIndex + 1}`}
-                </h5>
-                <p className="text-[11px] text-muted-foreground">
-                  Package {safeActiveIndex + 1} of {toursList.length}
-                  {activeTour.deleted
-                    ? ' • Soft-deleted / Inactive'
-                    : activeTour.enabled === false
-                    ? ' • Hidden from listing'
-                    : ' • Live on listing'}
-                </p>
+          {/* Active Tour Pager Bar */}
+          {toursList.length > 0 && activeTour && (
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-2.5 rounded-lg border border-border/60">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-white text-xs font-bold shadow-xs shrink-0"
+                  style={{ backgroundColor: draft.branding.primaryColor || '#1b4332' }}
+                >
+                  #{safeActiveIndex + 1}
+                </span>
+                <div className="min-w-0">
+                  <h5 className="text-sm font-bold text-foreground truncate">
+                    {activeTour.title || `Safari #${safeActiveIndex + 1}`}
+                  </h5>
+                  <p className="text-[11px] text-muted-foreground">
+                    Package {safeActiveIndex + 1} of {toursList.length}
+                    {activeTour.deleted
+                      ? ' • Soft-deleted / Inactive'
+                      : activeTour.enabled === false
+                      ? ' • Hidden from listing'
+                      : ' • Live on listing'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={safeActiveIndex === 0}
+                  onClick={() => setActiveTourIndex(safeActiveIndex - 1)}
+                  className="h-7 text-xs gap-1 px-2.5"
+                  title="Previous Safari Package"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" /> Prev
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={safeActiveIndex >= toursList.length - 1}
+                  onClick={() => setActiveTourIndex(safeActiveIndex + 1)}
+                  className="h-7 text-xs gap-1 px-2.5"
+                  title="Next Safari Package"
+                >
+                  Next <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+
+                <div className="h-4 w-px bg-border mx-1" />
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={safeActiveIndex === 0 || Boolean(activeTour.deleted)}
+                  onClick={() => handleMoveTour(safeActiveIndex, -1)}
+                  title="Move package left (earlier in order)"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  disabled={safeActiveIndex >= toursList.length - 1 || Boolean(activeTour.deleted)}
+                  onClick={() => handleMoveTour(safeActiveIndex, 1)}
+                  title="Move package right (later in order)"
+                >
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={safeActiveIndex === 0}
-                onClick={() => setActiveTourIndex(safeActiveIndex - 1)}
-                className="h-7 text-xs gap-1 px-2.5"
-                title="Previous Safari Package"
-              >
-                <ChevronLeft className="h-3.5 w-3.5" /> Prev
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={safeActiveIndex >= toursList.length - 1}
-                onClick={() => setActiveTourIndex(safeActiveIndex + 1)}
-                className="h-7 text-xs gap-1 px-2.5"
-                title="Next Safari Package"
-              >
-                Next <ChevronRight className="h-3.5 w-3.5" />
-              </Button>
-
-              <div className="h-4 w-px bg-border mx-1" />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                disabled={safeActiveIndex === 0 || Boolean(activeTour.deleted)}
-                onClick={() => handleMoveTour(safeActiveIndex, -1)}
-                title="Move package left (earlier in order)"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                disabled={safeActiveIndex >= toursList.length - 1 || Boolean(activeTour.deleted)}
-                onClick={() => handleMoveTour(safeActiveIndex, 1)}
-                title="Move package right (later in order)"
-              >
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Tour Editor Content */}
         {toursList.length === 0 ? (
@@ -426,13 +429,13 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
           return (
             <div
               key={t.id || `tpl-${i}`}
-              className={`relative rounded-lg border p-5 pt-11 transition-all ${
+              className={`rounded-xl border transition-all ${
                 isDeleted
                   ? 'border-dashed border-destructive/40 bg-muted/30 opacity-60'
                   : 'border-border bg-card shadow-xs'
               }`}
             >
-              <div className="absolute top-2.5 left-4 right-3 flex justify-between items-center">
+              <div className="flex items-center justify-between p-4 pb-3 border-b border-border/60">
                 <div className="flex items-center gap-2">
                   {!isDeleted ? (
                     <>
@@ -509,7 +512,15 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                   )}
                 </div>
               </div>
-              <div className="space-y-4 opacity-100 transition-opacity" style={{ opacity: isDeleted ? 0.6 : t.enabled ? 1 : 0.5 }}>
+              <div
+                className="p-4 space-y-4 opacity-100 transition-opacity max-h-[calc(100vh-320px)] min-h-[460px] overflow-y-auto overscroll-contain scroll-smooth pr-3"
+                style={{
+                  opacity: isDeleted ? 0.6 : t.enabled ? 1 : 0.5,
+                  scrollBehavior: 'smooth',
+                  overscrollBehavior: 'contain',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="flex gap-2.5 items-start">
                     <Switch
