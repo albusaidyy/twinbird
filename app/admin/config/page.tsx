@@ -33,6 +33,7 @@ import { ResetConfirmDialog } from './_components/shared/ResetConfirmDialog';
 // Global editors
 import { BrandingEditor } from './_components/global/BrandingEditor';
 import { NavigationEditor } from './_components/global/NavigationEditor';
+import { GlobalMediaEditor } from './_components/global/GlobalMediaEditor';
 import { VersionHistoryEditor } from './_components/global/VersionHistoryEditor';
 
 // Homepage editors
@@ -569,6 +570,7 @@ export default function AdminConfigPage() {
             {/* Global Settings */}
             {active === 'branding' && <BrandingEditor {...editorProps} />}
             {active === 'navigation' && <NavigationEditor {...editorProps} />}
+            {active === 'global-media' && <GlobalMediaEditor {...editorProps} />}
             {active === 'versions' && <VersionHistoryEditor {...editorProps} />}
 
             {/* Homepage */}

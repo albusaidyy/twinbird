@@ -12,10 +12,20 @@ import {
   HardDrive,
   Cloud,
   Trash2,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { uploadImage, getMediaLibrary, deleteUploadedImage, type MediaItem } from '../../actions';
+import {
+  uploadImage,
+  uploadMultipleImages,
+  getMediaLibrary,
+  deleteUploadedImage,
+  type MediaItem,
+} from '../../actions';
 import { optimizeImageToWebP, formatFileSize } from '@/lib/image-optimizer';
+import { useAppConfig } from '@/components/providers/AppConfigProvider';
+import { getAllUsedImageUrls, isMediaItemInUse } from './admin-helpers';
 import { ImageDeleteConfirmDialog } from './ImageDeleteConfirmDialog';
 
 export function ImageUploaderField({
@@ -34,18 +44,26 @@ export function ImageUploaderField({
   presets?: string[];
   disabled?: boolean;
 }) {
+  const { config } = useAppConfig();
+  const usedImageUrls = React.useMemo(
+    () => (config ? getAllUsedImageUrls(config) : new Set<string>()),
+    [config]
+  );
+
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showLibrary, setShowLibrary] = useState(false);
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loadingLibrary, setLoadingLibrary] = useState(false);
-  const [filterTab, setFilterTab] = useState<'all' | 'local' | 'uploaded'>('all');
+  const [filterTab, setFilterTab] = useState<'all' | 'global' | 'section' | 'local' | 'uploaded'>(
+    folder && folder !== 'uploads' ? 'section' : 'all'
+  );
   const [searchQuery, setSearchQuery] = useState('');
-  const [showAllFolders, setShowAllFolders] = useState(false);
+  const [showAllFolders, setShowAllFolders] = useState(true);
   const [deletingItem, setDeletingItem] = useState<MediaItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadImages = async (includeAll = showAllFolders) => {
+  const loadImages = async (includeAll = true) => {
     setLoadingLibrary(true);
     setError(null);
     try {
@@ -60,6 +78,11 @@ export function ImageUploaderField({
 
   const handleConfirmDelete = async () => {
     if (!deletingItem) return;
+    if (isMediaItemInUse(deletingItem, usedImageUrls) || value === deletingItem.url) {
+      toast.error('This image is currently in use across your website configuration and cannot be deleted.');
+      setDeletingItem(null);
+      return;
+    }
     setIsDeleting(true);
     try {
       const pathToDelete = deletingItem.storagePath || deletingItem.url;
@@ -83,31 +106,76 @@ export function ImageUploaderField({
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     setUploading(true);
     setError(null);
     try {
-      // Optimize image client-side to WebP (resizes & compresses to keep payload tiny)
-      const { file: optimizedFile } = await optimizeImageToWebP(file, { folder });
+      const fileList = Array.from(files).filter((f) => f.type.startsWith('image/'));
+      if (fileList.length === 0) {
+        setError('Please select valid image files');
+        setUploading(false);
+        return;
+      }
 
-      const formData = new FormData();
-      formData.append('file', optimizedFile);
-      const res = await uploadImage(formData, folder);
-      if ('error' in res) {
-        setError(res.error);
-      } else if (res.url) {
-        onChange(res.url);
-        const newItem: MediaItem = {
-          url: res.url,
-          name: optimizedFile.name || res.url.split('/').pop() || 'uploaded-image',
-          source: 'uploaded',
-          folder,
-          storagePath: res.storagePath,
-          size: optimizedFile.size,
-        };
-        setMediaItems((prev) => [newItem, ...prev.filter((item) => item.url !== res.url)]);
-        toast.success('Image optimized & uploaded as WebP');
+      if (fileList.length === 1) {
+        // Single file upload
+        const { file: optimizedFile } = await optimizeImageToWebP(fileList[0], { folder });
+        const formData = new FormData();
+        formData.append('file', optimizedFile);
+        const res = await uploadImage(formData, folder);
+        if ('error' in res) {
+          setError(res.error);
+        } else if (res.url) {
+          const newItem: MediaItem = {
+            url: res.url,
+            name: optimizedFile.name || res.url.split('/').pop() || 'uploaded-image',
+            source: 'uploaded',
+            folder,
+            storagePath: res.storagePath,
+            size: optimizedFile.size,
+          };
+          setMediaItems((prev) => [newItem, ...prev.filter((item) => item.url !== res.url)]);
+          setShowLibrary(true);
+          toast.success('Image uploaded to library. Click to select it when ready.');
+        }
+      } else {
+        // Multiple files upload
+        const formData = new FormData();
+        for (const file of fileList) {
+          try {
+            const { file: optimizedFile } = await optimizeImageToWebP(file, { folder });
+            formData.append('files', optimizedFile);
+          } catch {
+            formData.append('files', file);
+          }
+        }
+
+        const res = await uploadMultipleImages(formData, folder);
+        if (res.items && res.items.length > 0) {
+          const newEntries: MediaItem[] = res.items.map((it) => ({
+            url: it.url,
+            name: it.name || it.url.split('/').pop() || 'uploaded-image',
+            source: 'uploaded' as const,
+            folder,
+            storagePath: it.storagePath,
+            size: it.size,
+          }));
+
+          setMediaItems((prev) => [
+            ...newEntries,
+            ...prev.filter((p) => !newEntries.some((n) => n.url === p.url)),
+          ]);
+          setShowLibrary(true);
+
+          toast.success(
+            `Uploaded ${res.items.length} images to library! Click any image to select it.`
+          );
+        }
+
+        if (res.errors && res.errors.length > 0) {
+          res.errors.forEach((err) => toast.error(err));
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Upload failed';
@@ -120,10 +188,23 @@ export function ImageUploaderField({
 
   const localCount = mediaItems.filter((i) => i.source === 'local').length;
   const uploadedCount = mediaItems.filter((i) => i.source === 'uploaded').length;
+  const globalCount = mediaItems.filter(
+    (i) => i.source === 'uploaded' && (i.folder === 'uploads' || i.folder === 'global' || !i.folder)
+  ).length;
+  const sectionCount = mediaItems.filter((i) => i.folder === folder).length;
 
   const filteredItems = mediaItems.filter((item) => {
-    if (filterTab === 'local' && item.source !== 'local') return false;
-    if (filterTab === 'uploaded' && item.source !== 'uploaded') return false;
+    if (filterTab === 'global') {
+      if (item.source !== 'uploaded') return false;
+      if (item.folder && item.folder !== 'uploads' && item.folder !== 'global') return false;
+    } else if (filterTab === 'section') {
+      if (item.folder !== folder) return false;
+    } else if (filterTab === 'local') {
+      if (item.source !== 'local') return false;
+    } else if (filterTab === 'uploaded') {
+      if (item.source !== 'uploaded') return false;
+    }
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -157,7 +238,7 @@ export function ImageUploaderField({
             className={`flex h-9 w-full sm:w-auto cursor-pointer items-center justify-center gap-1.5 rounded-md px-2.5 sm:px-3 text-xs font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors ${
               disabled || uploading ? 'pointer-events-none opacity-50' : ''
             }`}
-            title="Upload new image from your device"
+            title="Upload one or multiple images from your device"
           >
             {uploading ? (
               <>
@@ -174,6 +255,7 @@ export function ImageUploaderField({
           <input
             id={`${id}-file`}
             type="file"
+            multiple
             accept="image/*"
             className="hidden"
             onChange={handleFileChange}
@@ -186,7 +268,12 @@ export function ImageUploaderField({
             variant={showLibrary ? 'secondary' : 'outline'}
             size="sm"
             onClick={() => {
-              if (!showLibrary) loadImages(showAllFolders);
+              if (!showLibrary) {
+                loadImages(showAllFolders);
+                if (folder && folder !== 'uploads') {
+                  setFilterTab('section');
+                }
+              }
               setShowLibrary(!showLibrary);
             }}
             disabled={disabled}
@@ -257,6 +344,30 @@ export function ImageUploaderField({
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <label
+                htmlFor={`${id}-drawer-upload`}
+                className={`flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-md text-white transition-opacity hover:opacity-90 cursor-pointer font-semibold shadow-xs ${
+                  disabled || uploading ? 'pointer-events-none opacity-50' : ''
+                }`}
+                style={{ backgroundColor: config?.branding?.primaryColor || '#1b4332' }}
+                title="Upload one or multiple images directly to library"
+              >
+                {uploading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Upload className="h-3.5 w-3.5" />
+                )}
+                Upload Images
+              </label>
+              <input
+                id={`${id}-drawer-upload`}
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+                disabled={disabled || uploading}
+              />
               <button
                 type="button"
                 onClick={() => {
@@ -298,13 +409,41 @@ export function ImageUploaderField({
 
           {/* Filter tabs & Search Bar */}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-1 bg-muted/50 p-0.5 rounded-lg border border-border/50 text-[11px]">
+            <div className="flex flex-wrap items-center gap-1 bg-muted/50 p-0.5 rounded-lg border border-border/50 text-[11px]">
+              {folder && folder !== 'uploads' && (
+                <button
+                  type="button"
+                  onClick={() => setFilterTab('section')}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${
+                    filterTab === 'section'
+                      ? 'bg-primary text-primary-foreground shadow-xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  title={`Images in ${folder}`}
+                >
+                  <Layers className="h-3 w-3" />
+                  This Section ({sectionCount})
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setFilterTab('global')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${
+                  filterTab === 'global'
+                    ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+                title="Images uploaded to Global Library"
+              >
+                <Sparkles className="h-3 w-3" />
+                Global Uploads ({globalCount})
+              </button>
               <button
                 type="button"
                 onClick={() => setFilterTab('all')}
                 className={`px-2.5 py-1 rounded-md font-medium transition-all ${
                   filterTab === 'all'
-                    ? 'bg-background text-foreground shadow-sm'
+                    ? 'bg-background text-foreground shadow-xs font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -315,7 +454,7 @@ export function ImageUploaderField({
                 onClick={() => setFilterTab('local')}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${
                   filterTab === 'local'
-                    ? 'bg-background text-foreground shadow-sm'
+                    ? 'bg-background text-foreground shadow-xs font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -327,12 +466,12 @@ export function ImageUploaderField({
                 onClick={() => setFilterTab('uploaded')}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition-all ${
                   filterTab === 'uploaded'
-                    ? 'bg-background text-foreground shadow-sm'
+                    ? 'bg-background text-foreground shadow-xs font-semibold'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Cloud className="h-3 w-3" />
-                Uploaded ({uploadedCount})
+                All Cloud ({uploadedCount})
               </button>
             </div>
 
@@ -378,16 +517,20 @@ export function ImageUploaderField({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 max-h-64 overflow-y-auto p-1">
+            <div
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 max-h-72 overflow-y-auto overscroll-contain scroll-smooth p-1"
+              style={{ scrollBehavior: 'smooth', overscrollBehavior: 'contain' }}
+            >
               {filteredItems.map((item) => {
                 const isSelected = value === item.url;
-                const canDelete = !isSelected && item.source === 'uploaded';
+                const isInUse = isSelected || isMediaItemInUse(item, usedImageUrls);
+                const canDelete = !isInUse && item.source === 'uploaded';
                 const formattedSize = formatFileSize(item.size);
 
                 return (
                   <div
                     key={item.url}
-                    className={`group relative aspect-video rounded-md overflow-hidden border-2 transition-all bg-muted/40 ${
+                    className={`group relative aspect-video rounded-md overflow-hidden border-2 transition-all bg-muted/40 transform-gpu ${
                       isSelected
                         ? 'border-primary ring-2 ring-primary/30'
                         : 'border-border/60 hover:border-foreground/30'
@@ -404,15 +547,16 @@ export function ImageUploaderField({
                       <img
                         src={item.url}
                         alt={item.name}
-                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105 transform-gpu"
                         loading="lazy"
+                        decoding="async"
                       />
                     </button>
 
-                    {/* Source & Size Tags (Top Left) */}
-                    <div className="pointer-events-none absolute top-1.5 left-1.5 z-10 flex items-center gap-1">
+                    {/* Top-Left: Source Badge */}
+                    <div className="pointer-events-none absolute top-1.5 left-1.5 z-10">
                       <span
-                        className={`text-[9px] font-semibold px-1.5 py-0.5 rounded shadow-xs uppercase tracking-wider ${
+                        className={`text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 leading-none rounded shadow-xs uppercase tracking-wider whitespace-nowrap inline-block ${
                           item.source === 'local'
                             ? 'bg-slate-900/80 text-slate-100'
                             : 'bg-blue-600/90 text-white'
@@ -420,23 +564,20 @@ export function ImageUploaderField({
                       >
                         {item.source === 'local' ? 'Local' : 'Upload'}
                       </span>
-                      {formattedSize && (
-                        <span
-                          className={`text-[9px] font-mono px-1.5 py-0.5 rounded shadow-xs backdrop-blur-xs ${
-                            (item.size ?? 0) > 1024 * 1024
-                              ? 'bg-amber-500/90 text-black font-semibold'
-                              : 'bg-black/60 text-white/90 font-medium'
-                          }`}
-                        >
-                          {formattedSize}
-                        </span>
-                      )}
                     </div>
 
-                    {/* Top Right: Selected Checkmark OR Delete button for unselected uploaded items */}
+                    {/* Top Right: Selected Checkmark OR In-Use Badge OR Delete button */}
                     {isSelected ? (
-                      <div className="pointer-events-none absolute top-1.5 right-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md ring-2 ring-background">
-                        <Check className="h-3.5 w-3.5 stroke-[3]" />
+                      <div className="pointer-events-none absolute top-1.5 right-1.5 z-10 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md ring-2 ring-background">
+                        <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 stroke-[3]" />
+                      </div>
+                    ) : isInUse ? (
+                      <div
+                        className="pointer-events-none absolute top-1.5 right-1.5 z-10 flex h-4.5 w-4.5 sm:h-auto sm:w-auto items-center justify-center rounded-full sm:rounded bg-emerald-600 text-white sm:px-1.5 sm:py-0.5 text-[8px] sm:text-[9px] font-bold shadow-xs whitespace-nowrap uppercase tracking-wider shrink-0"
+                        title="Currently selected in site configuration — cannot be deleted"
+                      >
+                        <Check className="h-2.5 w-2.5 sm:h-2.5 sm:w-2.5 stroke-[3] shrink-0" />
+                        <span className="hidden sm:inline ml-0.5">In Use</span>
                       </div>
                     ) : canDelete ? (
                       <button
@@ -453,11 +594,22 @@ export function ImageUploaderField({
                       </button>
                     ) : null}
 
-                    {/* Smooth Gradient Hover Overlay with Filename & Size */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent pt-6 pb-1.5 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <p className="truncate text-[10px] font-medium text-white drop-shadow-xs">
+                    {/* Bottom Strip: Filename on Left, File Size on Right */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/45 to-transparent pt-5 pb-1.5 px-2 flex items-center justify-between gap-1.5">
+                      <p className="truncate text-[9.5px] sm:text-[10px] font-medium text-white/95 drop-shadow-xs min-w-0">
                         {item.name}
                       </p>
+                      {formattedSize && (
+                        <span
+                          className={`text-[8px] sm:text-[9px] font-mono px-1.5 py-0.5 rounded shadow-xs shrink-0 leading-none ${
+                            (item.size ?? 0) > 1024 * 1024
+                              ? 'bg-amber-500/90 text-black font-bold'
+                              : 'bg-black/60 text-white/90 font-medium backdrop-blur-xs'
+                          }`}
+                        >
+                          {formattedSize}
+                        </span>
+                      )}
                     </div>
                   </div>
                 );

@@ -186,12 +186,43 @@ export async function getMediaLibrary(
   try {
     const foldersToFetch: string[] = [];
     if (includeAll) {
-      foldersToFetch.push('uploads', 'hero', 'brand/logos', 'brand/favicons', 'tours', 'gallery', 'whyus', 'contact-hero', 'about', 'team');
+      foldersToFetch.push(
+        'uploads',
+        'global',
+        'hero',
+        'brand/logos',
+        'brand/favicons',
+        'tours',
+        'excursions',
+        'gallery',
+        'whyus',
+        'contact-hero',
+        'about',
+        'team',
+        'air-ticketing',
+        'transfers'
+      );
+      try {
+        const { data: rootList } = await supabase.storage.from(MEDIA_BUCKET).list('', { limit: 100 });
+        if (rootList) {
+          for (const item of rootList) {
+            if (!item.id || item.metadata === null || !IMAGE_EXTENSIONS.test(item.name)) {
+              if (item.name && !item.name.includes('.')) {
+                foldersToFetch.push(item.name);
+              }
+            }
+          }
+        }
+      } catch {
+        // gracefully ignore
+      }
     } else {
       if (folder) foldersToFetch.push(folder);
       if (folder && !folder.startsWith('images/') && !folder.startsWith('brand/')) {
         foldersToFetch.push(`images/${folder}`);
       }
+      // Always include global uploads so global images can be viewed across all sections
+      foldersToFetch.push('uploads', 'global');
     }
 
     const uniqueFolders = Array.from(new Set(foldersToFetch));
@@ -328,6 +359,84 @@ export async function uploadImage(
     .getPublicUrl(fileName);
 
   return { url: urlData.publicUrl, storagePath: fileName, size: file.size };
+}
+
+/**
+ * Uploads multiple images to Supabase Storage and returns their details.
+ * Requires an active admin session.
+ */
+export async function uploadMultipleImages(
+  formData: FormData,
+  folder: string = 'uploads'
+): Promise<{ items: Array<{ url: string; storagePath: string; size?: number; name: string }>; errors: string[] }> {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) return { items: [], errors: ['Unauthorized'] };
+
+  const rawFiles = formData.getAll('files') as File[];
+  const files: File[] = [];
+  for (const f of rawFiles) {
+    if (f && typeof f === 'object' && 'name' in f && f.size > 0) {
+      files.push(f);
+    }
+  }
+
+  const singleFile = formData.get('file') as File | null;
+  if (singleFile && singleFile.size > 0 && !files.includes(singleFile)) {
+    files.push(singleFile);
+  }
+
+  if (files.length === 0) {
+    return { items: [], errors: ['No files provided'] };
+  }
+
+  const items: Array<{ url: string; storagePath: string; size?: number; name: string }> = [];
+  const errors: string[] = [];
+
+  const uploadPromises = files.map(async (file) => {
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'webp';
+      const cleanBase = file.name
+        .substring(0, file.name.lastIndexOf('.') > 0 ? file.name.lastIndexOf('.') : file.name.length)
+        .replace(/[^a-zA-Z0-9_-]/g, '_')
+        .toLowerCase()
+        .slice(0, 30);
+      const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${cleanBase}.${ext}`;
+
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = new Uint8Array(arrayBuffer);
+      const contentType = file.type || (ext === 'webp' ? 'image/webp' : 'application/octet-stream');
+
+      const { error } = await supabase.storage
+        .from(MEDIA_BUCKET)
+        .upload(fileName, buffer, {
+          contentType,
+          upsert: false,
+        });
+
+      if (error) {
+        errors.push(`${file.name}: ${error.message}`);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from(MEDIA_BUCKET)
+        .getPublicUrl(fileName);
+
+      items.push({
+        url: urlData.publicUrl,
+        storagePath: fileName,
+        size: file.size,
+        name: file.name,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Upload failed';
+      errors.push(`${file.name}: ${msg}`);
+    }
+  });
+
+  await Promise.all(uploadPromises);
+
+  return { items, errors };
 }
 
 /**

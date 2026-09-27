@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { getAppConfig } from '@/lib/config/getAppConfig';
 import { AppConfigProvider } from '@/components/providers/AppConfigProvider';
+import { Toaster } from '@/components/ui/sonner';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +77,10 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <body className="font-sans antialiased">
         {/* AppConfigProvider wraps everything so ALL routes can use useAppConfig() */}
-        <AppConfigProvider config={config}>{children}</AppConfigProvider>
+        <AppConfigProvider config={config}>
+          {children}
+          <Toaster />
+        </AppConfigProvider>
       </body>
     </html>
   );

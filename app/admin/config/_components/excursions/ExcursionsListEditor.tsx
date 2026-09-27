@@ -10,7 +10,12 @@ import {
   RotateCcw,
   ArrowUp,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 import type { ExcursionItem, ExcursionScheduleItem } from "@/types/app-config";
 import { defaultConfig, defaultExcursionItems, defaultExcursionSchedule } from "@/config/default-config";
@@ -22,6 +27,7 @@ import { SectionHeaderFields } from "../shared/SectionHeaderFields";
 import { ImageUploaderField } from "../shared/ImageUploaderField";
 import { TourDeleteConfirmDialog } from "../shared/TourDeleteConfirmDialog";
 import { isExcursionMatch } from "@/lib/excursion-utils";
+import { MultilineArrayField } from "../shared/MultilineArrayField";
 
 export function ExcursionsListEditor({ draft, set }: EditorProps) {
   const fallbackExcursions = defaultConfig.homepage.excursions || {
@@ -39,11 +45,30 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
   const data =
     currentExcursionsPage.tours || defaultConfig.excursionsPage!.tours;
   const excursionsList: ExcursionItem[] = data.items || [];
+  const [activeExcursionIndex, setActiveExcursionIndex] = useState(0);
   const [deletePrompt, setDeletePrompt] = useState<{
     type: "soft" | "permanent";
     excursion: ExcursionItem;
     index: number;
   } | null>(null);
+
+  const safeActiveIndex = Math.min(
+    Math.max(0, activeExcursionIndex),
+    Math.max(0, excursionsList.length - 1)
+  );
+  const activeExcursion = excursionsList[safeActiveIndex];
+
+  const handleAddExcursion = () => {
+    addExcursion();
+    setActiveExcursionIndex(excursionsList.length);
+  };
+
+  const handleMoveExcursion = (fromIdx: number, dir: -1 | 1) => {
+    const target = fromIdx + dir;
+    if (target < 0 || target >= excursionsList.length) return;
+    moveExcursion(fromIdx, dir);
+    setActiveExcursionIndex(target);
+  };
 
   const updEnabled = (v: boolean) =>
     set((p) => {
@@ -247,6 +272,7 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
         if (hpIdx !== -1) {
           hpItems.splice(hpIdx, 1);
         }
+        setActiveExcursionIndex((prev) => Math.max(0, prev - 1));
       }
 
       return {
@@ -356,22 +382,191 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
         }
       />
 
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-foreground">
-          Excursions Inventory ({excursionsList.length})
-        </h4>
-        <Button
-          type="button"
-          size="sm"
-          onClick={addExcursion}
-          className="gap-1.5"
-        >
-          <Plus className="h-4 w-4" /> Add Excursion
-        </Button>
-      </div>
-
       <div className="space-y-4">
-        {excursionsList.map((t, i) => {
+        {/* Excursions Header & Counter */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground">
+              Excursions Inventory ({excursionsList.length})
+            </h4>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              Select a tab below to focus on that excursion
+            </span>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddExcursion}
+            className="gap-1.5 text-xs font-semibold"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Excursion
+          </Button>
+        </div>
+
+        {/* Horizontal Tab Navigation Strip */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1 scrollbar-thin">
+          {excursionsList.map((t, idx) => {
+            const isSelected = idx === safeActiveIndex;
+            const isDeleted = Boolean(t.deleted);
+            const title = t.title
+              ? t.title.length > 22
+                ? t.title.slice(0, 20) + "…"
+                : t.title
+              : `Excursion #${idx + 1}`;
+            return (
+              <button
+                key={t.id || `exp-tab-${idx}`}
+                type="button"
+                onClick={() => setActiveExcursionIndex(idx)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border shrink-0 cursor-pointer ${
+                  isSelected
+                    ? "text-white border-transparent shadow-xs ring-1 ring-black/10"
+                    : isDeleted
+                    ? "bg-destructive/10 text-destructive/80 border-dashed border-destructive/30 hover:bg-destructive/15"
+                    : t.enabled === false
+                    ? "bg-muted/60 text-muted-foreground border-border hover:bg-muted hover:text-foreground"
+                    : "bg-card text-foreground border-border hover:border-foreground/30 shadow-2xs"
+                }`}
+                style={
+                  isSelected
+                    ? { backgroundColor: draft.branding.primaryColor || "#1b4332" }
+                    : undefined
+                }
+              >
+                <span
+                  className={`h-2 w-2 rounded-full shrink-0 ${
+                    isSelected
+                      ? "bg-white"
+                      : isDeleted
+                      ? "bg-destructive"
+                      : t.enabled === false
+                      ? "bg-muted-foreground/50"
+                      : "bg-emerald-500"
+                  }`}
+                />
+                <span>
+                  #{idx + 1} {title}
+                </span>
+                {isDeleted && <span className="text-[10px] opacity-75">(Deleted)</span>}
+                {!isDeleted && t.enabled === false && (
+                  <span className="text-[10px] opacity-75">(Hidden)</span>
+                )}
+              </button>
+            );
+          })}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddExcursion}
+            className="h-8 gap-1 text-xs font-semibold whitespace-nowrap shrink-0 border-dashed hover:border-solid"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Excursion
+          </Button>
+        </div>
+
+        {/* Active Excursion Pager Bar */}
+        {excursionsList.length > 0 && activeExcursion && (
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3 rounded-lg border border-border/60">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-md text-white text-xs font-bold shadow-xs shrink-0"
+                style={{
+                  backgroundColor: draft.branding.primaryColor || "#1b4332",
+                }}
+              >
+                #{safeActiveIndex + 1}
+              </span>
+              <div className="min-w-0">
+                <h5 className="text-sm font-bold text-foreground truncate">
+                  {activeExcursion.title || `Excursion #${safeActiveIndex + 1}`}
+                </h5>
+                <p className="text-[11px] text-muted-foreground">
+                  Excursion {safeActiveIndex + 1} of {excursionsList.length}
+                  {activeExcursion.deleted
+                    ? " • Soft-deleted / Inactive"
+                    : activeExcursion.enabled === false
+                    ? " • Hidden from listing"
+                    : " • Live on listing"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={safeActiveIndex === 0}
+                onClick={() => setActiveExcursionIndex(safeActiveIndex - 1)}
+                className="h-7 text-xs gap-1 px-2.5"
+                title="Previous Excursion"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" /> Prev
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={safeActiveIndex >= excursionsList.length - 1}
+                onClick={() => setActiveExcursionIndex(safeActiveIndex + 1)}
+                className="h-7 text-xs gap-1 px-2.5"
+                title="Next Excursion"
+              >
+                Next <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+
+              <div className="h-4 w-px bg-border mx-1" />
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                disabled={safeActiveIndex === 0 || Boolean(activeExcursion.deleted)}
+                onClick={() => handleMoveExcursion(safeActiveIndex, -1)}
+                title="Move excursion left (earlier in order)"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                disabled={
+                  safeActiveIndex >= excursionsList.length - 1 ||
+                  Boolean(activeExcursion.deleted)
+                }
+                onClick={() => handleMoveExcursion(safeActiveIndex, 1)}
+                title="Move excursion right (later in order)"
+              >
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Excursion Editor Content */}
+        {excursionsList.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-8 text-center text-muted-foreground space-y-3">
+            <Compass className="h-8 w-8 mx-auto text-muted-foreground/60" />
+            <p className="text-sm font-medium">No excursions found.</p>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleAddExcursion}
+              className="gap-1.5 text-xs font-semibold"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add First Excursion
+            </Button>
+          </div>
+        ) : (() => {
+          const i = safeActiveIndex;
+          const t = activeExcursion;
+          if (!t) return null;
           const isDeleted = t.deleted;
           const scheduleList =
             t.scheduleItems && t.scheduleItems.length > 0
@@ -421,8 +616,8 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                         size="icon"
                         className="h-7 w-7"
                         disabled={i === 0}
-                        onClick={() => moveExcursion(i, -1)}
-                        title="Move up"
+                        onClick={() => handleMoveExcursion(i, -1)}
+                        title="Move up / left"
                       >
                         <ArrowUp className="h-3.5 w-3.5" />
                       </Button>
@@ -432,8 +627,8 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                         size="icon"
                         className="h-7 w-7"
                         disabled={i === excursionsList.length - 1}
-                        onClick={() => moveExcursion(i, 1)}
-                        title="Move down"
+                        onClick={() => handleMoveExcursion(i, 1)}
+                        title="Move down / right"
                       >
                         <ArrowDown className="h-3.5 w-3.5" />
                       </Button>
@@ -656,10 +851,9 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
 
                 {/* Single Excursion Page Details Accordion */}
                 <details
-                  open={!isDeleted}
-                  className="rounded-xl border-2 border-sky-500/40 bg-sky-500/5 dark:bg-sky-950/20 dark:border-sky-500/35 p-3.5 sm:p-5 space-y-4 shadow-xs"
+                  className="group rounded-xl border-2 border-sky-500/40 bg-sky-500/5 dark:bg-sky-950/20 dark:border-sky-500/35 p-3.5 sm:p-5 space-y-4 shadow-xs"
                 >
-                  <summary className="cursor-pointer text-xs font-semibold flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-2 select-none p-2.5 sm:p-3 rounded-lg bg-sky-600/10 hover:bg-sky-600/15 dark:bg-sky-500/20 text-sky-950 dark:text-sky-100 border border-sky-500/30 transition-colors shadow-xs">
+                  <summary className="cursor-pointer text-xs font-semibold flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-2 select-none p-2.5 sm:p-3 rounded-lg bg-sky-600/10 hover:bg-sky-600/15 dark:bg-sky-500/20 text-sky-950 dark:text-sky-100 border border-sky-500/30 transition-colors shadow-xs list-none [&::-webkit-details-marker]:hidden">
                     <div className="flex items-center gap-2.5 font-bold min-w-0">
                       <div className="flex h-6 w-6 items-center justify-center rounded-md bg-sky-600 text-white shadow-xs shrink-0">
                         <Compass className="h-3.5 w-3.5" />
@@ -668,9 +862,12 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                         Single Excursion Page Content &amp; Details
                       </span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-sky-600/15 dark:bg-sky-400/20 text-sky-800 dark:text-sky-200 px-2.5 py-0.5 rounded-full border border-sky-500/25 shrink-0 self-start sm:self-auto">
-                      Single Page Config
-                    </span>
+                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-sky-600/15 dark:bg-sky-400/20 text-sky-800 dark:text-sky-200 px-2.5 py-0.5 rounded-full border border-sky-500/25">
+                        Single Page Config
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-sky-800 dark:text-sky-200 transition-transform duration-200 group-open:rotate-180" />
+                    </div>
                   </summary>
 
                   <div className="space-y-4 pt-1">
@@ -1220,27 +1417,17 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                               What&apos;s Included (1 item per line)
                             </Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`exp-inc-${i}`}
                             rows={7}
-                            value={(t.included || []).join('\n')}
+                            value={t.included}
                             placeholder="Professional guide&#10;Marine park entry permits&#10;Fresh lunch & drinks"
-                            onChange={(e) =>
-                              updExcursion(
-                                i,
-                                'included',
-                                e.target.value
-                                  .split('\n')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean)
-                              )
-                            }
+                            onChange={(items) => updExcursion(i, 'included', items)}
                             disabled={
                               !t.enabled ||
                               isDeleted ||
                               t.showIncluded === false
                             }
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
 
@@ -1258,27 +1445,17 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                               What&apos;s Not Included (1 item per line)
                             </Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`exp-notinc-${i}`}
                             rows={7}
-                            value={(t.notIncluded || []).join('\n')}
+                            value={t.notIncluded}
                             placeholder="Driver and excursion guide gratuities&#10;Personal shopping and souvenirs&#10;Personal travel insurance"
-                            onChange={(e) =>
-                              updExcursion(
-                                i,
-                                'notIncluded',
-                                e.target.value
-                                  .split('\n')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean)
-                              )
-                            }
+                            onChange={(items) => updExcursion(i, 'notIncluded', items)}
                             disabled={
                               !t.enabled ||
                               isDeleted ||
                               t.showNotIncluded === false
                             }
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
                       </div>
@@ -1298,27 +1475,17 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                               Why Choose This Excursion (1 per line)
                             </Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`exp-why-${i}`}
                             rows={6}
-                            value={(t.whyChoose || []).join('\n')}
+                            value={t.whyChoose}
                             placeholder="Licensed local marine skippers&#10;Modern snorkeling & safety equipment&#10;Authentic Swahili seafood lunch"
-                            onChange={(e) =>
-                              updExcursion(
-                                i,
-                                'whyChoose',
-                                e.target.value
-                                  .split('\n')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean)
-                              )
-                            }
+                            onChange={(items) => updExcursion(i, 'whyChoose', items)}
                             disabled={
                               !t.enabled ||
                               isDeleted ||
                               t.showWhyChoose === false
                             }
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
 
@@ -1340,20 +1507,12 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                               Know Before You Go (1 per line)
                             </Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`exp-know-${i}`}
                             rows={6}
-                            value={(
-                              t.knowBeforeYouGo ||
-                              t.whatToCarry ||
-                              []
-                            ).join('\n')}
+                            value={t.knowBeforeYouGo || t.whatToCarry}
                             placeholder="Wear comfortable walking shoes&#10;Swimwear & beach towel&#10;Hat, sunglasses, and sunscreen&#10;Waterproof camera recommended"
-                            onChange={(e) => {
-                              const items = e.target.value
-                                .split('\n')
-                                .map((s) => s.trim())
-                                .filter(Boolean);
+                            onChange={(items) => {
                               updExcursion(i, 'knowBeforeYouGo', items);
                               updExcursion(i, 'whatToCarry', items);
                             }}
@@ -1362,7 +1521,6 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                               isDeleted ||
                               t.showKnowBeforeYouGo === false
                             }
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
                       </div>
@@ -1413,9 +1571,9 @@ export function ExcursionsListEditor({ draft, set }: EditorProps) {
                   </div>
                 </details>
               </div>
-            </div>
-          );
-        })}
+              </div>
+            );
+          })()}
       </div>
     </div>
   );

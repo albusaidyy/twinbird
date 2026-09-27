@@ -10,7 +10,12 @@ import {
   RotateCcw,
   ArrowUp,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
   CalendarDays,
+  ChevronDown,
 } from 'lucide-react';
 import type { TourItem, SafariItineraryItem } from '@/types/app-config';
 import { defaultConfig, defaultSafariItinerary } from '@/config/default-config';
@@ -22,12 +27,29 @@ import { SectionHeaderFields } from '../shared/SectionHeaderFields';
 import { ImageUploaderField } from '../shared/ImageUploaderField';
 import { TourDeleteConfirmDialog } from '../shared/TourDeleteConfirmDialog';
 import { isTourMatch } from '../shared/admin-helpers';
+import { MultilineArrayField } from '../shared/MultilineArrayField';
 
 export function SafarisListEditor({ draft, set }: EditorProps) {
   const currentToursPage = draft.toursPage || defaultConfig.toursPage!;
   const data = currentToursPage.tours || defaultConfig.toursPage!.tours;
   const toursList = data.items || [];
+  const [activeTourIndex, setActiveTourIndex] = useState(0);
   const [deletePrompt, setDeletePrompt] = useState<{ type: 'soft' | 'permanent'; tour: TourItem; index: number } | null>(null);
+
+  const safeActiveIndex = Math.min(Math.max(0, activeTourIndex), Math.max(0, toursList.length - 1));
+  const activeTour = toursList[safeActiveIndex];
+
+  const handleAddTour = () => {
+    addTour();
+    setActiveTourIndex(toursList.length);
+  };
+
+  const handleMoveTour = (fromIdx: number, dir: -1 | 1) => {
+    const target = fromIdx + dir;
+    if (target < 0 || target >= toursList.length) return;
+    moveTour(fromIdx, dir);
+    setActiveTourIndex(target);
+  };
 
   const updEnabled = (v: boolean) => set((p) => {
     const current = p.toursPage || defaultConfig.toursPage!;
@@ -204,6 +226,7 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
               softDeleteTour(deletePrompt.tour, deletePrompt.index);
             } else {
               permanentDeleteTour(deletePrompt.tour, deletePrompt.index);
+              setActiveTourIndex((prev) => Math.max(0, prev - 1));
             }
             setDeletePrompt(null);
           }}
@@ -226,20 +249,175 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
       />
 
       <div className="space-y-4">
+        {/* Safari Packages Header & Counter */}
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold">Safari Packages ({toursList.length})</h4>
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-semibold">Safari Packages ({toursList.length})</h4>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              Select a tab below to focus on that safari
+            </span>
+          </div>
           <Button
             type="button"
             variant="outline"
             size="sm"
-            onClick={addTour}
+            onClick={handleAddTour}
             className="gap-1.5 text-xs font-semibold"
           >
             <Plus className="h-3.5 w-3.5" /> Add Safari Package
           </Button>
         </div>
 
-        {toursList.map((t, i) => {
+        {/* Horizontal Tab Navigation Strip */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-1 scrollbar-thin">
+          {toursList.map((t, idx) => {
+            const isSelected = idx === safeActiveIndex;
+            const isDeleted = Boolean(t.deleted);
+            const title = t.title
+              ? t.title.length > 22
+                ? t.title.slice(0, 20) + '…'
+                : t.title
+              : `Safari #${idx + 1}`;
+            return (
+              <button
+                key={t.id || `tab-${idx}`}
+                type="button"
+                onClick={() => setActiveTourIndex(idx)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border shrink-0 cursor-pointer ${
+                  isSelected
+                    ? 'text-white border-transparent shadow-xs ring-1 ring-black/10'
+                    : isDeleted
+                    ? 'bg-destructive/10 text-destructive/80 border-dashed border-destructive/30 hover:bg-destructive/15'
+                    : t.enabled === false
+                    ? 'bg-muted/60 text-muted-foreground border-border hover:bg-muted hover:text-foreground'
+                    : 'bg-card text-foreground border-border hover:border-foreground/30 shadow-2xs'
+                }`}
+                style={isSelected ? { backgroundColor: draft.branding.primaryColor || '#1b4332' } : undefined}
+              >
+                <span
+                  className={`h-2 w-2 rounded-full shrink-0 ${
+                    isSelected
+                      ? 'bg-white'
+                      : isDeleted
+                      ? 'bg-destructive'
+                      : t.enabled === false
+                      ? 'bg-muted-foreground/50'
+                      : 'bg-emerald-500'
+                  }`}
+                />
+                <span>#{idx + 1} {title}</span>
+                {isDeleted && <span className="text-[10px] opacity-75">(Deleted)</span>}
+                {!isDeleted && t.enabled === false && <span className="text-[10px] opacity-75">(Hidden)</span>}
+              </button>
+            );
+          })}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddTour}
+            className="h-8 gap-1 text-xs font-semibold whitespace-nowrap shrink-0 border-dashed hover:border-solid"
+          >
+            <Plus className="h-3.5 w-3.5" /> Add Package
+          </Button>
+        </div>
+
+        {/* Active Tour Pager Bar */}
+        {toursList.length > 0 && activeTour && (
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-muted/40 p-3 rounded-lg border border-border/60">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-md text-white text-xs font-bold shadow-xs shrink-0"
+                style={{ backgroundColor: draft.branding.primaryColor || '#1b4332' }}
+              >
+                #{safeActiveIndex + 1}
+              </span>
+              <div className="min-w-0">
+                <h5 className="text-sm font-bold text-foreground truncate">
+                  {activeTour.title || `Safari #${safeActiveIndex + 1}`}
+                </h5>
+                <p className="text-[11px] text-muted-foreground">
+                  Package {safeActiveIndex + 1} of {toursList.length}
+                  {activeTour.deleted
+                    ? ' • Soft-deleted / Inactive'
+                    : activeTour.enabled === false
+                    ? ' • Hidden from listing'
+                    : ' • Live on listing'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={safeActiveIndex === 0}
+                onClick={() => setActiveTourIndex(safeActiveIndex - 1)}
+                className="h-7 text-xs gap-1 px-2.5"
+                title="Previous Safari Package"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" /> Prev
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={safeActiveIndex >= toursList.length - 1}
+                onClick={() => setActiveTourIndex(safeActiveIndex + 1)}
+                className="h-7 text-xs gap-1 px-2.5"
+                title="Next Safari Package"
+              >
+                Next <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+
+              <div className="h-4 w-px bg-border mx-1" />
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                disabled={safeActiveIndex === 0 || Boolean(activeTour.deleted)}
+                onClick={() => handleMoveTour(safeActiveIndex, -1)}
+                title="Move package left (earlier in order)"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                disabled={safeActiveIndex >= toursList.length - 1 || Boolean(activeTour.deleted)}
+                onClick={() => handleMoveTour(safeActiveIndex, 1)}
+                title="Move package right (later in order)"
+              >
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Tour Editor Content */}
+        {toursList.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-8 text-center text-muted-foreground space-y-3">
+            <Compass className="h-8 w-8 mx-auto text-muted-foreground/60" />
+            <p className="text-sm font-medium">No safari packages found.</p>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleAddTour}
+              className="gap-1.5 text-xs font-semibold"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add First Safari Package
+            </Button>
+          </div>
+        ) : (() => {
+          const i = safeActiveIndex;
+          const t = activeTour;
+          if (!t) return null;
           const isDeleted = Boolean(t.deleted);
           const itineraryList =
             t.itinerary && t.itinerary.length > 0
@@ -476,19 +654,21 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
 
                 {/* Single Tour Page Details Accordion */}
                 <details
-                  open={!isDeleted}
-                  className="rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20 dark:border-emerald-500/35 p-3.5 sm:p-5 space-y-4 shadow-xs"
+                  className="group rounded-xl border-2 border-emerald-500/40 bg-emerald-500/5 dark:bg-emerald-950/20 dark:border-emerald-500/35 p-3.5 sm:p-5 space-y-4 shadow-xs"
                 >
-                  <summary className="cursor-pointer text-xs font-semibold flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-2 select-none p-2.5 sm:p-3 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/15 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-100 border border-emerald-500/30 transition-colors shadow-xs">
+                  <summary className="cursor-pointer text-xs font-semibold flex flex-col sm:flex-row sm:items-center sm:justify-between items-start gap-2 select-none p-2.5 sm:p-3 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/15 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-100 border border-emerald-500/30 transition-colors shadow-xs list-none [&::-webkit-details-marker]:hidden">
                     <div className="flex items-center gap-2.5 font-bold min-w-0">
                       <div className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-600 text-white shadow-xs shrink-0">
                         <Compass className="h-3.5 w-3.5" />
                       </div>
                       <span className="text-xs sm:text-sm font-bold leading-tight">Single Safari Page Content &amp; Details</span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-600/15 dark:bg-emerald-400/20 text-emerald-800 dark:text-emerald-200 px-2.5 py-0.5 rounded-full border border-emerald-500/25 shrink-0 self-start sm:self-auto">
-                      Single Page Config
-                    </span>
+                    <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-600/15 dark:bg-emerald-400/20 text-emerald-800 dark:text-emerald-200 px-2.5 py-0.5 rounded-full border border-emerald-500/25">
+                        Single Page Config
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-emerald-800 dark:text-emerald-200 transition-transform duration-200 group-open:rotate-180" />
+                    </div>
                   </summary>
                   
                   <div className="space-y-4 pt-1">
@@ -918,23 +1098,13 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                             />
                             <Label className="text-xs font-semibold">What&apos;s Included (1 item per line)</Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`tp-inc-${i}`}
                             rows={7}
-                            value={(t.included || []).join('\n')}
+                            value={t.included}
                             placeholder="Heavy tackle Penn & Shimano rods&#10;Live bait & lures&#10;Marine park entry permits&#10;Seafood lunch & drinks"
-                            onChange={(e) =>
-                              updTour(
-                                i,
-                                'included',
-                                e.target.value
-                                  .split('\n')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean)
-                              )
-                            }
+                            onChange={(items) => updTour(i, 'included', items)}
                             disabled={!t.enabled || isDeleted || t.showIncluded === false}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
 
@@ -948,23 +1118,13 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                             />
                             <Label className="text-xs font-semibold">What&apos;s Not Included (1 item per line)</Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`tp-notinc-${i}`}
                             rows={7}
-                            value={(t.notIncluded || []).join('\n')}
+                            value={t.notIncluded}
                             placeholder="Crew gratuities and tips (optional)&#10;Hotel pickup & return transfers&#10;Personal swimwear & towels&#10;Alcoholic beverages"
-                            onChange={(e) =>
-                              updTour(
-                                i,
-                                'notIncluded',
-                                e.target.value
-                                  .split('\n')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean)
-                              )
-                            }
+                            onChange={(items) => updTour(i, 'notIncluded', items)}
                             disabled={!t.enabled || isDeleted || t.showNotIncluded === false}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
                       </div>
@@ -980,23 +1140,13 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                             />
                             <Label className="text-xs font-semibold">Why Choose This Safari (1 per line)</Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`tp-why-${i}`}
                             rows={6}
-                            value={(t.whyChoose || []).join('\n')}
+                            value={t.whyChoose}
                             placeholder="Twin-engine sportfisher with fighting chair&#10;IGFA certified captain with 20+ years experience&#10;Strict billfish conservation policy"
-                            onChange={(e) =>
-                              updTour(
-                                i,
-                                'whyChoose',
-                                e.target.value
-                                  .split('\n')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean)
-                              )
-                            }
+                            onChange={(items) => updTour(i, 'whyChoose', items)}
                             disabled={!t.enabled || isDeleted || t.showWhyChoose === false}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
 
@@ -1010,23 +1160,13 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                             />
                             <Label className="text-xs font-semibold">Know Before You Go (1 per line)</Label>
                           </div>
-                          <textarea
+                          <MultilineArrayField
                             id={`tp-know-${i}`}
                             rows={6}
-                            value={(t.knowBeforeYouGo || []).join('\n')}
+                            value={t.knowBeforeYouGo}
                             placeholder="Departure: 6:00 AM from Watamu Marine Park Gate&#10;Duration: Approx. 8 hours&#10;What to bring: Polarized sunglasses, reef-safe sunscreen"
-                            onChange={(e) =>
-                              updTour(
-                                i,
-                                'knowBeforeYouGo',
-                                e.target.value
-                                  .split('\n')
-                                  .map((s) => s.trim())
-                                  .filter(Boolean)
-                              )
-                            }
+                            onChange={(items) => updTour(i, 'knowBeforeYouGo', items)}
                             disabled={!t.enabled || isDeleted || t.showKnowBeforeYouGo === false}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none disabled:opacity-50 font-mono"
                           />
                         </div>
                       </div>
@@ -1062,9 +1202,9 @@ export function SafarisListEditor({ draft, set }: EditorProps) {
                   </div>
                 </details>
               </div>
-            </div>
-          );
-        })}
+              </div>
+            );
+          })()}
       </div>
     </div>
   );

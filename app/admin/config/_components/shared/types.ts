@@ -26,6 +26,7 @@ import {
 export type SectionKey =
   | 'branding'
   | 'navigation'
+  | 'global-media'
   | 'versions'
   | 'hero'
   | 'stats'
@@ -86,6 +87,7 @@ export interface PageItem {
 export const APP_SETTINGS: SectionItem[] = [
   { key: 'branding', label: 'Branding & Theme', Icon: Palette, description: 'Colors, app name, logo' },
   { key: 'navigation', label: 'Header Navigation', Icon: Compass, description: 'Top navbar links & order' },
+  { key: 'global-media', label: 'Global Media Library', Icon: ImageIcon, description: 'Upload and manage images globally across all sections' },
   { key: 'versions', label: 'Version History', Icon: History, description: 'Config snapshots & restore' },
 ];
 
