@@ -73,7 +73,7 @@ export async function getAppConfig(): Promise<AppConfig> {
 
     if (error || !data?.config) return defaultConfig;
 
-    return mergeDeep(defaultConfig, data.config);
+    return mergeDeep(defaultConfig, data.config) as AppConfig;
   } catch {
     return defaultConfig;
   }

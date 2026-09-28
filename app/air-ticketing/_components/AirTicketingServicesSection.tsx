@@ -176,51 +176,37 @@ export function AirTicketingServicesSection({
           >
             {visibleAirlines.map((airline, idx) => {
               const itemKey = airline.id || `airline-${idx}`;
-              const logoSrc = airline.logoUrl || airline.imageUrl;
+              const logoSrc = airline.imageUrl || airline.logoUrl;
               const isBroken = failedLogos[itemKey];
+              const altText = airline.name || `Airline Partner ${idx + 1}`;
 
               return (
                 <div
                   key={itemKey}
-                  className="relative shrink-0 w-[60vw] sm:w-[220px] md:w-[240px] lg:w-[260px] snap-center rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/90 shadow-sm hover:shadow-xl hover:border-amber-400 dark:hover:border-amber-500/50 transition-all duration-300 group p-5 flex flex-col items-center justify-center text-center gap-3 min-h-[130px] sm:min-h-[140px]"
+                  className="relative shrink-0 w-[42vw] sm:w-[180px] md:w-[210px] snap-center rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/70 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-900 shadow-xs hover:shadow-md hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 group p-4 flex items-center justify-center h-24 sm:h-28"
                 >
-                  {/* Logo Display */}
-                  <div className="h-14 sm:h-16 w-full flex items-center justify-center p-1 relative">
-                    {logoSrc && !isBroken ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={logoSrc}
-                        alt={airline.name}
-                        className="max-h-12 sm:max-h-14 max-w-[170px] sm:max-w-[200px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none"
-                        loading="lazy"
-                        onError={() => {
-                          setFailedLogos((prev) => ({
-                            ...prev,
-                            [itemKey]: true,
-                          }));
-                        }}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-2 text-zinc-800 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800/80 px-3.5 py-2 rounded-xl">
-                        <Plane className="h-5 w-5 text-amber-600 shrink-0" />
-                        <span className="font-serif font-bold text-xs sm:text-sm truncate max-w-[140px]">
-                          {airline.name}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Airline Name & Category Label */}
-                  <div className="space-y-0.5 w-full">
-                    <h4 className="font-semibold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors truncate">
-                      {airline.name}
-                    </h4>
-                    {airline.category && (
-                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500 truncate uppercase font-medium tracking-wider">
-                        {airline.badge || airline.category}
-                      </p>
-                    )}
-                  </div>
+                  {logoSrc && !isBroken ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={logoSrc}
+                      alt={altText}
+                      className="max-h-14 sm:max-h-16 max-w-[130px] sm:max-w-[160px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none opacity-85 group-hover:opacity-100"
+                      loading="lazy"
+                      onError={() => {
+                        setFailedLogos((prev) => ({
+                          ...prev,
+                          [itemKey]: true,
+                        }));
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-300">
+                      <Plane className="h-5 w-5 text-primary shrink-0" />
+                      <span className="font-semibold text-xs sm:text-sm truncate max-w-[130px]">
+                        {altText}
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })}

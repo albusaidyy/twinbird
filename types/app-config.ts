@@ -526,15 +526,9 @@ export interface AirTicketingServiceItem {
 
 export interface AirlinePartnerItem {
   id: string;
-  name: string;
-  category?: string;
-  logoUrl?: string;
+  name?: string;
   imageUrl?: string;
-  badge?: string;
-  hub?: string;
-  fleet?: string;
-  routesCount?: string;
-  description?: string;
+  logoUrl?: string;
   enabled?: boolean;
 }
 

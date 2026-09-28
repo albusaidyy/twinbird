@@ -19,7 +19,7 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
     airlinesSubtitle: "We coordinate seamlessly with Kenya's premier safari bush carriers, regional scheduled airlines, and global flag carriers",
     airlines: [],
   };
-  const airlines = ss.airlines || defaultConfig.airTicketingPage?.servicesSection?.airlines || [];
+  const airlines = ss.airlines && ss.airlines.length > 0 ? ss.airlines : (defaultConfig.airTicketingPage?.servicesSection?.airlines || []);
 
   const upd = (k: string, v: unknown) =>
     set((p) => {
@@ -43,11 +43,8 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
   const addAirline = () => {
     const newAirline: AirlinePartnerItem = {
       id: `airline-${Date.now()}`,
-      name: 'New Airline Partner',
-      category: 'Safari Bush Carrier',
-      logoUrl: '',
+      name: '',
       imageUrl: '',
-      badge: 'Partner Carrier',
       enabled: true,
     };
     upd('airlines', [...airlines, newAirline]);
@@ -103,10 +100,10 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
             <div>
               <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Plane className="h-4 w-4 text-primary" />
-                <span>Airline Partners & Logos ({airlines.length})</span>
+                <span>Airline Partner Logos ({airlines.length})</span>
               </h4>
               <p className="text-xs text-muted-foreground">
-                Manage carrier names, logos, and category tags displayed in the auto-scrolling carousel.
+                Manage partner airline images displayed in the logo carousel.
               </p>
             </div>
             <Button
@@ -135,13 +132,8 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
                       disabled={ss.enabled === false}
                     />
                     <span className="font-semibold text-xs text-foreground">
-                      {a.name || `Airline #${idx + 1}`}
+                      {a.name || `Airline Image #${idx + 1}`}
                     </span>
-                    {a.badge && (
-                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-                        {a.badge}
-                      </span>
-                    )}
                   </div>
 
                   <div className="flex items-center gap-1">
@@ -181,41 +173,29 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
                   </div>
                 </div>
 
-                {/* Airline Logo */}
-                <FieldRow label="Airline Logo (Image / SVG / PNG)" id={`aimg-${idx}`}>
+                {/* Airline Logo Image */}
+                <FieldRow label="Logo Image" id={`aimg-${idx}`}>
                   <ImageUploaderField
                     id={`aimg-${idx}`}
-                    value={a.logoUrl || a.imageUrl || ''}
+                    value={a.imageUrl || a.logoUrl || ''}
                     onChange={(url) => {
-                      updAirline(idx, 'logoUrl', url);
                       updAirline(idx, 'imageUrl', url);
+                      updAirline(idx, 'logoUrl', url);
                     }}
                     folder="airlines"
                     placeholder="Choose or upload airline logo..."
                   />
                 </FieldRow>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <FieldRow label="Airline Name" id={`an-${idx}`}>
-                    <Input
-                      id={`an-${idx}`}
-                      value={a.name}
-                      placeholder="e.g. Kenya Airways, Safarilink"
-                      onChange={(e) => updAirline(idx, 'name', e.target.value)}
-                      disabled={ss.enabled === false}
-                    />
-                  </FieldRow>
-
-                  <FieldRow label="Category / Subtitle" id={`ac-${idx}`}>
-                    <Input
-                      id={`ac-${idx}`}
-                      value={a.category || ''}
-                      placeholder="e.g. Safari Bush Airline, National Flag Carrier"
-                      onChange={(e) => updAirline(idx, 'category', e.target.value)}
-                      disabled={ss.enabled === false}
-                    />
-                  </FieldRow>
-                </div>
+                <FieldRow label="Airline Name / Alt Text (Optional)" id={`an-${idx}`}>
+                  <Input
+                    id={`an-${idx}`}
+                    value={a.name || ''}
+                    placeholder="e.g. Kenya Airways, Safarilink"
+                    onChange={(e) => updAirline(idx, 'name', e.target.value)}
+                    disabled={ss.enabled === false}
+                  />
+                </FieldRow>
               </div>
             ))}
           </div>
