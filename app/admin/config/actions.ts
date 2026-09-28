@@ -298,13 +298,18 @@ export async function getMediaLibrary(
       storagePath: rec.storagePath,
       size: rec.size,
     })),
-    ...localImages.map((url) => ({
-      url,
-      name: url.split('/').pop() || 'local-image',
-      source: 'local' as const,
-      folder: url.split('/').slice(1, -1).join('/') || folder,
-      size: getLocalFileSize(url),
-    })),
+    ...localImages.map((url) => {
+      const parts = url.split('/').filter(Boolean);
+      const rawDir = parts.length > 1 ? parts.slice(0, -1).join('/') : 'root';
+      const cleanFolder = rawDir.replace(/^(images|brand)\//, '') || rawDir;
+      return {
+        url,
+        name: parts[parts.length - 1] || 'local-image',
+        source: 'local' as const,
+        folder: cleanFolder,
+        size: getLocalFileSize(url),
+      };
+    }),
   ];
 
   const all = Array.from(new Set([...uploadedUrls, ...localImages]));

@@ -183,14 +183,14 @@ export function AirTicketingServicesSection({
               return (
                 <div
                   key={itemKey}
-                  className="relative shrink-0 w-[42vw] sm:w-[180px] md:w-[210px] snap-center rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-zinc-50/70 dark:bg-zinc-900/60 hover:bg-white dark:hover:bg-zinc-900 shadow-xs hover:shadow-md hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 group p-4 flex items-center justify-center h-24 sm:h-28"
+                  className="relative shrink-0 w-[42vw] sm:w-[180px] md:w-[210px] snap-center rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:shadow-md hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 group p-4 flex items-center justify-center h-24 sm:h-28 overflow-hidden"
                 >
                   {logoSrc && !isBroken ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={logoSrc}
                       alt={altText}
-                      className="max-h-14 sm:max-h-16 max-w-[130px] sm:max-w-[160px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none opacity-85 group-hover:opacity-100"
+                      className="max-h-14 sm:max-h-16 max-w-[130px] sm:max-w-[160px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none opacity-90 group-hover:opacity-100"
                       loading="lazy"
                       onError={() => {
                         setFailedLogos((prev) => ({

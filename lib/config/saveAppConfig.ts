@@ -19,12 +19,4 @@ export async function saveAppConfig(config: AppConfig): Promise<void> {
   if (error) throw new Error(`Failed to save config: ${error.message}`);
 }
 
-// Legacy helpers (no longer needed since config is stored in Supabase):
-// export function loadConfigOverride(): AppConfig | null {
-//   return null;
-// }
-//
-// export function clearConfigOverride(): void {
-//   // no-op
-// }
 

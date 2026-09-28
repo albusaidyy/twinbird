@@ -186,19 +186,28 @@ export function ImageUploaderField({
     }
   };
 
+  const isItemInSection = (item: MediaItem) => {
+    if (!folder || folder === 'uploads' || folder === 'all') return false;
+    const target = folder.toLowerCase().replace(/^\/+|\/+$/g, '').replace(/^(images|brand)\//, '');
+    const itemF = (item.folder || '').toLowerCase().replace(/^\/+|\/+$/g, '').replace(/^(images|brand)\//, '');
+    if (itemF && (itemF === target || itemF.endsWith(`/${target}`))) return true;
+    const itemUrl = item.url.toLowerCase();
+    return itemUrl.includes(`/images/${target}/`) || itemUrl.includes(`/${target}/`);
+  };
+
   const localCount = mediaItems.filter((i) => i.source === 'local').length;
   const uploadedCount = mediaItems.filter((i) => i.source === 'uploaded').length;
   const globalCount = mediaItems.filter(
     (i) => i.source === 'uploaded' && (i.folder === 'uploads' || i.folder === 'global' || !i.folder)
   ).length;
-  const sectionCount = mediaItems.filter((i) => i.folder === folder).length;
+  const sectionCount = mediaItems.filter(isItemInSection).length;
 
   const filteredItems = mediaItems.filter((item) => {
     if (filterTab === 'global') {
       if (item.source !== 'uploaded') return false;
       if (item.folder && item.folder !== 'uploads' && item.folder !== 'global') return false;
     } else if (filterTab === 'section') {
-      if (item.folder !== folder) return false;
+      if (!isItemInSection(item)) return false;
     } else if (filterTab === 'local') {
       if (item.source !== 'local') return false;
     } else if (filterTab === 'uploaded') {

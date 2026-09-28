@@ -19,7 +19,10 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
     airlinesSubtitle: "We coordinate seamlessly with Kenya's premier safari bush carriers, regional scheduled airlines, and global flag carriers",
     airlines: [],
   };
-  const airlines = ss.airlines && ss.airlines.length > 0 ? ss.airlines : (defaultConfig.airTicketingPage?.servicesSection?.airlines || []);
+  const airlines =
+    ss.airlines && ss.airlines.length > 0
+      ? ss.airlines
+      : (defaultConfig.airTicketingPage?.servicesSection?.airlines || []);
 
   const upd = (k: string, v: unknown) =>
     set((p) => {
@@ -33,34 +36,102 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
       };
     });
 
-  // Airlines Carousel Management
-  const updAirline = (index: number, k: string, v: unknown) => {
-    const updated = [...airlines];
-    updated[index] = { ...updated[index], [k]: v };
-    upd('airlines', updated);
+  // Airlines Carousel Management - functional updates to prevent race conditions & stale closures
+  const updAirline = (index: number, patch: Partial<AirlinePartnerItem>) => {
+    set((p) => {
+      const current = p.airTicketingPage || defaultConfig.airTicketingPage!;
+      const ssCurrent = current.servicesSection || ss;
+      const currentList =
+        ssCurrent.airlines && ssCurrent.airlines.length > 0
+          ? ssCurrent.airlines
+          : (defaultConfig.airTicketingPage?.servicesSection?.airlines || []);
+      const updated = [...currentList];
+      updated[index] = { ...updated[index], ...patch };
+      return {
+        ...p,
+        airTicketingPage: {
+          ...current,
+          servicesSection: {
+            ...ssCurrent,
+            airlines: updated,
+          },
+        },
+      };
+    });
   };
 
   const addAirline = () => {
-    const newAirline: AirlinePartnerItem = {
-      id: `airline-${Date.now()}`,
-      name: '',
-      imageUrl: '',
-      enabled: true,
-    };
-    upd('airlines', [...airlines, newAirline]);
+    set((p) => {
+      const current = p.airTicketingPage || defaultConfig.airTicketingPage!;
+      const ssCurrent = current.servicesSection || ss;
+      const currentList =
+        ssCurrent.airlines && ssCurrent.airlines.length > 0
+          ? ssCurrent.airlines
+          : (defaultConfig.airTicketingPage?.servicesSection?.airlines || []);
+      const newAirline: AirlinePartnerItem = {
+        id: `airline-${Date.now()}`,
+        name: '',
+        imageUrl: '',
+        enabled: true,
+      };
+      return {
+        ...p,
+        airTicketingPage: {
+          ...current,
+          servicesSection: {
+            ...ssCurrent,
+            airlines: [...currentList, newAirline],
+          },
+        },
+      };
+    });
   };
 
   const removeAirline = (index: number) => {
-    upd('airlines', airlines.filter((_, i) => i !== index));
+    set((p) => {
+      const current = p.airTicketingPage || defaultConfig.airTicketingPage!;
+      const ssCurrent = current.servicesSection || ss;
+      const currentList =
+        ssCurrent.airlines && ssCurrent.airlines.length > 0
+          ? ssCurrent.airlines
+          : (defaultConfig.airTicketingPage?.servicesSection?.airlines || []);
+      return {
+        ...p,
+        airTicketingPage: {
+          ...current,
+          servicesSection: {
+            ...ssCurrent,
+            airlines: currentList.filter((_, i) => i !== index),
+          },
+        },
+      };
+    });
   };
 
   const moveAirline = (index: number, direction: -1 | 1) => {
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= airlines.length) return;
-    const reordered = [...airlines];
-    const [temp] = reordered.splice(index, 1);
-    reordered.splice(targetIndex, 0, temp);
-    upd('airlines', reordered);
+    set((p) => {
+      const current = p.airTicketingPage || defaultConfig.airTicketingPage!;
+      const ssCurrent = current.servicesSection || ss;
+      const currentList =
+        ssCurrent.airlines && ssCurrent.airlines.length > 0
+          ? ssCurrent.airlines
+          : (defaultConfig.airTicketingPage?.servicesSection?.airlines || []);
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= currentList.length) return p;
+      const reordered = [...currentList];
+      const [temp] = reordered.splice(index, 1);
+      reordered.splice(targetIndex, 0, temp);
+      return {
+        ...p,
+        airTicketingPage: {
+          ...current,
+          servicesSection: {
+            ...ssCurrent,
+            airlines: reordered,
+          },
+        },
+      };
+    });
   };
 
   return (
@@ -128,7 +199,7 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
                   <div className="flex items-center gap-2.5">
                     <Switch
                       checked={a.enabled !== false}
-                      onCheckedChange={(val) => updAirline(idx, 'enabled', val)}
+                      onCheckedChange={(val) => updAirline(idx, { enabled: val })}
                       disabled={ss.enabled === false}
                     />
                     <span className="font-semibold text-xs text-foreground">
@@ -178,10 +249,7 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
                   <ImageUploaderField
                     id={`aimg-${idx}`}
                     value={a.imageUrl || a.logoUrl || ''}
-                    onChange={(url) => {
-                      updAirline(idx, 'imageUrl', url);
-                      updAirline(idx, 'logoUrl', url);
-                    }}
+                    onChange={(url) => updAirline(idx, { imageUrl: url, logoUrl: url })}
                     folder="airlines"
                     placeholder="Choose or upload airline logo..."
                   />
@@ -192,7 +260,7 @@ export function AirTicketingServicesEditor({ draft, set }: EditorProps) {
                     id={`an-${idx}`}
                     value={a.name || ''}
                     placeholder="e.g. Kenya Airways, Safarilink"
-                    onChange={(e) => updAirline(idx, 'name', e.target.value)}
+                    onChange={(e) => updAirline(idx, { name: e.target.value })}
                     disabled={ss.enabled === false}
                   />
                 </FieldRow>
