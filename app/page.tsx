@@ -100,7 +100,7 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {visibleTours.map((tour) => {
+          {visibleTours.slice(0, 6).map((tour) => {
             const slug = getTourSlug(tour);
             const targetHref = `/safaris/${slug}`;
             const canShowBadge = tour.showBadge !== false && Boolean(tour.badge);
@@ -177,6 +177,18 @@ function FeaturedTours({ data, primaryColor, accentColor }: { data: SectionList<
               </article>
             );
           })}
+        </div>
+
+        {/* View All Safaris Button */}
+        <div className="mt-14 flex justify-center">
+          <Link
+            href="/safaris"
+            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-semibold text-white shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <span>View All Safaris</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </section>

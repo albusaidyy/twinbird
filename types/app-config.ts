@@ -181,6 +181,7 @@ export interface SectionList<T> {
   title?: string;
   subtitle?: string;
   eyebrow?: string;
+  imageUrl?: string;
   items: T[];
 }
 

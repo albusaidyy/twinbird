@@ -1539,35 +1539,36 @@
     "values": {
       "items": [
         {
-          "icon": "Leaf",
-          "title": "Wildlife Conservation",
+          "icon": "Tag",
+          "title": "Best Price",
           "enabled": true,
-          "description": "Directly funding park conservation, anti-poaching ranger units, and wildlife corridor preservation."
+          "description": "Direct, transparent pricing with no hidden fees and the best competitive rates guaranteed across all our ticketing and travel services."
         },
         {
-          "icon": "Compass",
-          "title": "Master Bush Tracking",
+          "icon": "Shield",
+          "title": "Professional",
           "enabled": true,
-          "description": "Certified KPSGA professional guides with unmatched animal tracking and behavioral expertise."
+          "description": "Experienced air ticketing specialists and dedicated travel experts ensuring accurate flight itineraries, timely re-booking, and reliable assistance."
         },
         {
-          "icon": "Users",
-          "title": "Community Empowerment",
+          "icon": "CalendarCheck",
+          "title": "Seamless Booking",
           "enabled": true,
-          "description": "Supporting local Maasai and Samburu community conservancies through revenue-sharing and schooling."
+          "description": "Fast reservations, swift e-ticket delivery, and flexible booking options tailored precisely to your schedule."
         },
         {
-          "icon": "Star",
-          "title": "Unrivaled Hospitality",
+          "icon": "ShieldCheck",
+          "title": "Guarantee",
           "enabled": true,
-          "description": "Premium 4x4 safari vehicles, handpicked luxury tented lodges, and bespoke guest care at every step."
+          "description": "100% committed to your satisfaction, route reliability, and peace of mind with 24/7 on-demand flight assistance and travel support."
         }
       ],
-      "title": "Guided by Conservation, Inspired by the Wild",
+      "title": "Our Core Values",
       "enabled": true,
-      "eyebrow": "OUR CORE VALUES",
-      "subtitle": "Our core principles guide every game drive we lead, every track we follow, and every relationship we build with local communities.",
-      "backgroundColor": "#fafafa"
+      "eyebrow": "",
+      "subtitle": "",
+      "backgroundColor": "#ffffff",
+      "imageUrl": "https://images.unsplash.com/photo-1542296332-2e4473faf563?q=80&w=2070&auto=format&fit=crop"
     }
   },
   "toursPage": {

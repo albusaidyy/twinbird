@@ -10,6 +10,7 @@ import type { EditorProps } from '../shared/types';
 import { FieldRow } from '../shared/FieldRow';
 import { SectionToggle } from '../shared/SectionToggle';
 import { BackgroundColorPicker } from '../shared/BackgroundColorPicker';
+import { ImageUploaderField } from '../shared/ImageUploaderField';
 
 export function AboutValuesEditor({ draft, set }: EditorProps) {
   const about = draft.aboutPage || defaultConfig.aboutPage!;
@@ -63,6 +64,16 @@ export function AboutValuesEditor({ draft, set }: EditorProps) {
           value={v.subtitle || ''}
           onChange={(e) => upd('subtitle', e.target.value)}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+        />
+      </FieldRow>
+
+      <FieldRow label="Featured Side Image" id="abv-image">
+        <ImageUploaderField
+          id="abv-image"
+          value={v.imageUrl || ''}
+          onChange={(url) => upd('imageUrl', url)}
+          folder="about"
+          placeholder="Upload or choose image..."
         />
       </FieldRow>
 

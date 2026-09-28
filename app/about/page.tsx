@@ -37,6 +37,7 @@ export default function AboutPage() {
       <AboutValuesSection
         data={aboutPage.values}
         primaryColor={primaryColor}
+        accentColor={accentColor}
       />
 
       {/* 4. Crew / Storytellers Section */}

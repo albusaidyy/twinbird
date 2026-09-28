@@ -1,20 +1,20 @@
 import React from 'react';
+import Image from 'next/image';
 import { getIcon } from '@/lib/icons';
 import { isColorDark } from '@/lib/utils';
 import type { SectionList, AboutValueItem } from '@/types/app-config';
-
-function renderIcon(name: string, className?: string) {
-  return React.createElement(getIcon(name), { className });
-}
+import { defaultConfig } from '@/config/default-config';
 
 interface AboutValuesSectionProps {
   data: SectionList<AboutValueItem>;
   primaryColor: string;
+  accentColor?: string;
 }
 
 export function AboutValuesSection({
   data,
   primaryColor,
+  accentColor,
 }: AboutValuesSectionProps) {
   if (!data.enabled) return null;
 
@@ -22,68 +22,100 @@ export function AboutValuesSection({
   if (visibleItems.length === 0) return null;
 
   const isDark = isColorDark(data.backgroundColor);
+  const activeAccent = accentColor || primaryColor;
+  const fallbackImage =
+    defaultConfig.aboutPage?.values.imageUrl ||
+    'https://images.unsplash.com/photo-1542296332-2e4473faf563?q=80&w=2070&auto=format&fit=crop';
+  const imageUrl = data.imageUrl || fallbackImage;
+
+  const title = data.title ?? 'Our Core Values';
+  const subtitle = data.subtitle;
+  const eyebrow = data.eyebrow;
 
   return (
     <section
-      className={`py-20 md:py-28 px-6 border-b border-border/60 ${
+      className={`py-24 px-6 border-b border-border/60 ${
         isDark ? 'dark text-white' : 'text-foreground'
       }`}
-      style={{ backgroundColor: data.backgroundColor || '#fafafa' }}
+      style={{ backgroundColor: data.backgroundColor || '#ffffff' }}
     >
-      <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="mb-14 text-center max-w-2xl mx-auto">
-          {data.eyebrow && data.eyebrow.trim() !== '' && (
+      <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+        {/* Left: Image with 100% Badge */}
+        <div className="relative">
+          <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl shadow-xl">
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+          <div
+            className="absolute -bottom-6 -right-6 md:bottom-8 md:-right-8 p-6 rounded-2xl shadow-2xl flex flex-col items-center text-center text-white"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <span className="text-4xl font-bold tracking-tight">100%</span>
+            <span className="text-xs font-semibold uppercase tracking-widest mt-1">
+              Locally Owned
+              <br />& Operated
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Content */}
+        <div className="flex flex-col">
+          {eyebrow && eyebrow.trim() !== '' && (
             <span
-              className="mb-3 inline-block text-xs font-bold uppercase tracking-widest"
-              style={{ color: primaryColor }}
+              className="mb-4 text-xs font-bold uppercase tracking-widest"
+              style={{ color: activeAccent }}
             >
-              {data.eyebrow}
+              {eyebrow}
             </span>
           )}
 
-          {data.title && (
-            <h2 className="text-3xl md:text-5xl font-serif font-bold tracking-tight text-foreground">
-              {data.title}
+          {title && title.trim() !== '' && (
+            <h2
+              className={`text-4xl md:text-5xl font-serif text-foreground leading-tight ${
+                subtitle && subtitle.trim() !== '' ? 'mb-4' : 'mb-10'
+              }`}
+            >
+              {title}
             </h2>
           )}
 
-          {data.subtitle && (
-            <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">
-              {data.subtitle}
+          {subtitle && subtitle.trim() !== '' && (
+            <p className="mb-10 text-muted-foreground text-sm md:text-base leading-relaxed">
+              {subtitle}
             </p>
           )}
-        </div>
 
-        {/* 4-Card Values Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {visibleItems.map((item, idx) => (
-            <div
-              key={`${item.title}-${idx}`}
-              className="bg-card text-card-foreground rounded-2xl p-7 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-all duration-200 border border-border/60 group"
-            >
-              {/* Icon Container */}
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-transform group-hover:scale-110"
-                style={{
-                  backgroundColor: `${primaryColor}14`,
-                  color: primaryColor,
-                }}
-              >
-                {renderIcon(item.icon, 'w-7 h-7')}
-              </div>
-
-              {/* Card Title */}
-              <h3 className="font-serif font-bold text-lg text-foreground mb-2.5">
-                {item.title}
-              </h3>
-
-              {/* Card Body */}
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {item.description}
-              </p>
-            </div>
-          ))}
+          <div className="space-y-8">
+            {visibleItems.map((item, idx) => {
+              const Icon = getIcon(item.icon);
+              return (
+                <div key={`${item.title}-${idx}`} className="flex gap-5">
+                  <div
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform hover:scale-105"
+                    style={{
+                      backgroundColor: `${activeAccent}20`,
+                      color: activeAccent,
+                    }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <h3 className="font-bold text-foreground text-lg mb-1">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>

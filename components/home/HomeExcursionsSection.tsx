@@ -160,6 +160,18 @@ export function HomeExcursionsSection({
             );
           })}
         </div>
+
+        {/* View All Excursions Button */}
+        <div className="mt-14 flex justify-center">
+          <Link
+            href="/excursions"
+            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-semibold text-white shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group cursor-pointer"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <span>View All Excursions</span>
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+        </div>
       </div>
     </section>
   );
